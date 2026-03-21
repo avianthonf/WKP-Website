@@ -59,7 +59,7 @@ export default function LoginPage() {
           <div className="max-w-xl">
             <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(229,229,224,0.9)] bg-white/80 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-[var(--stone)] shadow-sm">
               <Sparkles size={14} className="text-[var(--ember)]" />
-              Control room
+              Admin access
             </div>
 
             <h1

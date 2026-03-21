@@ -34,8 +34,8 @@ export default async function OrdersPage() {
           <div className="mb-3">
             <span className="mono-label text-[9px] tracking-wider uppercase" style={{ color: 'var(--stone)', opacity: 0.7 }}>Operations</span>
           </div>
-          <h1 className="page-title">Active Orders</h1>
-          <p className="page-subtitle">Real-time order tracking and fulfillment for the kitchen team.</p>
+          <h1 className="page-title">Live Orders</h1>
+          <p className="page-subtitle">Real-time order flow and fulfillment for the kitchen team.</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <a href="/dashboard/orders/history" className="btn-ghost inline-flex items-center gap-2 px-5 py-2.5">

@@ -463,7 +463,7 @@ function PizzaSection({
           </div>
           <button type="button" onClick={onCreatePizza} className="group btn-primary inline-flex items-center gap-2 px-5 py-3">
             <Plus size={16} />
-            <span>Add New Pizza</span>
+            <span>Create pizza</span>
             <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
           </button>
         </div>

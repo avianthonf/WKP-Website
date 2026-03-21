@@ -87,7 +87,7 @@ export function Sidebar({ isExpanded, onToggleExpanded, onNavigate }: SidebarPro
           <span className="dashboard-drawer__brand-mark">WKP</span>
           <span className="dashboard-drawer__brand-copy">
             <span className="dashboard-drawer__brand-name">We Knead Pizza</span>
-            <span className="dashboard-drawer__brand-sub">Admin Dashboard</span>
+            <span className="dashboard-drawer__brand-sub">Store operations</span>
           </span>
           <span className="dashboard-drawer__brand-toggle" aria-hidden="true">
             {isExpanded ? <PanelLeftClose size={16} /> : <PanelLeftOpen size={16} />}
@@ -113,7 +113,7 @@ export function Sidebar({ isExpanded, onToggleExpanded, onNavigate }: SidebarPro
             className="dashboard-drawer__status"
             onClick={handleStoreToggle}
             disabled={isSavingStore || isStoreOpen === null}
-            title="Toggle store status"
+            title="Toggle storefront intake"
           >
             <span className={`dashboard-drawer__status-dot ${isStoreOpen ? 'is-open' : 'is-closed'}`} />
             <span className="dashboard-drawer__status-label">
@@ -132,8 +132,8 @@ export function Sidebar({ isExpanded, onToggleExpanded, onNavigate }: SidebarPro
               A
             </div>
             <div className="dashboard-drawer__profile-copy">
-              <span className="dashboard-drawer__profile-name">Store Admin</span>
-              <span className="dashboard-drawer__profile-role">Control room</span>
+              <span className="dashboard-drawer__profile-name">We Knead Pizza</span>
+              <span className="dashboard-drawer__profile-role">Admin console</span>
             </div>
             <button
               type="button"

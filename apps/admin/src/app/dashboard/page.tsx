@@ -22,6 +22,13 @@ const hourFormatter = new Intl.DateTimeFormat('en-IN', {
   timeZone: 'Asia/Kolkata',
 });
 
+const statusFormatter = new Intl.DateTimeFormat('en-IN', {
+  hour: 'numeric',
+  minute: '2-digit',
+  hour12: true,
+  timeZone: 'Asia/Kolkata',
+});
+
 export default async function DashboardPage() {
   const supabase = supabaseAdmin;
   const twelveHoursAgo = new Date(Date.now() - 11 * 60 * 60 * 1000);
@@ -57,6 +64,7 @@ export default async function DashboardPage() {
   const isOpen = siteStatus?.value === 'true';
   const avgTicket = totalOrders ? Math.round(totalRevenue / totalOrders) : 0;
   const liveTone = isOpen ? 'Serving guests' : 'Kitchen paused';
+  const refreshedAt = statusFormatter.format(new Date());
   const sparkSeries = buildSparklineSeries((trendOrders || []) as Pick<Order, 'created_at'>[]);
 
   return (
@@ -66,7 +74,7 @@ export default async function DashboardPage() {
         <div className="dashboard-hero__grid">
           <div className="overview-hero__content dashboard-hero__content--center">
             <div className="dashboard-hero__eyebrow-row">
-              <p className="mono-label">Control room</p>
+              <p className="mono-label">Operations snapshot</p>
               <span className={`dashboard-hero__live ${isOpen ? 'is-live' : 'is-muted'}`}>
                 <span className="dashboard-hero__live-dot" />
                 {liveTone}
@@ -77,12 +85,15 @@ export default async function DashboardPage() {
               className="page-title dashboard-hero__title"
               style={{ fontSize: 'clamp(2.3rem, 4.8vw, 4rem)', fontWeight: 600 }}
             >
-              Live Overview
+              Store overview
             </h1>
 
             <p className="page-subtitle dashboard-hero__subtitle">
-              Real-time operational metrics, store status, and recent activity in one focused
-              workspace.
+              Monitor revenue, open orders, and store state from one calm workspace.
+            </p>
+
+            <p className="dashboard-hero__meta mono-label text-[10px]" style={{ opacity: 0.72 }}>
+              Updated {refreshedAt}
             </p>
 
             <div className="dashboard-hero__chips">
@@ -102,8 +113,8 @@ export default async function DashboardPage() {
             <div className="dashboard-snapshot">
               <div className="dashboard-snapshot__top">
                 <div>
-                  <p className="dashboard-snapshot__label">System snapshot</p>
-                  <h2 className="dashboard-snapshot__title">Operations at a glance</h2>
+                  <p className="dashboard-snapshot__label">Live snapshot</p>
+                  <h2 className="dashboard-snapshot__title">Store at a glance</h2>
                 </div>
                 <div className="dashboard-snapshot__pulse" />
               </div>
@@ -130,7 +141,7 @@ export default async function DashboardPage() {
                   href="/dashboard/orders"
                   className="btn-primary inline-flex items-center gap-2.5 px-5 py-3 group"
                 >
-                  <span>Open Active Orders</span>
+                  <span>Open orders</span>
                   <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
                 </Link>
               </div>
@@ -142,7 +153,7 @@ export default async function DashboardPage() {
               href="/dashboard/orders"
               className="btn-primary inline-flex items-center gap-2.5 px-6 py-3 group"
             >
-              <span>View Active Orders</span>
+              <span>Open orders</span>
               <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
             </Link>
             <Link
@@ -150,14 +161,14 @@ export default async function DashboardPage() {
               className="btn-ghost inline-flex items-center gap-2.5 border-2 border-[var(--border-default)] px-6 py-3 hover:border-[var(--ember)] hover:bg-white group"
             >
               <Plus size={16} className="transition-transform group-hover:scale-110" />
-              <span>Add New Pizza</span>
+              <span>Create pizza</span>
             </Link>
             <Link
               href="/dashboard/settings"
               className="btn-ghost inline-flex items-center gap-2.5 border-2 border-[var(--border-default)] px-6 py-3 hover:border-[var(--stone)] hover:bg-[var(--surface-secondary)]"
             >
               <Settings size={16} />
-              <span>Settings</span>
+              <span>Store settings</span>
             </Link>
           </div>
         </div>
@@ -224,7 +235,7 @@ export default async function DashboardPage() {
             <div>
               <h2 className="dashboard-section-title">Recent Orders</h2>
               <p className="mono-label text-[10px] mt-1" style={{ opacity: 0.7 }}>
-                Latest transactions
+                Fresh from Supabase
               </p>
             </div>
             <Link
@@ -313,14 +324,14 @@ export default async function DashboardPage() {
                               fontFamily: "'Cormorant Garamond', serif",
                             }}
                           >
-                            No Orders Yet
+                            No orders yet
                           </h3>
                           <p className="mb-4 text-sm" style={{ color: 'var(--stone)', maxWidth: '280px' }}>
-                            Your first order will appear here once a customer places an order.
+                            Your first order will appear here as soon as a customer checks out.
                           </p>
                           <Link href="/dashboard/orders" className="btn-primary inline-flex gap-2 px-6 py-3">
                             <Receipt size={16} />
-                            <span>View Orders</span>
+                            <span>Open orders</span>
                           </Link>
                         </div>
                       </div>
@@ -338,7 +349,7 @@ export default async function DashboardPage() {
               <div>
                 <p className="mono-label text-[10px]">Performance</p>
                 <h2 className="mt-1 text-xl font-semibold" style={{ color: 'var(--ink)' }}>
-                  Today&apos;s rhythm
+                  Activity rhythm
                 </h2>
               </div>
               <Sparkline bars={sparkSeries} />
@@ -355,7 +366,7 @@ export default async function DashboardPage() {
               <div>
                 <p className="mono-label text-[10px]">Actions</p>
                 <h2 className="mt-1 text-xl font-semibold" style={{ color: 'var(--ink)' }}>
-                  Fast lanes
+                  Quick actions
                 </h2>
               </div>
               <div className="dashboard-meter" aria-hidden="true">
@@ -370,7 +381,7 @@ export default async function DashboardPage() {
                   <Plus size={16} />
                 </span>
                 <span className="dashboard-quicklink__stack">
-                  <span className="dashboard-quicklink__label">New pizza recipe</span>
+                  <span className="dashboard-quicklink__label">Create pizza</span>
                   <span className="dashboard-quicklink__note">Build</span>
                 </span>
               </Link>

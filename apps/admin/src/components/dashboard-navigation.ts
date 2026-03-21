@@ -32,7 +32,7 @@ export const dashboardSections: DashboardNavSection[] = [
     label: 'Operations',
     items: [
       { href: '/dashboard', label: 'Overview', icon: LayoutDashboard, exact: true },
-      { href: '/dashboard/orders', label: 'Active Orders', icon: ChefHat },
+      { href: '/dashboard/orders', label: 'Live Orders', icon: ChefHat },
       { href: '/dashboard/orders/history', label: 'Order History', icon: Receipt },
       { href: '/dashboard/pizzas', label: 'Menu Studio', icon: Grid2X2 },
       { href: '/dashboard/analytics', label: 'Analytics', icon: BarChart3 },
@@ -42,7 +42,7 @@ export const dashboardSections: DashboardNavSection[] = [
     label: 'Management',
     items: [
       { href: '/dashboard/settings', label: 'Store Settings', icon: Settings },
-      { href: '/dashboard/staff', label: 'Staff', icon: Users },
+      { href: '/dashboard/staff', label: 'Team', icon: Users },
       { href: '/dashboard/prices', label: 'Pricing', icon: ShoppingBag },
     ],
   },
@@ -51,10 +51,10 @@ export const dashboardSections: DashboardNavSection[] = [
 export const dashboardRouteMeta: Record<string, DashboardRouteMeta> = {
   '/dashboard': {
     label: 'Overview',
-    subtitle: 'Live metrics, store status, and the quickest next actions.',
+    subtitle: 'A calm snapshot of revenue, live status, and the next best action.',
   },
   '/dashboard/orders': {
-    label: 'Active Orders',
+    label: 'Live Orders',
     subtitle: 'Move tickets through the kitchen and keep deliveries flowing.',
   },
   '/dashboard/orders/history': {
@@ -63,7 +63,7 @@ export const dashboardRouteMeta: Record<string, DashboardRouteMeta> = {
   },
   '/dashboard/pizzas': {
     label: 'Menu Studio',
-    subtitle: 'Edit menu items, pricing, categories, and customizations.',
+    subtitle: 'Shape menu items, pricing, categories, and customizations.',
   },
   '/dashboard/categories': {
     label: 'Categories',
@@ -99,10 +99,10 @@ export const dashboardRouteMeta: Record<string, DashboardRouteMeta> = {
   },
   '/dashboard/settings': {
     label: 'Store Settings',
-    subtitle: 'Control storefront content, hours, nav, and live flags.',
+    subtitle: 'Control storefront content, hours, navigation, and live flags.',
   },
   '/dashboard/staff': {
-    label: 'Staff',
+    label: 'Team',
     subtitle: 'Track the roster, contacts, and shift visibility.',
   },
 };
@@ -110,5 +110,5 @@ export const dashboardRouteMeta: Record<string, DashboardRouteMeta> = {
 export function resolveDashboardRouteMeta(pathname: string): DashboardRouteMeta {
   const sortedRoutes = Object.entries(dashboardRouteMeta).sort(([a], [b]) => b.length - a.length);
   const match = sortedRoutes.find(([path]) => pathname === path || pathname.startsWith(`${path}/`));
-  return match?.[1] || { label: 'Overview', subtitle: 'Live control room for the store.' };
+  return match?.[1] || { label: 'Overview', subtitle: 'A live snapshot of the store and the team behind it.' };
 }

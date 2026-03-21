@@ -41,7 +41,7 @@ export function Navbar({
         <div className="dashboard-topbar__crumbs">
           <span className="dashboard-topbar__crumb dashboard-topbar__crumb--root">
             <LayoutDashboard size={14} />
-            Control Room
+            Admin Console
           </span>
           <span className="dashboard-topbar__crumb-divider">/</span>
           <div className="dashboard-topbar__page">
@@ -63,7 +63,7 @@ export function Navbar({
           disabled={isDashboardLiveSaving}
         >
           {isDashboardLive ? <ToggleRight size={18} /> : <ToggleLeft size={18} />}
-          <span>{isDashboardLiveSaving ? 'Saving...' : 'Dashboard Live'}</span>
+          <span>{isDashboardLiveSaving ? 'Saving...' : 'Live mode'}</span>
         </button>
 
         <Link
@@ -85,7 +85,7 @@ export function Navbar({
         </Link>
 
         <Link href="/dashboard/settings" className="dashboard-topbar__avatar-link" aria-label="Open settings">
-          <div className="dashboard-topbar__avatar">N</div>
+          <div className="dashboard-topbar__avatar">WK</div>
         </Link>
       </div>
     </header>
