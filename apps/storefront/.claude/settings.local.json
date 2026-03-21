@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(timeout 5 bash -c \"while [ ! -f \"\"D:\\\\Files\\\\Desktop\\\\WKP-Final-Workspace\\\\Websites-v2\\\\apps\\\\storefront\\\\app\\\\components\\\\storefront-shell.tsx\"\" ]; do sleep 1; done; echo \"\"File exists\"\"\")"
+    ]
+  }
+}
