@@ -214,10 +214,10 @@ function ContactLine({ icon, value }: { icon: React.ReactNode; value: string }) 
 
 function formatShift(start?: string | null, end?: string | null) {
   if (!start && !end) {
-    return 'Not assigned';
+    return 'Not scheduled';
   }
 
-  const displayStart = start || 'TBD';
-  const displayEnd = end || 'TBD';
+  const displayStart = start || 'Not set';
+  const displayEnd = end || 'Not set';
   return `${displayStart} - ${displayEnd}`;
 }
