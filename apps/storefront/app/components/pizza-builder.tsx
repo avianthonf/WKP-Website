@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useMemo, useState } from 'react';
 import { ArrowRight, ChefHat, Sparkles } from 'lucide-react';
@@ -11,6 +12,7 @@ import {
   getPizzaDisplayToppings,
   getPizzaPrice,
   getSizeName,
+  getStorefrontState,
   money,
 } from '../lib/catalog';
 import type { Extra, Pizza, Size, StorefrontBundle } from '../lib/types';
@@ -26,7 +28,8 @@ export function PizzaBuilder({ bundle, initialPizzaSlug }: { bundle: StorefrontB
   const [quantity, setQuantity] = useState(1);
   const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
   const [notes, setNotes] = useState('');
-  const orderingPaused = bundle.maintenanceMode || !bundle.isOpen;
+  const storefrontState = getStorefrontState(bundle);
+  const orderingPaused = storefrontState.mode !== 'open';
   const builderHeroTitle = getConfigValue(
     bundle.config,
     'build_hero_title',
@@ -81,37 +84,42 @@ export function PizzaBuilder({ bundle, initialPizzaSlug }: { bundle: StorefrontB
             <h1 className="hero-title">{builderHeroTitle}</h1>
             <p className="hero-copy">{builderHeroCopy}</p>
             <div className="hero-actions">
-              <button
-                type="button"
-                className="button"
-                disabled={orderingPaused}
-                onClick={() =>
-                  addItem({
-                    kind: 'pizza',
-                    sourceId: pizza.id,
-                    name: `Custom ${pizza.name}`,
-                    imageUrl: pizza.image_url,
-                    size,
-                    quantity,
-                    unitPrice: total / Math.max(quantity, 1),
-                    customization: {
-                      basePizzaId: pizza.id,
-                      basePizzaName: pizza.name,
-                      selectedExtras,
+              {orderingPaused ? (
+                <Link href="/status" className="button">
+                  View live status
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  className="button"
+                  onClick={() =>
+                    addItem({
+                      kind: 'pizza',
+                      sourceId: pizza.id,
+                      name: `Custom ${pizza.name}`,
+                      imageUrl: pizza.image_url,
                       size,
-                      notes,
-                    },
-                    notes: notes || undefined,
-                    extras: selectedExtraRecords.map((extra) => ({
-                      id: extra.id,
-                      name: extra.name,
-                      price: getExtraPrice(extra, size),
-                    })),
-                  })
-                }
-              >
-                {orderingPaused ? 'Ordering paused' : 'Add custom pizza'}
-              </button>
+                      quantity,
+                      unitPrice: total / Math.max(quantity, 1),
+                      customization: {
+                        basePizzaId: pizza.id,
+                        basePizzaName: pizza.name,
+                        selectedExtras,
+                        size,
+                        notes,
+                      },
+                      notes: notes || undefined,
+                      extras: selectedExtraRecords.map((extra) => ({
+                        id: extra.id,
+                        name: extra.name,
+                        price: getExtraPrice(extra, size),
+                      })),
+                    })
+                  }
+                >
+                  Add custom pizza
+                </button>
+              )}
               <a href="/menu" className="button-secondary">
                 Back to menu
               </a>
@@ -136,6 +144,12 @@ export function PizzaBuilder({ bundle, initialPizzaSlug }: { bundle: StorefrontB
                 <Sparkles size={16} />
                 Builder selections flow directly into the cart and WhatsApp order.
               </div>
+              {orderingPaused ? (
+                <div className="notice" data-tone={storefrontState.tone}>
+                  <Sparkles size={16} />
+                  {storefrontState.summary}
+                </div>
+              ) : null}
               <div className="tag-list">
                 {getPizzaDisplayToppings(pizza).map((item) => (
                   <span key={item} className="tag tag--accent">
@@ -311,37 +325,44 @@ export function PizzaBuilder({ bundle, initialPizzaSlug }: { bundle: StorefrontB
                 <SummaryRow label="Total" value={money(total)} accent />
               </motion.div>
             </div>
-            <button
-              type="button"
-              className="button"
-              onClick={() =>
-                addItem({
-                  kind: 'pizza',
-                  sourceId: pizza.id,
-                  name: `Custom ${pizza.name}`,
-                  imageUrl: pizza.image_url,
-                  size,
-                  quantity,
-                  unitPrice: total / Math.max(quantity, 1),
-                  customization: {
-                    basePizzaId: pizza.id,
-                    basePizzaName: pizza.name,
-                    selectedExtras,
+            {orderingPaused ? (
+              <Link href="/status" className="button">
+                View live status
+                <ArrowRight size={16} />
+              </Link>
+            ) : (
+              <button
+                type="button"
+                className="button"
+                onClick={() =>
+                  addItem({
+                    kind: 'pizza',
+                    sourceId: pizza.id,
+                    name: `Custom ${pizza.name}`,
+                    imageUrl: pizza.image_url,
                     size,
-                    notes,
-                  },
-                  notes: notes || undefined,
-                  extras: selectedExtraRecords.map((extra) => ({
-                    id: extra.id,
-                    name: extra.name,
-                    price: getExtraPrice(extra, size),
-                  })),
-                })
-              }
-            >
-              Add to cart
-              <ArrowRight size={16} />
-            </button>
+                    quantity,
+                    unitPrice: total / Math.max(quantity, 1),
+                    customization: {
+                      basePizzaId: pizza.id,
+                      basePizzaName: pizza.name,
+                      selectedExtras,
+                      size,
+                      notes,
+                    },
+                    notes: notes || undefined,
+                    extras: selectedExtraRecords.map((extra) => ({
+                      id: extra.id,
+                      name: extra.name,
+                      price: getExtraPrice(extra, size),
+                    })),
+                  })
+                }
+              >
+                Add to cart
+                <ArrowRight size={16} />
+              </button>
+            )}
           </motion.aside>
         </div>
       </motion.section>

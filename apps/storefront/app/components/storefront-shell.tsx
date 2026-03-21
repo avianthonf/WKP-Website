@@ -16,6 +16,7 @@ import {
   getNavLinks,
   getStoreName,
   getStorePhone,
+  getStorefrontState,
 } from '../lib/catalog';
 import type { StorefrontBundle } from '../lib/types';
 
@@ -32,6 +33,7 @@ export function StorefrontShell({
   const prefersReducedMotion = useReducedMotion();
   const notification = bundle.notifications[0];
   const navLinks = getNavLinks(bundle);
+  const storefrontState = getStorefrontState(bundle);
 
   useEffect(() => {
     document.body.style.overflow = drawerOpen ? 'hidden' : '';
@@ -123,9 +125,9 @@ export function StorefrontShell({
           </nav>
 
           <div className="shell-actions">
-            <span className="pill" data-tone={bundle.maintenanceMode ? 'warning' : bundle.isOpen ? 'success' : 'danger'}>
+            <span className="pill" data-tone={storefrontState.tone}>
               <Power size={14} />
-              {bundle.maintenanceMode ? 'Maintenance mode' : bundle.isOpen ? 'Open now' : 'Closed'}
+              {storefrontState.label}
             </span>
             <Link
               href="/cart"
@@ -144,8 +146,8 @@ export function StorefrontShell({
             >
               <Menu size={16} />
             </button>
-            <Link href="/cart" className="pill shell-cta">
-              <span>View cart</span>
+            <Link href={storefrontState.primaryAction.href} className="pill shell-cta">
+              <span>{storefrontState.primaryAction.label}</span>
               <ArrowRight size={16} />
             </Link>
           </div>
@@ -165,6 +167,26 @@ export function StorefrontShell({
             </div>
           </div>
         ) : null}
+
+        <div className="site-shell__announcement">
+          <div className="site-shell__status-banner notice" data-tone={storefrontState.tone}>
+            <div className="site-shell__status-banner-copy">
+              <div className="site-shell__status-banner-title">
+                <Power size={16} />
+                <span>{storefrontState.label}</span>
+              </div>
+              <p>{storefrontState.summary}</p>
+            </div>
+            <div className="site-shell__status-banner-actions">
+              <Link href={storefrontState.primaryAction.href} className="button">
+                {storefrontState.primaryAction.label}
+              </Link>
+              <Link href={storefrontState.secondaryAction.href} className="button-secondary">
+                {storefrontState.secondaryAction.label}
+              </Link>
+            </div>
+          </div>
+        </div>
       </header>
 
       <AnimatePresence>
@@ -242,9 +264,9 @@ export function StorefrontShell({
                     <strong>{getAddressLine(bundle)}</strong>
                   </div>
                 </div>
-                <Link href="/cart" className="button" onClick={() => setDrawerOpen(false)}>
+                <Link href={storefrontState.primaryAction.href} className="button" onClick={() => setDrawerOpen(false)}>
                   <PhoneCall size={16} />
-                  Order now
+                  {storefrontState.primaryAction.label}
                 </Link>
               </div>
             </motion.aside>
@@ -306,8 +328,8 @@ export function StorefrontShell({
             <div>
               <p className="section__eyebrow">Order</p>
               <p className="footer__copy">{storePhone}</p>
-              <Link href="/cart" className="footer__link">
-                Start checkout
+              <Link href={storefrontState.primaryAction.href} className="footer__link">
+                {storefrontState.primaryAction.label}
               </Link>
             </div>
             <div>

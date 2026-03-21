@@ -2,13 +2,22 @@ import Link from 'next/link';
 import { Mail, MapPin, PhoneCall, MessageCircle } from 'lucide-react';
 import { StorefrontShell } from '../components/storefront-shell';
 import { fetchStorefrontBundle } from '../lib/storefront';
-import { getAddressLine, getConfigValue, getOpeningWindow, getOrderLink, getStorePhone, getSupportEmail } from '../lib/catalog';
+import {
+  getAddressLine,
+  getConfigValue,
+  getOpeningWindow,
+  getOrderLink,
+  getStorePhone,
+  getStorefrontState,
+  getSupportEmail,
+} from '../lib/catalog';
 
 export const dynamic = 'force-dynamic';
 
 export default async function ContactPage() {
   const bundle = await fetchStorefrontBundle();
   const phone = getStorePhone(bundle);
+  const storefrontState = getStorefrontState(bundle);
 
   return (
     <StorefrontShell bundle={bundle}>
@@ -58,8 +67,8 @@ export default async function ContactPage() {
                     <PhoneCall size={16} />
                     WhatsApp us
                   </Link>
-                  <Link href="/menu" className="button-secondary">
-                    Order now
+                  <Link href={storefrontState.primaryAction.href} className="button-secondary">
+                    {storefrontState.primaryAction.label}
                   </Link>
                 </div>
               </div>

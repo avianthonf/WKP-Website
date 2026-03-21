@@ -15,6 +15,7 @@ import {
   getPizzaPrice,
   getSizeLabel,
   getSizeName,
+  getStorefrontState,
   money,
 } from '../lib/catalog';
 import type { Pizza, Size, StorefrontBundle } from '../lib/types';
@@ -36,7 +37,8 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
   const [filter, setFilter] = useState<FilterKey>('all');
   const [query, setQuery] = useState('');
   const prefersReducedMotion = useReducedMotion();
-  const orderingPaused = bundle.maintenanceMode || !bundle.isOpen;
+  const storefrontState = getStorefrontState(bundle);
+  const orderingPaused = storefrontState.mode !== 'open';
   const menuHeroTitle = getConfigValue(
     bundle.config,
     'menu_hero_title',
@@ -102,12 +104,12 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
             <p className="hero-copy">{menuHeroCopy}</p>
 
             <div className="hero-actions">
-              <Link href="/build" className="button">
+              <Link href={orderingPaused ? '/status' : '/build'} className="button">
                 <ChefHat size={16} />
-                Open Builder
+                {orderingPaused ? 'View live status' : 'Open Builder'}
               </Link>
-              <Link href="/cart" className="button-secondary">
-                Review Cart
+              <Link href={orderingPaused ? '/contact' : '/cart'} className="button-secondary">
+                {orderingPaused ? 'Contact us' : 'Review Cart'}
               </Link>
             </div>
 
@@ -170,6 +172,12 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
                 <Sparkles size={16} />
                 WhatsApp is the fastest way out of the menu and into the kitchen.
               </div>
+              {orderingPaused ? (
+                <div className="notice" data-tone={storefrontState.tone}>
+                  <Sparkles size={16} />
+                  {storefrontState.summary}
+                </div>
+              ) : null}
               <div className="tag-list">
                 {bundle.notifications.slice(0, 4).map((note) => (
                   <span key={note.id} className="tag tag--accent">
@@ -189,9 +197,9 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
             <h2 className="section__title">{menuSectionTitle}</h2>
             <p className="section__copy">{menuSectionCopy}</p>
           </div>
-          <div className="stack stack--end">
-            <span className="badge" data-tone={orderingPaused ? 'warning' : 'success'}>
-              {orderingPaused ? 'Closed for the moment' : 'Open for orders'}
+              <div className="stack stack--end">
+            <span className="badge" data-tone={storefrontState.tone}>
+              {storefrontState.label}
             </span>
             <span className="muted">
               {bundle.pizzas.length} pizzas, {bundle.addons.length} addons, {bundle.extras.length} extras, {bundle.desserts.length} desserts
@@ -343,10 +351,12 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
                   body={
                     query
                       ? 'Try a different search term or clear the filters.'
+                      : orderingPaused
+                      ? 'The menu is live, but ordering is paused until the store reopens.'
                       : 'The menu is waiting for the kitchen to publish items.'
                   }
-                  actionHref="/build"
-                  actionLabel="Open builder"
+                  actionHref={orderingPaused ? '/status' : '/build'}
+                  actionLabel={orderingPaused ? 'View live status' : 'Open builder'}
                 />
               ) : null}
             </div>

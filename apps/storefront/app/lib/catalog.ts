@@ -208,6 +208,81 @@ export function getOpeningWindow(bundle: StorefrontBundle) {
   return `${opening} - ${closing}`;
 }
 
+export type StorefrontAvailability = 'open' | 'closed' | 'maintenance';
+
+export type StorefrontState = {
+  mode: StorefrontAvailability;
+  tone: 'success' | 'warning' | 'danger';
+  label: string;
+  summary: string;
+  primaryAction: {
+    href: string;
+    label: string;
+  };
+  secondaryAction: {
+    href: string;
+    label: string;
+  };
+};
+
+export function getStorefrontState(bundle: StorefrontBundle): StorefrontState {
+  if (bundle.maintenanceMode) {
+    return {
+      mode: 'maintenance',
+      tone: 'warning',
+      label: 'Maintenance mode',
+      summary:
+        'The storefront is being updated. Browsing still works, but checkout is paused until maintenance ends.',
+      primaryAction: {
+        href: '/status',
+        label: 'View status',
+      },
+      secondaryAction: {
+        href: '/contact',
+        label: 'Contact us',
+      },
+    };
+  }
+
+  if (!bundle.isOpen) {
+    return {
+      mode: 'closed',
+      tone: 'danger',
+      label: 'Closed',
+      summary:
+        'Orders are closed right now. Browse the menu and check the live status for the next open window.',
+      primaryAction: {
+        href: '/status',
+        label: 'View status',
+      },
+      secondaryAction: {
+        href: '/menu',
+        label: 'Browse menu',
+      },
+    };
+  }
+
+  return {
+    mode: 'open',
+    tone: 'success',
+    label: 'Open now',
+    summary:
+      `Orders are live now. Checkout is available and the live window is ${getOpeningWindow(bundle)}.`,
+    primaryAction: {
+      href: '/cart',
+      label: 'View cart',
+    },
+    secondaryAction: {
+      href: '/menu',
+      label: 'Browse menu',
+    },
+  };
+}
+
+export function isOrderingPaused(bundle: StorefrontBundle) {
+  return getStorefrontState(bundle).mode !== 'open';
+}
+
 export function getSizeLabel(size: Size) {
   return size === 'small' ? 'S' : size === 'medium' ? 'M' : 'L';
 }

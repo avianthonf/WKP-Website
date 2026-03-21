@@ -41,6 +41,7 @@ export default async function MenuItemPage({ params }: { params: Promise<{ slug:
     'menu_detail_action_copy',
     'Use the main menu or builder to add this item to your cart.'
   );
+  const orderingPaused = bundle.maintenanceMode || !bundle.isOpen;
 
   return (
     <StorefrontShell bundle={bundle}>
@@ -52,7 +53,7 @@ export default async function MenuItemPage({ params }: { params: Promise<{ slug:
         primaryPrice={price}
         priceCopy={priceCopy}
         statusText={pizza?.is_sold_out || addon?.is_sold_out || dessert?.is_sold_out || extra?.is_sold_out ? 'Sold out' : 'Available'}
-        statusCopy={statusCopy}
+        statusCopy={orderingPaused ? 'Ordering is paused while the storefront is closed or in maintenance mode.' : statusCopy}
         actionCopy={actionCopy}
         notice={getConfigValue(
           bundle.config,
@@ -61,6 +62,7 @@ export default async function MenuItemPage({ params }: { params: Promise<{ slug:
         )}
         toppings={pizza ? getPizzaDisplayToppings(pizza) : []}
         isPizza={Boolean(pizza)}
+        orderingPaused={orderingPaused}
         sizePrices={
           pizza
             ? [

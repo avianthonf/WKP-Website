@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight, Flame, Sparkles, ShoppingBag, Wand2 } from 'lucide-react';
 import { useMemo, useRef } from 'react';
-import { getConfigValue, getHomeFeaturedImageUrl, money } from '../lib/catalog';
+import { getConfigValue, getHomeFeaturedImageUrl, getStorefrontState, money } from '../lib/catalog';
 import type { StorefrontBundle } from '../lib/types';
 
 export function ImmersiveHome({
@@ -22,6 +22,7 @@ export function ImmersiveHome({
 }) {
   const prefersReducedMotion = useReducedMotion();
   const featuredPizzas = bundle.pizzas.slice(0, 4);
+  const storefrontState = getStorefrontState(bundle);
   const heroRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
     target: heroRef,
@@ -55,9 +56,15 @@ export function ImmersiveHome({
       copy: getConfigValue(bundle.config, 'home_step_2_copy', 'Start with a base, add extras, and build the exact bite you want.'),
     },
     {
-      href: getConfigValue(bundle.config, 'home_step_3_href', '/cart'),
-      title: getConfigValue(bundle.config, 'home_step_3_title', 'Send it fast'),
-      copy: getConfigValue(bundle.config, 'home_step_3_copy', 'Checkout flows straight into WhatsApp with a clean order summary.'),
+      href: storefrontState.mode === 'open' ? getConfigValue(bundle.config, 'home_step_3_href', '/cart') : '/status',
+      title:
+        storefrontState.mode === 'open'
+          ? getConfigValue(bundle.config, 'home_step_3_title', 'Send it fast')
+          : 'Check live status',
+      copy:
+        storefrontState.mode === 'open'
+          ? getConfigValue(bundle.config, 'home_step_3_copy', 'Checkout flows straight into WhatsApp with a clean order summary.')
+          : storefrontState.summary,
     },
   ];
   const introEyebrow = getConfigValue(bundle.config, 'home_steps_eyebrow', 'Start here');
@@ -150,9 +157,9 @@ export function ImmersiveHome({
                 <Wand2 size={16} />
                 Build your pizza
               </Link>
-              <Link href="/cart" className="button-ghost button-ghost--hero">
+              <Link href={storefrontState.mode === 'open' ? '/cart' : '/status'} className="button-ghost button-ghost--hero">
                 <ShoppingBag size={16} />
-                Checkout now
+                {storefrontState.mode === 'open' ? 'Checkout now' : 'View live status'}
               </Link>
             </motion.div>
 
@@ -163,8 +170,8 @@ export function ImmersiveHome({
               transition={{ duration: 0.55, delay: 0.22 }}
             >
               <div className="hero-orbit__item">
-                <span className="hero-orbit__label">Open</span>
-                <strong>{bundle.isOpen ? 'Accepting orders' : 'Closed right now'}</strong>
+                <span className="hero-orbit__label">State</span>
+                <strong>{storefrontState.label}</strong>
               </div>
               <div className="hero-orbit__item">
                 <span className="hero-orbit__label">Tonight</span>
@@ -278,7 +285,7 @@ export function ImmersiveHome({
               <div className="intro-card__title">{item.title}</div>
               <p className="intro-card__copy">{item.copy}</p>
               <Link href={item.href} className="intro-card__link">
-                Open now
+                {storefrontState.mode === 'open' ? 'Open now' : item.href === '/status' ? 'View live status' : 'Browse now'}
                 <ArrowRight size={14} />
               </Link>
             </motion.div>
@@ -343,11 +350,11 @@ export function ImmersiveHome({
             <h2 className="section__title">{closingTitle}</h2>
           </div>
           <div className="closing-banner__actions">
-            <Link href="/menu" className="button button--hero">
-              {closingPrimary}
+            <Link href={storefrontState.mode === 'open' ? '/menu' : '/status'} className="button button--hero">
+              {storefrontState.mode === 'open' ? closingPrimary : 'View live status'}
             </Link>
             <Link href="/build" className="button-secondary button-secondary--hero">
-              {closingSecondary}
+              {storefrontState.mode === 'open' ? closingSecondary : 'Plan ahead'}
             </Link>
           </div>
         </motion.div>

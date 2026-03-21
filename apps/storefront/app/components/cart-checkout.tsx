@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useMemo, useState, useTransition, type FormEvent } from 'react';
 import { ArrowRight, CheckCircle2, PhoneCall, ShoppingBag, Trash2 } from 'lucide-react';
@@ -14,6 +15,7 @@ import {
   getOrderLink,
   getSizeLabel,
   getSizeName,
+  getStorefrontState,
   money,
 } from '../lib/catalog';
 import type { Size, StorefrontBundle } from '../lib/types';
@@ -28,10 +30,11 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
   const [notes, setNotes] = useState('');
   const [status, setStatus] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const storefrontState = getStorefrontState(bundle);
 
   const minimumOrder = getMinimumOrder(bundle);
   const deliveryRequired = fulfillment === 'delivery';
-  const orderingPaused = bundle.maintenanceMode || !bundle.isOpen;
+  const orderingPaused = storefrontState.mode !== 'open';
   const checkoutHeroTitle = getConfigValue(bundle.config, 'cart_hero_title', 'Send the order on WhatsApp and keep moving.');
   const checkoutHeroCopy = getConfigValue(
     bundle.config,
@@ -144,10 +147,17 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
             <h1 className="hero-title">{checkoutHeroTitle}</h1>
             <p className="hero-copy">{checkoutHeroCopy}</p>
             <div className="hero-actions">
-              <a href={getOrderLink(bundle)} className="button">
-                <PhoneCall size={16} />
-                Open WhatsApp
-              </a>
+              {orderingPaused ? (
+                <Link href="/status" className="button">
+                  <PhoneCall size={16} />
+                  View live status
+                </Link>
+              ) : (
+                <a href={getOrderLink(bundle)} className="button">
+                  <PhoneCall size={16} />
+                  Open WhatsApp
+                </a>
+              )}
               <a href="/menu" className="button-secondary">
                 Continue browsing
               </a>
@@ -289,14 +299,21 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
             ) : null}
 
             <motion.button
-              type="submit"
+              type={orderingPaused ? 'button' : 'submit'}
               className="button"
-              disabled={isPending || !isReady || (deliveryRequired && deliveryAddress.trim().length < 8)}
+              disabled={!orderingPaused && (isPending || !isReady || (deliveryRequired && deliveryAddress.trim().length < 8))}
+              onClick={
+                orderingPaused
+                  ? () => {
+                      window.location.href = '/status';
+                    }
+                  : undefined
+              }
               whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
               whileHover={prefersReducedMotion ? {} : { scale: 1.03 }}
               animate={isReady && !isPending && !orderingPaused && items.length > 0 ? { scale: 1.02, transition: { type: 'spring', stiffness: 300, damping: 20 } } : undefined}
             >
-              {isPending ? 'Sending...' : orderingPaused ? 'Ordering paused' : 'Send order on WhatsApp'}
+              {isPending ? 'Sending...' : orderingPaused ? 'View live status' : 'Send order on WhatsApp'}
               <ArrowRight size={16} />
             </motion.button>
             <p className="footnote">

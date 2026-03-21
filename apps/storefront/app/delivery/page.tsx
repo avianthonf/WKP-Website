@@ -2,12 +2,13 @@ import Link from 'next/link';
 import { MapPin, Truck, TimerReset } from 'lucide-react';
 import { StorefrontShell } from '../components/storefront-shell';
 import { fetchStorefrontBundle } from '../lib/storefront';
-import { getAddressLine, getConfigValue, getOpeningWindow, getOrderLink } from '../lib/catalog';
+import { getAddressLine, getConfigValue, getOpeningWindow, getOrderLink, getStorefrontState } from '../lib/catalog';
 
 export const dynamic = 'force-dynamic';
 
 export default async function DeliveryPage() {
   const bundle = await fetchStorefrontBundle();
+  const storefrontState = getStorefrontState(bundle);
 
   return (
     <StorefrontShell bundle={bundle}>
@@ -30,8 +31,8 @@ export default async function DeliveryPage() {
                 )}
               </p>
               <div className="hero-actions">
-                <Link href="/cart" className="button">
-                  Start checkout
+                <Link href={storefrontState.primaryAction.href} className="button">
+                  {storefrontState.primaryAction.label}
                 </Link>
                 <Link href={getOrderLink(bundle)} className="button-secondary" target="_blank" rel="noreferrer">
                   WhatsApp now

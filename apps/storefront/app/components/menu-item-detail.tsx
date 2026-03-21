@@ -25,6 +25,7 @@ type MenuItemDetailProps = {
   toppings: string[];
   sizePrices?: SizePrice[];
   isPizza?: boolean;
+  orderingPaused?: boolean;
 };
 
 const sectionMotion = {
@@ -46,6 +47,7 @@ export function MenuItemDetailClient({
   toppings,
   sizePrices,
   isPizza = false,
+  orderingPaused = false,
 }: MenuItemDetailProps) {
   const prefersReducedMotion = useReducedMotion();
 
@@ -76,9 +78,9 @@ export function MenuItemDetailClient({
               <Link href="/menu" className="button-secondary">
                 Back to menu
               </Link>
-              <Link href="/cart" className="button">
+              <Link href={orderingPaused ? '/status' : '/cart'} className="button">
                 <ShoppingBag size={16} />
-                View cart
+                {orderingPaused ? 'View live status' : 'View cart'}
               </Link>
             </div>
 
@@ -100,7 +102,7 @@ export function MenuItemDetailClient({
                 transition={{ duration: 0.35, delay: 0.18 }}
               >
                 <div className="stat-card__label">Status</div>
-                <div className="stat-card__value">{statusText}</div>
+                <div className="stat-card__value">{orderingPaused ? 'Ordering paused' : statusText}</div>
                 <div className="stat-card__note">{statusCopy}</div>
               </motion.div>
               <motion.div
@@ -110,8 +112,10 @@ export function MenuItemDetailClient({
                 transition={{ duration: 0.35, delay: 0.24 }}
               >
                 <div className="stat-card__label">Quick add</div>
-                <div className="stat-card__value">Fast lane</div>
-                <div className="stat-card__note">{actionCopy}</div>
+                <div className="stat-card__value">{orderingPaused ? 'Status first' : 'Fast lane'}</div>
+                <div className="stat-card__note">
+                  {orderingPaused ? 'Ordering is paused until the store reopens.' : actionCopy}
+                </div>
               </motion.div>
             </div>
           </motion.div>
@@ -220,9 +224,11 @@ export function MenuItemDetailClient({
         >
           <div className="info-card__title">Action</div>
           <div className="info-card__body">
-            <ArrowRight size={16} /> Add from menu
+            <ArrowRight size={16} /> {orderingPaused ? 'View live status' : 'Add from menu'}
           </div>
-          <div className="info-card__copy">{actionCopy}</div>
+          <div className="info-card__copy">
+            {orderingPaused ? 'The kitchen is not accepting new orders at the moment.' : actionCopy}
+          </div>
         </motion.div>
       </section>
     </div>
