@@ -76,20 +76,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Pull Vercel environment
-        working-directory: ${{ matrix.path }}
-        run: npx --yes vercel@latest pull --yes --environment=${{ github.event_name == 'push' && 'production' || 'preview' }} --token=${{ env.VERCEL_TOKEN }}
-
-      - name: Build Vercel project
-        working-directory: ${{ matrix.path }}
-        run: npx --yes vercel@latest build ${{ github.event_name == 'push' && '--prod' || '' }} --token=${{ env.VERCEL_TOKEN }}
-
       - name: Deploy preview
         if: github.event_name == 'pull_request'
         working-directory: ${{ matrix.path }}
-        run: npx --yes vercel@latest deploy --prebuilt --token=${{ env.VERCEL_TOKEN }}
+        run: npx --yes vercel@latest deploy --yes --token=${{ env.VERCEL_TOKEN }}
 
       - name: Deploy production
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         working-directory: ${{ matrix.path }}
-        run: npx --yes vercel@latest deploy --prebuilt --prod --token=${{ env.VERCEL_TOKEN }}
+        run: npx --yes vercel@latest deploy --prod --yes --token=${{ env.VERCEL_TOKEN }}
