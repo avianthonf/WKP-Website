@@ -54,10 +54,8 @@ jobs:
       matrix:
         include:
           - app: admin
-            path: apps/admin
             project_secret: VERCEL_ADMIN_PROJECT_ID
           - app: storefront
-            path: apps/storefront
             project_secret: VERCEL_STOREFRONT_PROJECT_ID
     env:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -77,19 +75,15 @@ jobs:
         run: npm ci
 
       - name: Pull Vercel environment
-        working-directory: ${{ matrix.path }}
         run: npx --yes vercel@latest pull --yes --environment=${{ (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && 'production' || 'preview' }} --token=${{ env.VERCEL_TOKEN }}
 
       - name: Build Vercel project
-        working-directory: ${{ matrix.path }}
         run: npx --yes vercel@latest build ${{ (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && '--prod' || '' }} --token=${{ env.VERCEL_TOKEN }}
 
       - name: Deploy preview
         if: github.event_name == 'pull_request'
-        working-directory: ${{ matrix.path }}
         run: npx --yes vercel@latest deploy --prebuilt --token=${{ env.VERCEL_TOKEN }}
 
       - name: Deploy production
         if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
-        working-directory: ${{ matrix.path }}
         run: npx --yes vercel@latest deploy --prebuilt --prod --token=${{ env.VERCEL_TOKEN }}
