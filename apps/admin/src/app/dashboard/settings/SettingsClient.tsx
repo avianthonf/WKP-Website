@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect, useTransition, type ReactNode } from 'react';
+import { useState, useEffect, useMemo, useTransition, type ReactNode } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { createClient } from '@/lib/supabaseClient';
 import { MenuImageField } from '@/components/admin/MenuImageField';
@@ -23,6 +23,7 @@ import {
   ListChecks,
   Menu,
   Power,
+  Search,
   Settings as SettingsIcon,
   Shield,
   ShoppingCart,
@@ -48,6 +49,7 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
   const prefersReducedMotion = useReducedMotion() ?? false;
   const [isPending, startTransition] = useTransition();
   const [configs, setConfigs] = useState<SiteConfigItem[]>(initialConfigs);
+  const [search, setSearch] = useState('');
   const [powerStates, setPowerStates] = useState<Record<string, boolean>>(() => {
     const states: Record<string, boolean> = {};
     initialConfigs.forEach((cfg) => {
@@ -177,6 +179,10 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
       }
     });
   };
+
+  const normalizedSearch = search.trim().toLowerCase();
+  const matchesSearch = (...values: Array<string | null | undefined>) =>
+    !normalizedSearch || values.some((value) => (value || '').toLowerCase().includes(normalizedSearch));
 
   const saveCmsSetting = (
     key: string,
@@ -487,6 +493,38 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
   });
   const managedCount = configs.filter((config) => managedKeys.has(config.key)).length;
   const advancedCount = configs.length - managedCount;
+  const visibleCmsGroups = cmsGroups
+    .map((group) => {
+      if ('custom' in group) {
+        const navConfig = getField('nav_links');
+        const navValue = navConfig?.value || '';
+        return matchesSearch(group.title, group.description, navValue) ? group : null;
+      }
+
+      const fields = group.fields.filter((field) =>
+        matchesSearch(field.key, field.label, field.description, getField(field.key)?.value, group.title, group.description)
+      );
+
+      return fields.length ? { ...group, fields } : null;
+    })
+    .filter(Boolean);
+  const visibleManagedCount = configs.filter(
+    (config) => managedKeys.has(config.key) && matchesSearch(config.key, config.label, config.description, config.value)
+  ).length;
+  const visibleAdvancedConfigs = useMemo(
+    () =>
+      configs.filter(
+        (config) =>
+          !managedKeys.has(config.key) &&
+          matchesSearch(config.key, config.label, config.description, config.value)
+      ),
+    [configs, normalizedSearch]
+  );
+  const visibleAdvancedCount = visibleAdvancedConfigs.length;
+  const visibleSectionAnchors = useMemo(
+    () => sectionAnchors.filter((section) => matchesSearch(section.title, section.description, String(section.count))),
+    [normalizedSearch, sectionAnchors]
+  );
 
   // Render value editor based on type
   const renderValueEditor = (config: SiteConfigItem) => {
@@ -578,13 +616,30 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
           <h1 className="page-title">Live Config Editor</h1>
           <p className="page-subtitle">Guided controls first, advanced config only when you need it.</p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Link href="/" className="btn-ghost">
-            Open storefront
-          </Link>
-          <Link href="/dashboard/orders" className="btn-ghost">
-            Open active orders
-          </Link>
+        <div className="dashboard-settings__header-actions">
+          <div className="dashboard-search">
+            <Search size={16} />
+            <input
+              type="search"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search settings, keys, or copy"
+              aria-label="Search settings"
+            />
+            {search ? (
+              <button type="button" className="dashboard-search__clear" onClick={() => setSearch('')}>
+                Clear
+              </button>
+            ) : null}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Link href="/" className="btn-ghost">
+              Open storefront
+            </Link>
+            <Link href="/dashboard/orders" className="btn-ghost">
+              Open active orders
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -603,13 +658,13 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
               <div className="rounded-2xl bg-[var(--surface-secondary)] px-4 py-3">
                 <span className="mono-label block text-[9px]">Managed settings</span>
                 <div className="mt-1 font-semibold" style={{ color: 'var(--ink)' }}>
-                  {managedCount} live storefront keys
+                  {visibleManagedCount} matching of {managedCount} managed keys
                 </div>
               </div>
               <div className="rounded-2xl bg-[var(--surface-secondary)] px-4 py-3">
                 <span className="mono-label block text-[9px]">Advanced config</span>
                 <div className="mt-1 font-semibold" style={{ color: 'var(--ink)' }}>
-                  {advancedCount} manual entries
+                  {visibleAdvancedCount} matching of {advancedCount} manual entries
                 </div>
               </div>
             </div>
@@ -618,7 +673,7 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
           <section className="card card-premium p-5">
             <p className="mono-label">Jump to</p>
             <nav className="mt-3 space-y-2">
-              {sectionAnchors.map((section) => (
+              {visibleSectionAnchors.map((section) => (
                 <a
                   key={section.id}
                   href={`#${section.id}`}
@@ -674,7 +729,10 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
               </div>
               <div className="flex flex-wrap gap-2">
                 <span className="rounded-full border border-[var(--border-default)] px-3 py-1 text-xs font-medium" style={{ color: 'var(--stone)' }}>
-                  Supabase-backed
+                  {visibleManagedCount} visible managed
+                </span>
+                <span className="rounded-full border border-[var(--border-default)] px-3 py-1 text-xs font-medium" style={{ color: 'var(--stone)' }}>
+                  {visibleAdvancedCount} visible advanced
                 </span>
                 <span className="rounded-full border border-[var(--border-default)] px-3 py-1 text-xs font-medium" style={{ color: 'var(--stone)' }}>
                   Live sync
@@ -714,38 +772,50 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
           </div>
 
           <div className="grid gap-6 xl:grid-cols-2">
-            {cmsGroups.map((group: any) =>
-              group.custom === 'nav' ? (
-                <NavLinksEditor
-                  key={group.title}
-                  config={getField('nav_links')}
-                  pending={isPending}
-                  onSave={(value) =>
-                    saveCmsSetting('nav_links', 'Navigation links', 'json', value, 'Primary site navigation', true)
-                  }
-                />
-              ) : (
-                <SettingsPanel
-                  key={group.title}
-                  id={slugify(group.title)}
-                  title={group.title}
-                  description={group.description}
-                  icon={group.icon}
-                  prefersReducedMotion={prefersReducedMotion}
-                >
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    {group.fields.map((field: any) => (
-                      <EditableConfigField
-                        key={field.key}
-                        config={getField(field.key)}
-                        field={field}
-                        pending={isPending}
-                        onSave={saveCmsSetting}
-                      />
-                    ))}
-                  </div>
-                </SettingsPanel>
+            {visibleCmsGroups.length ? (
+              visibleCmsGroups.map((group: any) =>
+                group.custom === 'nav' ? (
+                  <NavLinksEditor
+                    key={group.title}
+                    config={getField('nav_links')}
+                    pending={isPending}
+                    onSave={(value) =>
+                      saveCmsSetting('nav_links', 'Navigation links', 'json', value, 'Primary site navigation', true)
+                    }
+                  />
+                ) : (
+                  <SettingsPanel
+                    key={group.title}
+                    id={slugify(group.title)}
+                    title={group.title}
+                    description={group.description}
+                    icon={group.icon}
+                    prefersReducedMotion={prefersReducedMotion}
+                  >
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      {group.fields.map((field: any) => (
+                        <EditableConfigField
+                          key={field.key}
+                          config={getField(field.key)}
+                          field={field}
+                          pending={isPending}
+                          onSave={saveCmsSetting}
+                        />
+                      ))}
+                    </div>
+                  </SettingsPanel>
+                )
               )
+            ) : (
+              <section className="rounded-3xl border border-dashed border-[var(--border-default)] bg-white/90 p-8 shadow-sm xl:col-span-2">
+                <p className="mono-label">No matches</p>
+                <h3 className="mt-2 text-2xl font-semibold" style={{ color: 'var(--ink)' }}>
+                  Nothing matches “{search}”
+                </h3>
+                <p className="mt-2 max-w-2xl text-sm" style={{ color: 'var(--stone)' }}>
+                  Try a different keyword or clear the search to return to the full settings catalog.
+                </p>
+              </section>
             )}
           </div>
 
@@ -809,7 +879,7 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
                   </p>
                 </div>
                 <span className="rounded-full border border-[var(--border-default)] px-3 py-1 text-xs font-medium" style={{ color: 'var(--stone)' }}>
-                  {advancedCount} entries
+                  {visibleAdvancedCount} entries
                 </span>
               </div>
             </summary>
@@ -838,8 +908,7 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#E5E5E0]">
-                      {configs
-                        .filter((config) => !managedKeys.has(config.key))
+                      {visibleAdvancedConfigs
                         .map((config) => (
                           <tr key={config.key} className="hover:bg-gray-50 transition-colors">
                             <td className="p-4" data-label="Key">
@@ -877,6 +946,11 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
                   </table>
                 </div>
               </div>
+              {normalizedSearch && !visibleAdvancedConfigs.length ? (
+                <div className="rounded-2xl border border-dashed border-[var(--border-default)] bg-[var(--surface-secondary)] px-4 py-3 text-sm text-[var(--stone)]">
+                  No advanced config entries match your search.
+                </div>
+              ) : null}
 
               <div className="bg-white border border-dashed border-[#E5E5E0] rounded-xl p-4">
                 {!addConfigOpen ? (
