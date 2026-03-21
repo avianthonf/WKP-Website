@@ -82,7 +82,7 @@ jobs:
 
       - name: Build Vercel project
         working-directory: ${{ matrix.path }}
-        run: npx --yes vercel@latest build --token=${{ env.VERCEL_TOKEN }}
+        run: npx --yes vercel@latest build ${{ github.event_name == 'push' && '--prod' || '' }} --token=${{ env.VERCEL_TOKEN }}
 
       - name: Deploy preview
         if: github.event_name == 'pull_request'
