@@ -13,7 +13,6 @@ export async function updateSiteConfig(key: string, value: string) {
     if (error) throw error;
 
     revalidatePath('/dashboard/settings');
-    revalidatePath('/', 'layout');
 
     return { success: true };
   } catch (error: any) {
@@ -52,7 +51,6 @@ export async function upsertSiteConfig(
     if (error) throw error;
 
     revalidatePath('/dashboard/settings');
-    revalidatePath('/', 'layout');
 
     return { success: true };
   } catch (error: any) {
@@ -80,7 +78,6 @@ export async function upsertDashboardLiveMode(value: boolean) {
     if (error) throw error;
 
     revalidatePath('/dashboard/settings');
-    revalidatePath('/', 'layout');
 
     return { success: true };
   } catch (error: any) {
@@ -119,7 +116,6 @@ export async function createSiteConfig(key: string, value: string, label: string
     if (error) throw error;
 
     revalidatePath('/dashboard/settings');
-    revalidatePath('/', 'layout');
 
     return { success: true };
   } catch (error: any) {
@@ -143,7 +139,6 @@ export async function deleteSiteConfig(key: string) {
     if (error) throw error;
 
     revalidatePath('/dashboard/settings');
-    revalidatePath('/', 'layout');
 
     return { success: true };
   } catch (error: any) {
