@@ -63,7 +63,7 @@ export function ImmersiveHome({
           : 'Check live status',
       copy:
         storefrontState.mode === 'open'
-          ? getConfigValue(bundle.config, 'home_step_3_copy', 'Checkout flows straight into WhatsApp with a clean order summary.')
+          ? getConfigValue(bundle.config, 'home_step_3_copy', 'Checkout flows into a clean order handoff with the summary already prepared.')
           : storefrontState.summary,
     },
   ];

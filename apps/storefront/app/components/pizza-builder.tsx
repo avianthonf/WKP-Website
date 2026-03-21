@@ -39,7 +39,7 @@ export function PizzaBuilder({ bundle, initialPizzaSlug }: { bundle: StorefrontB
   const builderHeroCopy = getConfigValue(
     bundle.config,
     'build_hero_copy',
-    'Pick a base recipe, choose a size, layer in extra toppings, then send the final order to WhatsApp with the exact details preserved in the cart.'
+    'Pick a base recipe, choose a size, layer in extra toppings, then send the final order with the exact details preserved in the cart.'
   );
 
   const pizza = bundle.pizzas.find((item) => item.id === pizzaId) || initialPizza;
@@ -142,7 +142,7 @@ export function PizzaBuilder({ bundle, initialPizzaSlug }: { bundle: StorefrontB
             <div className="content-card">
               <div className="notice">
                 <Sparkles size={16} />
-                Builder selections flow directly into the cart and WhatsApp order.
+                Builder selections flow directly into the cart and order handoff.
               </div>
               {orderingPaused ? (
                 <div className="notice" data-tone={storefrontState.tone}>
@@ -279,7 +279,7 @@ export function PizzaBuilder({ bundle, initialPizzaSlug }: { bundle: StorefrontB
             transition={{ duration: 0.45, delay: 0.08 }}
           >
             <div className="side-panel__title">Live summary</div>
-            <p className="side-panel__copy">This is the exact payload that lands in the cart and WhatsApp message.</p>
+            <p className="side-panel__copy">This is the exact payload that lands in the cart and final handoff.</p>
             <div className="summary-list summary-list--spaced">
               <motion.div
                 initial={prefersReducedMotion ? false : { x: "100%", opacity: 0 }}

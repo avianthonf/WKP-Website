@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { useMemo, useState, useTransition, type FormEvent } from 'react';
+import { useEffect, useMemo, useState, useTransition, type FormEvent } from 'react';
 import { ArrowRight, CheckCircle2, PhoneCall, ShoppingBag, Trash2 } from 'lucide-react';
 import { useCart } from './cart-provider';
 import { createWhatsAppOrder } from '../actions';
@@ -29,23 +29,30 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [notes, setNotes] = useState('');
   const [status, setStatus] = useState<string | null>(null);
+  const [handoff, setHandoff] = useState<{ orderNumber: number; whatsappUrl: string } | null>(null);
+  const [deviceMode, setDeviceMode] = useState<'mobile' | 'desktop' | null>(null);
   const [isPending, startTransition] = useTransition();
   const storefrontState = getStorefrontState(bundle);
+
+  useEffect(() => {
+    const coarsePointer = window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 768;
+    setDeviceMode(coarsePointer ? 'mobile' : 'desktop');
+  }, []);
 
   const minimumOrder = getMinimumOrder(bundle);
   const deliveryRequired = fulfillment === 'delivery';
   const orderingPaused = storefrontState.mode !== 'open';
-  const checkoutHeroTitle = getConfigValue(bundle.config, 'cart_hero_title', 'Send the order on WhatsApp and keep moving.');
+  const checkoutHeroTitle = getConfigValue(bundle.config, 'cart_hero_title', 'Send the order and keep moving.');
   const checkoutHeroCopy = getConfigValue(
     bundle.config,
     'cart_hero_copy',
-    'This checkout keeps WhatsApp as the primary customer action while storing the same order for kitchen visibility and reporting.'
+    'This checkout stores the order for the kitchen and prepares the final handoff after checkout.'
   );
   const checkoutPreviewTitle = getConfigValue(bundle.config, 'cart_preview_title', 'Your cart is ready');
   const checkoutPreviewCopy = getConfigValue(
     bundle.config,
     'cart_preview_copy',
-    'Orders are stored in the system and sent to WhatsApp with the full payload intact.'
+    'Orders are stored in the system and prepared with the full payload intact.'
   );
   const cartHeroImageUrl = getCartHeroImageUrl(bundle);
   const checkoutHoursCopy = getConfigValue(bundle.config, 'cart_hours_copy', 'Store hours:');
@@ -104,8 +111,10 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
         const response = await createWhatsAppOrder({
           customerName: customerName.trim(),
           customerPhone: customerPhone.trim(),
-          deliveryAddress: deliveryRequired ? deliveryAddress.trim() : 'Pickup order',
-          notes: [notes.trim(), fulfillment === 'pickup' ? 'Pickup requested' : null].filter(Boolean).join(' - '),
+          fulfillment,
+          deliveryAddress: deliveryRequired ? deliveryAddress.trim() : undefined,
+          pickupNote: fulfillment === 'pickup' ? deliveryAddress.trim() : undefined,
+          notes: notes.trim() || undefined,
           total,
           items: items.map((item) => ({
             id: item.id,
@@ -123,7 +132,17 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
         });
 
         clearCart();
-        window.location.href = response.whatsappUrl;
+        const shouldOpenOnMobile =
+          deviceMode === 'mobile' ||
+          (deviceMode === null && (window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 768));
+
+        if (shouldOpenOnMobile) {
+          window.location.href = response.whatsappUrl;
+          return;
+        }
+
+        setHandoff({ orderNumber: response.orderNumber, whatsappUrl: response.whatsappUrl });
+        setStatus(`Order #${response.orderNumber} is ready. Scan the QR with your phone to send it.`);
       } catch (error) {
         setStatus(error instanceof Error ? error.message : 'We could not place the order.');
       }
@@ -142,7 +161,7 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
           <div>
             <span className="eyebrow">
               <PhoneCall size={12} />
-              {getConfigValue(bundle.config, 'cart_eyebrow', 'WhatsApp checkout')}
+              {getConfigValue(bundle.config, 'cart_eyebrow', 'Order checkout')}
             </span>
             <h1 className="hero-title">{checkoutHeroTitle}</h1>
             <p className="hero-copy">{checkoutHeroCopy}</p>
@@ -153,9 +172,9 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
                   View live status
                 </Link>
               ) : (
-                <Link href={getOrderLink(bundle)} className="button">
+                <Link href={getOrderLink(bundle, 'Hi, I would like to place an order from the website.')} className="button">
                   <PhoneCall size={16} />
-                  Open WhatsApp
+                  Open order chat
                 </Link>
               )}
               <Link href="/menu" className="button-secondary">
@@ -311,15 +330,49 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
               }
               whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
               whileHover={prefersReducedMotion ? {} : { scale: 1.03 }}
-              animate={isReady && !isPending && !orderingPaused && items.length > 0 ? { scale: 1.02, transition: { type: 'spring', stiffness: 300, damping: 20 } } : undefined}
+              animate={
+                isReady && !isPending && !orderingPaused && items.length > 0
+                  ? { scale: 1.02, transition: { type: 'spring', stiffness: 300, damping: 20 } }
+                  : undefined
+              }
             >
-              {isPending ? 'Sending...' : orderingPaused ? 'View live status' : 'Send order on WhatsApp'}
+              {isPending ? 'Sending...' : orderingPaused ? 'View live status' : 'Place order'}
               <ArrowRight size={16} />
             </motion.button>
             <p className="footnote">
-              WhatsApp is the primary flow. The order is also persisted for kitchen tracking and reporting.
+              The order is saved for kitchen tracking and reporting before the handoff opens.
             </p>
           </form>
+
+          {handoff ? (
+            <motion.div
+              className="content-card order-handoff"
+              initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
+              animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+              transition={{ duration: 0.35 }}
+            >
+              <div className="section__eyebrow">Send from your phone</div>
+              <div className="section__title checkout-summary__title">Order #{handoff.orderNumber}</div>
+              <p className="hero-copy hero-copy--tight">
+                Scan the QR code with your phone to open the exact order message, then send it from there.
+              </p>
+              <div className="order-handoff__qr">
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${encodeURIComponent(handoff.whatsappUrl)}`}
+                  alt={`QR code for order ${handoff.orderNumber}`}
+                  className="order-handoff__qr-image"
+                />
+              </div>
+              <div className="hero-actions">
+                <Link href={handoff.whatsappUrl} className="button-secondary" target="_blank" rel="noreferrer">
+                  Open on this computer
+                </Link>
+                <Link href="/menu" className="button">
+                  Back to menu
+                </Link>
+              </div>
+            </motion.div>
+          ) : null}
 
           <motion.aside
             className="content-card"
@@ -328,110 +381,137 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.45, delay: 0.08 }}
           >
-            <div className="section__eyebrow">Order summary</div>
-            <div className="section__title checkout-summary__title">Cart items</div>
-            <div className="summary-list summary-list--spaced">
-              <AnimatePresence initial={false}>
-                {items.length ? (
-                  items.map((item, index) => (
-                    <motion.div
-                      key={item.id}
-                      layout
-                      className="summary-row summary-row--top summary-row--cart"
-                      initial={prefersReducedMotion ? false : { x: "-100%", opacity: 0 }}
-                      animate={prefersReducedMotion ? false : { x: 0, opacity: 1 }}
-                      exit={prefersReducedMotion ? undefined : { opacity: 0, y: -8, scale: 0.98 }}
-                      transition={{ duration: 0.4, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] }}
-                    >
-                      <div className="cart-line">
-                        <div className="cart-line__media" aria-hidden="true">
-                          {item.imageUrl ? <img src={item.imageUrl} alt="" /> : <ShoppingBag size={14} />}
-                        </div>
-                        <div className="stack cart-line__content">
-                          <span className="summary-row__label">{item.name}</span>
-                          <span className="footnote">
-                            {item.kind.charAt(0).toUpperCase() + item.kind.slice(1)}
-                            {item.size ? ` - ${getSizeLabel(item.size)}` : ''}
-                          </span>
-                          <div className="menu-tabs cart-line__controls">
-                            <motion.button
-                              type="button"
-                              className="menu-tab"
-                              onClick={() => setQuantity(item.id, item.quantity - 1)}
-                              whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
-                              whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}
-                            >
-                              -
-                            </motion.button>
-                            <span className="menu-tab" data-active="true">
-                              {item.quantity}
-                            </span>
-                            <motion.button
-                              type="button"
-                              className="menu-tab"
-                              onClick={() => setQuantity(item.id, item.quantity + 1)}
-                              whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
-                              whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}
-                            >
-                              +
-                            </motion.button>
-                            <motion.button
-                              type="button"
-                              className="menu-tab"
-                              onClick={() => removeItem(item.id)}
-                              initial={prefersReducedMotion ? false : { width: 40 }}
-                              whileHover={prefersReducedMotion ? undefined : { width: 80 }}
-                              whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
-                              style={{ overflow: 'hidden' }}
-                            >
-                              <Trash2 size={14} />
-                              <motion.span
-                                initial={prefersReducedMotion ? false : { opacity: 0 }}
-                                animate={prefersReducedMotion ? false : { opacity: 1 }}
-                                exit={prefersReducedMotion ? undefined : { opacity: 0 }}
-                                transition={{ duration: 0.2 }}
-                              >
-                                Remove
-                              </motion.span>
-                            </motion.button>
+            {handoff ? (
+              <div className="summary-list summary-list--spaced">
+                <div className="notice" data-tone="success">
+                  <CheckCircle2 size={16} />
+                  The order is saved and ready to send.
+                </div>
+                <div className="summary-row">
+                  <span className="summary-row__label">Order number</span>
+                  <span className="summary-row__value">#{handoff.orderNumber}</span>
+                </div>
+                <div className="summary-row">
+                  <span className="summary-row__label">Next step</span>
+                  <span className="summary-row__value">Scan the QR or open the link</span>
+                </div>
+                <div className="hero-actions">
+                  <Link href={handoff.whatsappUrl} className="button" target="_blank" rel="noreferrer">
+                    Open on this computer
+                  </Link>
+                  <Link href="/status" className="button-secondary">
+                    View status
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="section__eyebrow">Order summary</div>
+                <div className="section__title checkout-summary__title">Cart items</div>
+                <div className="summary-list summary-list--spaced">
+                  <AnimatePresence initial={false}>
+                    {items.length ? (
+                      items.map((item, index) => (
+                        <motion.div
+                          key={item.id}
+                          layout
+                          className="summary-row summary-row--top summary-row--cart"
+                          initial={prefersReducedMotion ? false : { x: "-100%", opacity: 0 }}
+                          animate={prefersReducedMotion ? false : { x: 0, opacity: 1 }}
+                          exit={prefersReducedMotion ? undefined : { opacity: 0, y: -8, scale: 0.98 }}
+                          transition={{ duration: 0.4, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] }}
+                        >
+                          <div className="cart-line">
+                            <div className="cart-line__media" aria-hidden="true">
+                              {item.imageUrl ? <img src={item.imageUrl} alt="" /> : <ShoppingBag size={14} />}
+                            </div>
+                            <div className="stack cart-line__content">
+                              <span className="summary-row__label">{item.name}</span>
+                              <span className="footnote">
+                                {item.kind.charAt(0).toUpperCase() + item.kind.slice(1)}
+                                {item.size ? ` - ${getSizeLabel(item.size)}` : ''}
+                              </span>
+                              <div className="menu-tabs cart-line__controls">
+                                <motion.button
+                                  type="button"
+                                  className="menu-tab"
+                                  onClick={() => setQuantity(item.id, item.quantity - 1)}
+                                  whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
+                                  whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}
+                                >
+                                  -
+                                </motion.button>
+                                <span className="menu-tab" data-active="true">
+                                  {item.quantity}
+                                </span>
+                                <motion.button
+                                  type="button"
+                                  className="menu-tab"
+                                  onClick={() => setQuantity(item.id, item.quantity + 1)}
+                                  whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
+                                  whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}
+                                >
+                                  +
+                                </motion.button>
+                                <motion.button
+                                  type="button"
+                                  className="menu-tab"
+                                  onClick={() => removeItem(item.id)}
+                                  initial={prefersReducedMotion ? false : { width: 40 }}
+                                  whileHover={prefersReducedMotion ? undefined : { width: 80 }}
+                                  whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
+                                  style={{ overflow: 'hidden' }}
+                                >
+                                  <Trash2 size={14} />
+                                  <motion.span
+                                    initial={prefersReducedMotion ? false : { opacity: 0 }}
+                                    animate={prefersReducedMotion ? false : { opacity: 1 }}
+                                    exit={prefersReducedMotion ? undefined : { opacity: 0 }}
+                                    transition={{ duration: 0.2 }}
+                                  >
+                                    Remove
+                                  </motion.span>
+                                </motion.button>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                      <span className="summary-row__value">{money(getLinePrice(item))}</span>
-                    </motion.div>
-                  ))
-                ) : (
+                          <span className="summary-row__value">{money(getLinePrice(item))}</span>
+                        </motion.div>
+                      ))
+                    ) : (
+                      <motion.div
+                        className="notice"
+                        data-tone="warning"
+                        initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
+                        animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+                      >
+                        {emptyCartCopy}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                   <motion.div
-                    className="notice"
-                    data-tone="warning"
-                    initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
-                    animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+                    initial={prefersReducedMotion ? false : { y: 20, opacity: 0 }}
+                    animate={prefersReducedMotion ? false : { y: 0, opacity: 1 }}
+                    transition={{ duration: 0.4, delay: 0 * 0.06, ease: [0.16, 1, 0.3, 1] }}
                   >
-                    {emptyCartCopy}
+                    <div className="summary-row">
+                      <span className="summary-row__label">Subtotal</span>
+                      <span className="summary-row__value">{money(total)}</span>
+                    </div>
                   </motion.div>
-                )}
-              </AnimatePresence>
-              <motion.div
-                initial={prefersReducedMotion ? false : { y: 20, opacity: 0 }}
-                animate={prefersReducedMotion ? false : { y: 0, opacity: 1 }}
-                transition={{ duration: 0.4, delay: 0 * 0.06, ease: [0.16, 1, 0.3, 1] }}
-              >
-                <div className="summary-row">
-                  <span className="summary-row__label">Subtotal</span>
-                  <span className="summary-row__value">{money(total)}</span>
+                  <motion.div
+                    initial={prefersReducedMotion ? false : { y: 20, opacity: 0 }}
+                    animate={prefersReducedMotion ? false : { y: 0, opacity: 1 }}
+                    transition={{ duration: 0.4, delay: 1 * 0.06, ease: [0.16, 1, 0.3, 1] }}
+                  >
+                    <div className="summary-row">
+                      <span className="summary-row__label">Items</span>
+                      <span className="summary-row__value">{totalItems}</span>
+                    </div>
+                  </motion.div>
                 </div>
-              </motion.div>
-              <motion.div
-                initial={prefersReducedMotion ? false : { y: 20, opacity: 0 }}
-                animate={prefersReducedMotion ? false : { y: 0, opacity: 1 }}
-                transition={{ duration: 0.4, delay: 1 * 0.06, ease: [0.16, 1, 0.3, 1] }}
-              >
-                <div className="summary-row">
-                  <span className="summary-row__label">Items</span>
-                  <span className="summary-row__value">{totalItems}</span>
-                </div>
-              </motion.div>
-            </div>
+              </>
+            )}
           </motion.aside>
         </div>
       </motion.section>

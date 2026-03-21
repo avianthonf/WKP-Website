@@ -10,7 +10,7 @@ export default async function PrivacyPage() {
   const sections = getStructuredContent(bundle, 'privacy_sections', [
     {
       title: 'Order storage',
-      body: 'Order content is persisted to the database before WhatsApp handoff.',
+      body: 'Order content is persisted to the database before the handoff step.',
     },
     {
       title: 'Usage',

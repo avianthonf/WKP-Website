@@ -35,7 +35,7 @@ export default async function AboutPage() {
                   {getConfigValue(
                     bundle.config,
                     'about_notice',
-                    'Fresh ingredients, live data, and a WhatsApp-first ordering experience.'
+                    'Fresh ingredients, live data, and a simple order handoff.'
                   )}
                 </div>
                 <div className="summary-list">
@@ -82,13 +82,13 @@ export default async function AboutPage() {
               {getConfigValue(bundle.config, 'about_workflow_title', 'Workflow')}
             </div>
             <div className="info-card__body">
-              {getConfigValue(bundle.config, 'about_workflow_body', 'Primary order path is WhatsApp.')}
+              {getConfigValue(bundle.config, 'about_workflow_body', 'Primary order path is a quick mobile handoff.')}
             </div>
             <div className="info-card__copy">
               {getConfigValue(
                 bundle.config,
                 'about_workflow_copy',
-                'The order is stored in the database first, then the customer is taken to WhatsApp with the message already composed.'
+                'The order is stored in the database first, then the customer is given the next step to complete the send.'
               )}
             </div>
           </div>

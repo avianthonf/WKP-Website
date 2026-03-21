@@ -34,8 +34,13 @@ export default async function DeliveryPage() {
                 <Link href={storefrontState.primaryAction.href} className="button">
                   {storefrontState.primaryAction.label}
                 </Link>
-                <Link href={getOrderLink(bundle)} className="button-secondary" target="_blank" rel="noreferrer">
-                  WhatsApp now
+                <Link
+                  href={getOrderLink(bundle, 'Hi, I would like to check delivery details for my order.')}
+                  className="button-secondary"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Open order chat
                 </Link>
               </div>
             </div>

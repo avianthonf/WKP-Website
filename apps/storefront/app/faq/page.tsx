@@ -10,7 +10,7 @@ export default async function FaqPage() {
   const faqs = getStructuredContent(bundle, 'faq_items', [
     {
       title: 'How do I order?',
-      body: 'Build your cart, go to checkout, and send the order on WhatsApp. The same order is stored for the kitchen as well.',
+      body: 'Build your cart, go to checkout, and complete the handoff. The same order is stored for the kitchen as well.',
     },
     {
       title: 'Can I customize pizzas?',
@@ -18,7 +18,7 @@ export default async function FaqPage() {
     },
     {
       title: 'Do you take offline orders?',
-      body: 'The storefront is WhatsApp-first. That keeps the flow simple for the kitchen and the customer.',
+      body: 'The storefront uses a lightweight order handoff so the flow stays simple for the kitchen and the customer.',
     },
     {
       title: 'What happens if an item is sold out?',

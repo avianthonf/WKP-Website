@@ -253,7 +253,7 @@ export function StorefrontShell({
               <div className="drawer-footer">
                 <div className="drawer-card">
                   <div className="stack">
-                    <span className="section__eyebrow">WhatsApp</span>
+                    <span className="section__eyebrow">Order chat</span>
                     <strong>{storePhone}</strong>
                     <span className="muted">{getOpeningWindow(bundle)}</span>
                   </div>

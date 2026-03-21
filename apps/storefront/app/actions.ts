@@ -10,7 +10,9 @@ import { z } from 'zod';
 const orderSchema = z.object({
   customerName: z.string().min(2),
   customerPhone: z.string().min(6).optional(),
+  fulfillment: z.enum(['delivery', 'pickup']),
   deliveryAddress: z.string().optional(),
+  pickupNote: z.string().optional(),
   notes: z.string().optional(),
   items: z.array(
     z.object({
@@ -85,12 +87,22 @@ export async function createWhatsAppOrder(payload: z.infer<typeof orderSchema>) 
       order_number: orderNumber,
       customer_name: data.customerName,
       customer_phone: data.customerPhone || null,
-      delivery_address: data.deliveryAddress || null,
+      delivery_address: data.fulfillment === 'delivery' ? data.deliveryAddress || null : null,
       total_price: data.total,
       status: 'pending',
       payment_method: 'cash' satisfies PaymentMethod,
       payment_status: 'pending' satisfies PaymentStatus,
-      notes: data.notes || null,
+      notes:
+        [
+          data.notes?.trim() || null,
+          data.fulfillment === 'pickup'
+            ? data.pickupNote?.trim()
+              ? `Pickup note: ${data.pickupNote.trim()}`
+              : 'Pickup requested'
+            : null,
+        ]
+          .filter(Boolean)
+          .join(' - ') || null,
     })
     .select('id, order_number')
     .single();
@@ -118,7 +130,8 @@ export async function createWhatsAppOrder(payload: z.infer<typeof orderSchema>) 
     orderNumber: order.order_number,
     customerName: data.customerName,
     customerPhone: data.customerPhone,
-    deliveryAddress: data.deliveryAddress,
+    fulfillment: data.fulfillment,
+    deliveryAddress: data.fulfillment === 'delivery' ? data.deliveryAddress : data.pickupNote,
     notes: data.notes,
     items: data.items,
     total: data.total,

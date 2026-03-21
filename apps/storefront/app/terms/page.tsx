@@ -10,7 +10,7 @@ export default async function TermsPage() {
   const sections = getStructuredContent(bundle, 'terms_sections', [
     {
       title: 'Order confirmation',
-      body: 'WhatsApp is the primary confirmation channel for all orders.',
+      body: 'The handoff channel is the primary confirmation path for all orders.',
     },
     {
       title: 'Accuracy',
@@ -32,11 +32,11 @@ export default async function TermsPage() {
               <h1 className="hero-title">
                 {getConfigValue(bundle.config, 'terms_hero_title', 'Plain terms for a straightforward order flow.')}
               </h1>
-              <p className="hero-copy">
+                <p className="hero-copy">
                 {getConfigValue(
                   bundle.config,
                   'terms_hero_copy',
-                  'Placing an order means the kitchen may contact you through WhatsApp to confirm details or delivery timing.'
+                  'Placing an order means the kitchen may contact you through the selected handoff channel to confirm details or delivery timing.'
                 )}
               </p>
             </div>

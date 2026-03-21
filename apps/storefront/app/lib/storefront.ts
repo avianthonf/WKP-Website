@@ -23,7 +23,7 @@ const fallbackBundle: StorefrontBundle = {
   notifications: [],
   config: {
     hero_title: 'We Knead Pizza',
-    hero_subtitle: 'Hand-tossed pizza, warm sides, and a WhatsApp-first order flow.',
+    hero_subtitle: 'Hand-tossed pizza, warm sides, and a guided order flow.',
     announcement_bar: 'Freshly made daily.',
     whatsapp_number: '918484802540',
     opening_time: '11:00',
@@ -33,7 +33,7 @@ const fallbackBundle: StorefrontBundle = {
     site_maintenance_mode: 'false',
     address_line1: 'Carona, Goa',
     site_meta_title: 'We Knead Pizza | Crafted Pizza Ordering',
-    site_meta_description: 'An editorial pizza storefront with live menu data, WhatsApp ordering, and a premium customer experience.',
+    site_meta_description: 'An editorial pizza storefront with live menu data, guided ordering, and a premium customer experience.',
     nav_links: JSON.stringify([
       { href: '/home', label: 'Home' },
       { href: '/menu', label: 'Menu' },

@@ -51,7 +51,7 @@ export default async function StatusPage() {
           <div className="info-card">
             <div className="info-card__title">{getConfigValue(bundle.config, 'status_path_title', 'Order path')}</div>
             <div className="info-card__copy">
-              {getConfigValue(bundle.config, 'status_path_copy', 'Menu -> cart -> WhatsApp.')}
+              {getConfigValue(bundle.config, 'status_path_copy', 'Menu -> cart -> handoff.')}
             </div>
           </div>
         </section>

@@ -1,4 +1,5 @@
 import type { Addon, CartLine, Dessert, Extra, Pizza, Size, StorefrontBundle } from './types';
+import { buildWhatsAppUrl } from './whatsapp';
 
 export function getConfigValue(config: Record<string, string>, key: string, fallback = '') {
   return config[key] || fallback;
@@ -81,7 +82,7 @@ export function getSiteMetaDescription(bundle: StorefrontBundle) {
   return getConfigValue(
     bundle.config,
     'site_meta_description',
-    'An editorial pizza storefront with live menu data, WhatsApp ordering, and a premium customer experience.'
+    'An editorial pizza storefront with live menu data, guided ordering, and a premium customer experience.'
   );
 }
 
@@ -102,7 +103,7 @@ export function getHeroSubtitle(bundle: StorefrontBundle) {
   return getConfigValue(
     bundle.config,
     'hero_subtitle',
-    'Hand-tossed pizza, warm sides, and a WhatsApp-first order flow built for real life.'
+    'Hand-tossed pizza, warm sides, and a guided order flow built for real life.'
   );
 }
 
@@ -291,9 +292,10 @@ export function getSizeName(size: Size) {
   return size === 'small' ? 'Small' : size === 'medium' ? 'Medium' : 'Large';
 }
 
-export function getOrderLink(bundle: StorefrontBundle) {
+export function getOrderLink(bundle: StorefrontBundle, message?: string) {
   const phone = getStorePhone(bundle);
-  return phone ? `https://wa.me/${phone}` : '/contact';
+  if (!phone) return '/contact';
+  return message ? buildWhatsAppUrl(phone, message) : `https://wa.me/${phone}`;
 }
 
 export function getPizzaPrice(pizza: Pizza, size: Size) {

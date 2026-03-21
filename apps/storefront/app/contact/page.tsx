@@ -32,20 +32,20 @@ export default async function ContactPage() {
               <h1 className="hero-title">
                 {getConfigValue(bundle.config, 'contact_hero_title', 'Talk to the kitchen directly.')}
               </h1>
-              <p className="hero-copy">
-                {getConfigValue(
-                  bundle.config,
-                  'contact_hero_copy',
-                  'Orders, delivery questions, and special notes all work best through WhatsApp. This page exists for convenience and trust.'
-                )}
-              </p>
+                <p className="hero-copy">
+                  {getConfigValue(
+                    bundle.config,
+                    'contact_hero_copy',
+                    'Orders, delivery questions, and special notes all work best through the direct order chat. This page exists for convenience and trust.'
+                  )}
+                </p>
             </div>
             <div className="hero-aside">
               <div className="content-card">
                 <div className="summary-list">
                   <div className="summary-row">
                     <span className="summary-row__label">
-                      {getConfigValue(bundle.config, 'contact_whatsapp_label', 'WhatsApp')}
+                      {getConfigValue(bundle.config, 'contact_whatsapp_label', 'Direct chat')}
                     </span>
                     <span className="summary-row__value">{phone}</span>
                   </div>
@@ -63,9 +63,9 @@ export default async function ContactPage() {
                   </div>
                 </div>
                 <div className="hero-actions">
-                  <Link href={getOrderLink(bundle)} className="button">
+                  <Link href={getOrderLink(bundle, 'Hi, I would like to place an order or ask a question.')} className="button">
                     <PhoneCall size={16} />
-                    WhatsApp us
+                    Message us
                   </Link>
                   <Link href={storefrontState.primaryAction.href} className="button-secondary">
                     {storefrontState.primaryAction.label}
@@ -108,13 +108,13 @@ export default async function ContactPage() {
               {getConfigValue(bundle.config, 'contact_ordering_title', 'Live ordering')}
             </div>
             <div className="info-card__body">
-              {getConfigValue(bundle.config, 'contact_ordering_body', 'WhatsApp-first.')}
+              {getConfigValue(bundle.config, 'contact_ordering_body', 'Direct order chat.')}
             </div>
             <div className="info-card__copy">
               {getConfigValue(
                 bundle.config,
                 'contact_ordering_copy',
-                'The order is stored and then handed off to WhatsApp, which keeps the customer flow low-friction.'
+                'The order is stored and then handed off to the selected chat flow, which keeps the customer flow low-friction.'
               )}
             </div>
           </div>

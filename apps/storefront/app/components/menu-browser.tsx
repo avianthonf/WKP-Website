@@ -168,10 +168,10 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
               </div>
             </div>
             <div className="content-card">
-              <div className="notice">
-                <Sparkles size={16} />
-                WhatsApp is the fastest way out of the menu and into the kitchen.
-              </div>
+            <div className="notice">
+              <Sparkles size={16} />
+              The menu flows straight into the kitchen handoff.
+            </div>
               {orderingPaused ? (
                 <div className="notice" data-tone={storefrontState.tone}>
                   <Sparkles size={16} />
