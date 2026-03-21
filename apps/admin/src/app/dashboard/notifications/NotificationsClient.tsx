@@ -34,6 +34,12 @@ interface NotificationsClientProps {
   initialNotifications: Notification[];
 }
 
+type RealtimeNotificationPayload = {
+  eventType: 'INSERT' | 'UPDATE' | 'DELETE';
+  new: Notification;
+  old: Notification;
+};
+
 const typeConfig = {
   info: { icon: Info, color: '#3b82f6', bgColor: '#dbeafe', textColor: '#1e40af', label: 'Info' },
   offer: { icon: Tag, color: '#ec4899', bgColor: '#fce7f3', textColor: '#9d174d', label: 'Offer' },
@@ -81,7 +87,7 @@ export default function NotificationsClient({ initialNotifications }: Notificati
           schema: 'public',
           table: 'notifications',
         },
-        (payload) => {
+        (payload: RealtimeNotificationPayload) => {
           const eventType = payload.eventType;
           const notification = payload.new as Notification;
 

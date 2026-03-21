@@ -29,7 +29,7 @@ export default async function EditPizzaPage({ params }: EditPizzaPageProps) {
 
   const initialData = {
     ...pizza,
-    toppings: pizzaToppings?.map(pt => pt.topping_id) || []
+    toppings: pizzaToppings?.map((pt: { topping_id: string }) => pt.topping_id) || []
   };
 
   const handleUpdate = async (data: any) => {

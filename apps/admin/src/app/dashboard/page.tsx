@@ -50,7 +50,10 @@ export default async function DashboardPage() {
   ]);
 
   const totalRevenue =
-    revenueData?.reduce((sum, order) => sum + (Number(order.total_price) || 0), 0) || 0;
+    (revenueData as Array<Pick<Order, 'total_price'>> | undefined)?.reduce(
+      (sum: number, order: Pick<Order, 'total_price'>) => sum + (Number(order.total_price) || 0),
+      0
+    ) || 0;
   const isOpen = siteStatus?.value === 'true';
   const avgTicket = totalOrders ? Math.round(totalRevenue / totalOrders) : 0;
   const liveTone = isOpen ? 'Serving guests' : 'Kitchen paused';

@@ -20,6 +20,12 @@ interface KanbanBoardProps {
   initialOrders: Order[];
 }
 
+type RealtimeOrderPayload = {
+  eventType: 'INSERT' | 'UPDATE' | 'DELETE';
+  new: Order;
+  old: Order;
+};
+
 export default function KanbanBoard({ initialOrders }: KanbanBoardProps) {
   const [orders, setOrders] = useState<Order[]>(initialOrders);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -46,7 +52,7 @@ export default function KanbanBoard({ initialOrders }: KanbanBoardProps) {
           schema: 'public',
           table: 'orders',
         },
-        (payload) => {
+        (payload: RealtimeOrderPayload) => {
           const eventType = payload.eventType;
           const order = payload.new as Order;
 

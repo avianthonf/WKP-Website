@@ -37,6 +37,12 @@ interface SettingsClientProps {
   initialConfigs: SiteConfigItem[];
 }
 
+type RealtimeSiteConfigPayload = {
+  eventType: 'INSERT' | 'UPDATE' | 'DELETE';
+  new: SiteConfigItem;
+  old: SiteConfigItem;
+};
+
 export default function SettingsClient({ initialConfigs }: SettingsClientProps) {
   const router = useRouter();
   const prefersReducedMotion = useReducedMotion() ?? false;
@@ -72,7 +78,7 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
           schema: 'public',
           table: 'site_config',
         },
-        (payload) => {
+        (payload: RealtimeSiteConfigPayload) => {
           const eventType = payload.eventType;
           const config = payload.new as SiteConfigItem;
 

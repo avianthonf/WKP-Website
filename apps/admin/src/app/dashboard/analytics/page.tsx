@@ -51,7 +51,9 @@ export default async function AnalyticsPage() {
   ]);
 
   const deliveredRevenue =
-    deliveredOrders?.reduce((sum, order) => sum + (Number(order.total_price) || 0), 0) || 0;
+    deliveredOrders?.reduce((sum: number, order: Pick<Order, 'total_price'>) => {
+      return sum + (Number(order.total_price) || 0);
+    }, 0) || 0;
   const averageTicket = totalOrders ? Math.round(deliveredRevenue / totalOrders) : 0;
   const activeSample = (statusWindowOrders || []) as Pick<Order, 'status' | 'created_at' | 'total_price'>[];
   const trendSeries = buildTrendSeries((trendWindowOrders || []) as Pick<Order, 'created_at'>[]);
