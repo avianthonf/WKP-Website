@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { ChefHat, Search, Sparkles } from 'lucide-react';
 import { useCart } from './cart-provider';
@@ -36,6 +36,7 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
   const { addItem, items } = useCart();
   const [filter, setFilter] = useState<FilterKey>('all');
   const [query, setQuery] = useState('');
+  const [hasFinePointer, setHasFinePointer] = useState(false);
   const prefersReducedMotion = useReducedMotion();
   const storefrontState = getStorefrontState(bundle);
   const orderingPaused = storefrontState.mode !== 'open';
@@ -61,6 +62,17 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
   );
   const menuHeroImageUrl = getMenuHeroImageUrl(bundle);
   const activeFilterIndex = Math.max(0, filters.findIndex((item) => item.key === filter));
+
+  useEffect(() => {
+    const media = window.matchMedia('(hover: hover) and (pointer: fine)');
+    const update = () => setHasFinePointer(media.matches);
+
+    update();
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
+
+  const canHover = !prefersReducedMotion && hasFinePointer;
 
   const pizzaCategoryOptions = useMemo(
     () => bundle.categories.filter((category) => category.type === 'pizza'),
@@ -246,7 +258,7 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
                   initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
                   animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: index * 0.05 }}
-                  whileHover={prefersReducedMotion ? {} : { y: -2, scale: 1.05 }}
+                  whileHover={canHover ? { y: -2, scale: 1.05 } : {}}
                   whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
                 >
                   {item.label}
@@ -425,11 +437,23 @@ function PizzaCard({
   index: number;
 }) {
   const prefersReducedMotion = useReducedMotion();
+  const [hasFinePointer, setHasFinePointer] = useState(false);
   const [size, setSize] = useState<Size>('medium');
   const toppings = getPizzaDisplayToppings(pizza);
   const price = getPizzaPrice(pizza, size);
   const [tiltX, setTiltX] = useState(0);
   const [tiltY, setTiltY] = useState(0);
+
+  useEffect(() => {
+    const media = window.matchMedia('(hover: hover) and (pointer: fine)');
+    const update = () => setHasFinePointer(media.matches);
+
+    update();
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
+
+  const canHover = !prefersReducedMotion && hasFinePointer;
 
   const handleMouseMove = (event: MouseEvent<HTMLDivElement>) => {
     if (prefersReducedMotion) return;
@@ -458,12 +482,12 @@ function PizzaCard({
       whileInView={prefersReducedMotion ? {} : { opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, amount: 0.24 }}
       transition={{ duration: 0.5, delay: index * 0.045 }}
-      whileHover={prefersReducedMotion ? {} : { y: -8, scale: 1.015 }}
+      whileHover={canHover ? { y: -8, scale: 1.015 } : {}}
     >
       <div
         className="product-card__tilt"
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
+        onMouseMove={canHover ? handleMouseMove : undefined}
+        onMouseLeave={canHover ? handleMouseLeave : undefined}
         style={
           {
             '--tilt-x': `${tiltX}deg`,
@@ -477,7 +501,7 @@ function PizzaCard({
               src={pizza.image_url}
               alt={pizza.name}
               initial={prefersReducedMotion ? false : { scale: 1 }}
-              whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}
+              whileHover={canHover ? { scale: 1.05 } : {}}
               whileTap={prefersReducedMotion ? {} : { scale: 0.97 }}
               transition={{ type: 'spring', stiffness: 300, damping: 20 }}
             />
@@ -578,6 +602,19 @@ function SimpleCard({
   index: number;
 }) {
   const prefersReducedMotion = useReducedMotion();
+  const [hasFinePointer, setHasFinePointer] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia('(hover: hover) and (pointer: fine)');
+    const update = () => setHasFinePointer(media.matches);
+
+    update();
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
+
+  const canHover = !prefersReducedMotion && hasFinePointer;
+
   return (
     <motion.article
       className="product-card"
@@ -585,7 +622,7 @@ function SimpleCard({
       whileInView={prefersReducedMotion ? {} : { opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, amount: 0.24 }}
       transition={{ duration: 0.45, delay: index * 0.04 }}
-      whileHover={prefersReducedMotion ? {} : { y: -6, scale: 1.01 }}
+      whileHover={canHover ? { y: -6, scale: 1.01 } : {}}
     >
       <div className="product-card__body">
         <div className="product-card__title-row">
