@@ -31,6 +31,9 @@ export default async function MenuItemPage({ params }: { params: Promise<{ slug:
     'menu_detail_price_copy',
     pizza ? `Small ${money(pizza.price_small)} - Large ${money(pizza.price_large)}` : 'Price comes from the live menu.'
   );
+  const priceTitle = getConfigValue(bundle.config, 'menu_detail_price_title', 'Price');
+  const statusTitle = getConfigValue(bundle.config, 'menu_detail_status_title', 'Status');
+  const actionTitle = getConfigValue(bundle.config, 'menu_detail_action_title', 'Action');
   const statusCopy = getConfigValue(
     bundle.config,
     'menu_detail_status_copy',
@@ -41,6 +44,11 @@ export default async function MenuItemPage({ params }: { params: Promise<{ slug:
     'menu_detail_action_copy',
     'Use the main menu or builder to add this item to your cart.'
   );
+  const previewCopy = getConfigValue(
+    bundle.config,
+    'menu_detail_preview_copy',
+    pizza ? 'Medium price shown here. Use the size ladder for the full range.' : 'Pulled live from the menu.'
+  );
   const orderingPaused = bundle.maintenanceMode || !bundle.isOpen;
 
   return (
@@ -50,10 +58,14 @@ export default async function MenuItemPage({ params }: { params: Promise<{ slug:
         title={title}
         heroCopy={getConfigValue(bundle.config, 'menu_detail_hero_copy', description || detailCopy)}
         image={image}
+        previewCopy={previewCopy}
         primaryPrice={price}
+        priceTitle={priceTitle}
         priceCopy={priceCopy}
+        statusTitle={statusTitle}
         statusText={pizza?.is_sold_out || addon?.is_sold_out || dessert?.is_sold_out || extra?.is_sold_out ? 'Sold out' : 'Available'}
         statusCopy={orderingPaused ? 'Ordering is paused while the storefront is closed or in maintenance mode.' : statusCopy}
+        actionTitle={actionTitle}
         actionCopy={actionCopy}
         notice={getConfigValue(
           bundle.config,

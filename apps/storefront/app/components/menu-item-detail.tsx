@@ -16,10 +16,14 @@ type MenuItemDetailProps = {
   title: string;
   heroCopy: string;
   image?: string | null;
+  previewCopy: string;
   primaryPrice: number;
+  priceTitle: string;
   priceCopy: string;
+  statusTitle: string;
   statusText: string;
   statusCopy: string;
+  actionTitle: string;
   actionCopy: string;
   notice: string;
   toppings: string[];
@@ -38,10 +42,14 @@ export function MenuItemDetailClient({
   title,
   heroCopy,
   image,
+  previewCopy,
   primaryPrice,
+  priceTitle,
   priceCopy,
+  statusTitle,
   statusText,
   statusCopy,
+  actionTitle,
   actionCopy,
   notice,
   toppings,
@@ -91,7 +99,7 @@ export function MenuItemDetailClient({
                 animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
                 transition={{ duration: 0.35, delay: 0.12 }}
               >
-                <div className="stat-card__label">Single price view</div>
+                <div className="stat-card__label">{priceTitle}</div>
                 <div className="stat-card__value">{money(primaryPrice)}</div>
                 <div className="stat-card__note">{priceCopy}</div>
               </motion.div>
@@ -101,7 +109,7 @@ export function MenuItemDetailClient({
                 animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
                 transition={{ duration: 0.35, delay: 0.18 }}
               >
-                <div className="stat-card__label">Status</div>
+                <div className="stat-card__label">{statusTitle}</div>
                 <div className="stat-card__value">{orderingPaused ? 'Ordering paused' : statusText}</div>
                 <div className="stat-card__note">{statusCopy}</div>
               </motion.div>
@@ -111,7 +119,7 @@ export function MenuItemDetailClient({
                 animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
                 transition={{ duration: 0.35, delay: 0.24 }}
               >
-                <div className="stat-card__label">Quick add</div>
+                <div className="stat-card__label">{actionTitle}</div>
                 <div className="stat-card__value">{orderingPaused ? 'Status first' : 'Fast lane'}</div>
                 <div className="stat-card__note">
                   {orderingPaused ? 'Ordering is paused until the store reopens.' : actionCopy}
@@ -126,15 +134,13 @@ export function MenuItemDetailClient({
             animate={prefersReducedMotion ? {} : { opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.55, delay: 0.12 }}
           >
-            <div className="hero-preview menu-detail-hero__preview">
-              {image ? <img src={image} alt={title} className="hero-preview__image" /> : null}
-              <div className="hero-preview__overlay">
-                <div className="hero-preview__title">{money(primaryPrice)}</div>
-                <p className="hero-preview__meta">
-                  {isPizza ? 'Medium price shown here. Use the size ladder for the full range.' : 'Pulled live from the menu.'}
-                </p>
+              <div className="hero-preview menu-detail-hero__preview">
+                {image ? <img src={image} alt={title} className="hero-preview__image" /> : null}
+                <div className="hero-preview__overlay">
+                  <div className="hero-preview__title">{money(primaryPrice)}</div>
+                  <p className="hero-preview__meta">{previewCopy}</p>
+                </div>
               </div>
-            </div>
 
             <div className="content-card menu-detail-hero__card">
               <div className="notice">
@@ -196,7 +202,7 @@ export function MenuItemDetailClient({
           transition={{ duration: 0.4 }}
           whileHover={prefersReducedMotion ? {} : { y: -4 }}
         >
-          <div className="info-card__title">Price</div>
+          <div className="info-card__title">{priceTitle}</div>
           <div className="info-card__body">{money(primaryPrice)}</div>
           <div className="info-card__copy">{priceCopy}</div>
         </motion.div>
@@ -209,7 +215,7 @@ export function MenuItemDetailClient({
           transition={{ duration: 0.4, delay: 0.05 }}
           whileHover={prefersReducedMotion ? {} : { y: -4 }}
         >
-          <div className="info-card__title">Status</div>
+          <div className="info-card__title">{statusTitle}</div>
           <div className="info-card__body">{statusText}</div>
           <div className="info-card__copy">{statusCopy}</div>
         </motion.div>
@@ -222,7 +228,7 @@ export function MenuItemDetailClient({
           transition={{ duration: 0.4, delay: 0.1 }}
           whileHover={prefersReducedMotion ? {} : { y: -4 }}
         >
-          <div className="info-card__title">Action</div>
+          <div className="info-card__title">{actionTitle}</div>
           <div className="info-card__body">
             <ArrowRight size={16} /> {orderingPaused ? 'View live status' : 'Add from menu'}
           </div>
