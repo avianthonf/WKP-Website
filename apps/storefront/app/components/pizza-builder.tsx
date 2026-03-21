@@ -15,7 +15,7 @@ import {
   getStorefrontState,
   money,
 } from '../lib/catalog';
-import type { Extra, Pizza, Size, StorefrontBundle } from '../lib/types';
+import type { Extra, Size, StorefrontBundle } from '../lib/types';
 
 const sizes: Size[] = ['small', 'medium', 'large'];
 
@@ -120,9 +120,9 @@ export function PizzaBuilder({ bundle, initialPizzaSlug }: { bundle: StorefrontB
                   Add custom pizza
                 </button>
               )}
-              <a href="/menu" className="button-secondary">
+              <Link href="/menu" className="button-secondary">
                 Back to menu
-              </a>
+              </Link>
             </div>
           </div>
           <div className="hero-aside">

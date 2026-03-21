@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Mail, MapPin, PhoneCall, MessageCircle } from 'lucide-react';
+import { Mail, PhoneCall, MessageCircle } from 'lucide-react';
 import { StorefrontShell } from '../components/storefront-shell';
 import { fetchStorefrontBundle } from '../lib/storefront';
 import {

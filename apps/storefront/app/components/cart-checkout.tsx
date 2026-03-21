@@ -153,14 +153,14 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
                   View live status
                 </Link>
               ) : (
-                <a href={getOrderLink(bundle)} className="button">
+                <Link href={getOrderLink(bundle)} className="button">
                   <PhoneCall size={16} />
                   Open WhatsApp
-                </a>
+                </Link>
               )}
-              <a href="/menu" className="button-secondary">
+              <Link href="/menu" className="button-secondary">
                 Continue browsing
-              </a>
+              </Link>
             </div>
           </div>
 
