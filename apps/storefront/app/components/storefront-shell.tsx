@@ -12,6 +12,7 @@ import {
   getFooterCopy,
   getHeroTitle,
   getHeroSubtitle,
+  getDashboardLiveMode,
   getOpeningWindow,
   getNavLinks,
   getStoreName,
@@ -59,6 +60,7 @@ export function StorefrontShell({
   const storeName = getStoreName(bundle);
   const storePhone = getStorePhone(bundle);
   const brandLogoUrl = getBrandLogoUrl(bundle);
+  const dashboardLiveMode = getDashboardLiveMode(bundle);
 
   return (
     <div className="site-shell">
@@ -312,6 +314,7 @@ export function StorefrontShell({
               <Link href={storefrontState.primaryAction.href} className="footer__link">
                 {storefrontState.primaryAction.label}
               </Link>
+              <p className="footer__copy">Control room sync: {dashboardLiveMode ? 'Live' : 'Paused'}</p>
             </div>
             <div>
               <p className="section__eyebrow">Location</p>

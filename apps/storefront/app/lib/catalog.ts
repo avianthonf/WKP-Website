@@ -90,6 +90,10 @@ export function getThemeColor(bundle: StorefrontBundle) {
   return getConfigValue(bundle.config, 'site_theme_color', '#050403');
 }
 
+export function getDashboardLiveMode(bundle: StorefrontBundle) {
+  return getConfigValue(bundle.config, 'dashboard_live_mode', 'true') !== 'false';
+}
+
 export function getStorePhone(bundle: StorefrontBundle) {
   const value = getConfigValue(bundle.config, 'whatsapp_number', '');
   return value.replace(/\D/g, '');
