@@ -168,25 +168,6 @@ export function StorefrontShell({
           </div>
         ) : null}
 
-        <div className="site-shell__announcement">
-          <div className="site-shell__status-banner notice" data-tone={storefrontState.tone}>
-            <div className="site-shell__status-banner-copy">
-              <div className="site-shell__status-banner-title">
-                <Power size={16} />
-                <span>{storefrontState.label}</span>
-              </div>
-              <p>{storefrontState.summary}</p>
-            </div>
-            <div className="site-shell__status-banner-actions">
-              <Link href={storefrontState.primaryAction.href} className="button">
-                {storefrontState.primaryAction.label}
-              </Link>
-              <Link href={storefrontState.secondaryAction.href} className="button-secondary">
-                {storefrontState.secondaryAction.label}
-              </Link>
-            </div>
-          </div>
-        </div>
       </header>
 
       <AnimatePresence>
