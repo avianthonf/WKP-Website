@@ -4,6 +4,8 @@ node_modules/
 **/.next/
 .next-admin/
 **/.next-admin/
+.vercel/
+**/.vercel/
 .env
 .env.*
 !.env.example
