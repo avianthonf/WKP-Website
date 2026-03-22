@@ -53,18 +53,6 @@ function createServiceClient() {
   });
 }
 
-async function nextOrderNumber(supabase: ReturnType<typeof createServiceClient>) {
-  const { data, error } = await supabase
-    .from('orders')
-    .select('order_number')
-    .order('order_number', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  if (error) throw error;
-  return (data?.order_number || 0) + 1;
-}
-
 export async function createWhatsAppOrder(payload: z.infer<typeof orderSchema>) {
   const data = orderSchema.parse(payload);
   const supabase = createServiceClient();
@@ -83,7 +71,6 @@ export async function createWhatsAppOrder(payload: z.infer<typeof orderSchema>) 
   const openingWindow = `${getConfig('opening_time', '11:00')} - ${getConfig('closing_time', '23:00')}`;
   const withHours = (value: string) => value.replace('{hours}', openingWindow);
 
-  const orderNumber = await nextOrderNumber(supabase);
   const storeName = getConfig('store_name', getConfig('hero_title'));
   const whatsappNumber = getConfig('whatsapp_number');
   const availability = getStoreAvailabilityFromConfig(config);
@@ -182,7 +169,6 @@ export async function createWhatsAppOrder(payload: z.infer<typeof orderSchema>) 
   const { data: order, error: orderError } = await supabase
     .from('orders')
     .insert({
-      order_number: orderNumber,
       customer_name: data.customerName,
       customer_phone: data.customerPhone || null,
       fulfillment_type: data.fulfillment,
