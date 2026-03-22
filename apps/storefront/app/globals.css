@@ -1918,8 +1918,7 @@ img {
 }
 
 .page-wrap > .hero-card.reveal,
-.page-wrap > .hero-card,
-.immersive-home > .hero-card--immersive {
+.page-wrap > .hero-card {
   order: 99;
 }
 
