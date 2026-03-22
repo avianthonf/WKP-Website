@@ -111,84 +111,6 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
 
   return (
     <div className="page-wrap">
-      <section className="hero-card reveal">
-        <div className="hero-card__grid">
-          <div>
-            <span className="eyebrow">
-              <Sparkles size={12} />
-              {menuCopy.heroEyebrow}
-            </span>
-            <h1 className="hero-title">{menuHeroTitle}</h1>
-            <p className="hero-copy">{menuHeroCopy}</p>
-
-            <div className="hero-actions">
-              <Link href={orderingPaused ? '/status' : '/build'} className="button">
-                <ChefHat size={16} />
-                {orderingPaused ? menuCopy.heroViewStatusLabel : menuCopy.heroOpenBuilderLabel}
-              </Link>
-              <Link href={heroSecondaryHref} className="button-secondary">
-                {heroSecondaryLabel}
-              </Link>
-            </div>
-
-            <div className="hero-grid">
-              <motion.div
-                className="stat-card"
-                initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
-                animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
-                transition={{ duration: 0.35, delay: 0.12 }}
-              >
-                <div className="stat-card__label">{menuCopy.whatsShowingLabel}</div>
-                <div className="stat-card__value">{totalVisible}</div>
-                <div className="stat-card__note">{menuCopy.whatsShowingCopy}</div>
-              </motion.div>
-              <motion.div
-                className="stat-card"
-                initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
-                animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
-                transition={{ duration: 0.35, delay: 0.18 }}
-              >
-                <div className="stat-card__label">{menuCopy.pizzaMoodsLabel}</div>
-                <div className="stat-card__value">{pizzaCategoryOptions.length}</div>
-                <div className="stat-card__note">{menuCopy.pizzaMoodsCopy}</div>
-              </motion.div>
-              <motion.div
-                className="stat-card"
-                initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
-                animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
-                transition={{ duration: 0.35, delay: 0.24 }}
-              >
-                <div className="stat-card__label">{menuCopy.freshPairingsLabel}</div>
-                <div className="stat-card__value">{bundle.toppings.length}</div>
-                <div className="stat-card__note">{menuCopy.freshPairingsCopy}</div>
-              </motion.div>
-            </div>
-          </div>
-
-          <div className="hero-aside">
-            <div className="hero-preview">
-              {menuHeroImageUrl ? (
-                <img
-                  src={menuHeroImageUrl as string}
-                  alt={bundle.pizzas[0]?.name || getStoreName(bundle) || menuCopy.heroPreviewFallbackAlt}
-                  className="hero-preview__image"
-                />
-              ) : (
-                <div className="hero-preview__image hero-preview__image--empty">
-                  <span>{menuCopy.heroPreviewFallbackAlt}</span>
-                </div>
-              )}
-              <div className="hero-preview__overlay">
-                <div className="hero-preview__title">{bundle.pizzas[0]?.name || menuCopy.heroPreviewFallbackTitle}</div>
-                <p className="hero-preview__meta">
-                  {bundle.pizzas[0]?.description || menuCopy.heroPreviewFallbackCopy}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <section className="section">
         <div className="section__header">
           <div>
@@ -368,7 +290,83 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
           </div>
         </div>
       </section>
+    <section className="hero-card reveal">
+        <div className="hero-card__grid">
+          <div>
+            <span className="eyebrow">
+              <Sparkles size={12} />
+              {menuCopy.heroEyebrow}
+            </span>
+            <h1 className="hero-title">{menuHeroTitle}</h1>
+            <p className="hero-copy">{menuHeroCopy}</p>
 
+            <div className="hero-actions">
+              <Link href={orderingPaused ? '/status' : '/build'} className="button">
+                <ChefHat size={16} />
+                {orderingPaused ? menuCopy.heroViewStatusLabel : menuCopy.heroOpenBuilderLabel}
+              </Link>
+              <Link href={heroSecondaryHref} className="button-secondary">
+                {heroSecondaryLabel}
+              </Link>
+            </div>
+
+            <div className="hero-grid">
+              <motion.div
+                className="stat-card"
+                initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
+                animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+                transition={{ duration: 0.35, delay: 0.12 }}
+              >
+                <div className="stat-card__label">{menuCopy.whatsShowingLabel}</div>
+                <div className="stat-card__value">{totalVisible}</div>
+                <div className="stat-card__note">{menuCopy.whatsShowingCopy}</div>
+              </motion.div>
+              <motion.div
+                className="stat-card"
+                initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
+                animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+                transition={{ duration: 0.35, delay: 0.18 }}
+              >
+                <div className="stat-card__label">{menuCopy.pizzaMoodsLabel}</div>
+                <div className="stat-card__value">{pizzaCategoryOptions.length}</div>
+                <div className="stat-card__note">{menuCopy.pizzaMoodsCopy}</div>
+              </motion.div>
+              <motion.div
+                className="stat-card"
+                initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
+                animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+                transition={{ duration: 0.35, delay: 0.24 }}
+              >
+                <div className="stat-card__label">{menuCopy.freshPairingsLabel}</div>
+                <div className="stat-card__value">{bundle.toppings.length}</div>
+                <div className="stat-card__note">{menuCopy.freshPairingsCopy}</div>
+              </motion.div>
+            </div>
+          </div>
+
+          <div className="hero-aside">
+            <div className="hero-preview">
+              {menuHeroImageUrl ? (
+                <img
+                  src={menuHeroImageUrl as string}
+                  alt={bundle.pizzas[0]?.name || getStoreName(bundle) || menuCopy.heroPreviewFallbackAlt}
+                  className="hero-preview__image"
+                />
+              ) : (
+                <div className="hero-preview__image hero-preview__image--empty">
+                  <span>{menuCopy.heroPreviewFallbackAlt}</span>
+                </div>
+              )}
+              <div className="hero-preview__overlay">
+                <div className="hero-preview__title">{bundle.pizzas[0]?.name || menuCopy.heroPreviewFallbackTitle}</div>
+                <p className="hero-preview__meta">
+                  {bundle.pizzas[0]?.description || menuCopy.heroPreviewFallbackCopy}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
       <section className="section">
         <div className="section__header">
           <div>

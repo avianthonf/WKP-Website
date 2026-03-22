@@ -1917,6 +1917,12 @@ img {
   gap: 1.2rem;
 }
 
+.page-wrap > .hero-card.reveal,
+.page-wrap > .hero-card,
+.immersive-home > .hero-card--immersive {
+  order: 99;
+}
+
 .page-title {
   font-size: clamp(2.3rem, 4vw, 4rem);
   line-height: 1;
