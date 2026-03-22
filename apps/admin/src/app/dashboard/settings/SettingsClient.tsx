@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import { useState, useEffect, useMemo, useTransition, type ReactNode } from 'react';
@@ -16,6 +16,7 @@ import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import {
   Activity,
+  ChefHat,
   Contact2,
   Globe2,
   Image as ImageIcon,
@@ -279,7 +280,7 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
         { key: 'whatsapp_number', label: 'WhatsApp number', kind: 'text', fallback: '918484802540', description: 'Used for order handoff and quick contact.' },
         { key: 'site_meta_title', label: 'SEO title', kind: 'text', fallback: 'We Knead Pizza | Crafted Pizza Ordering', description: 'Browser title and metadata title.' },
         { key: 'site_meta_description', label: 'SEO description', kind: 'textarea', fallback: 'An editorial pizza storefront with live menu data, WhatsApp ordering, and a premium customer experience.', description: 'Browser description used by search engines.' },
-        { key: 'site_theme_color', label: 'Theme color', kind: 'text', fallback: '#050403', description: 'Browser theme color in hex format.' },
+        { key: 'site_theme_color', label: 'Theme color', kind: 'text', fallback: '#F5F0E8', description: 'Browser theme color in hex format.' },
       ],
     },
     {
@@ -760,6 +761,150 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
       ],
     },
   ] as const;
+  type CmsField = {
+    key: string;
+    label: string;
+    kind: 'text' | 'textarea' | 'url' | 'image' | 'number' | 'time' | 'boolean' | 'json';
+    fallback: string;
+    description: string;
+  };
+
+  type PageSectionSpec = {
+    id: string;
+    title: string;
+    description: string;
+    icon: any;
+    fields: CmsField[];
+    custom?: 'nav';
+    extra?: {
+      key: string;
+      title: string;
+      description: string;
+    };
+  };
+
+  const allManagedFields: CmsField[] = cmsGroups.flatMap((group) => ('fields' in group ? [...group.fields] : []));
+  const pageScopedPrefixes = ['home_', 'menu_', 'build_', 'cart_', 'about_', 'contact_', 'delivery_', 'status_', 'faq_', 'privacy_', 'terms_', 'not_found_'] as const;
+  const isPageScopedKey = (key: string) => pageScopedPrefixes.some((prefix) => key.startsWith(prefix));
+  const getFieldsByPrefix = (...prefixes: string[]) =>
+    allManagedFields.filter((field) => prefixes.some((prefix) => field.key.startsWith(prefix)));
+  const globalSharedFields = allManagedFields.filter((field) => !isPageScopedKey(field.key));
+  const pageSectionSpecs: PageSectionSpec[] = [
+    {
+      id: 'global-shared',
+      title: 'Global / Shared',
+      description: 'Branding, imagery, hours, shell labels, and live state wording used across the storefront.',
+      icon: Store,
+      fields: globalSharedFields,
+    },
+    {
+      id: 'navigation',
+      title: 'Navigation',
+      description: 'Primary links shown in the top bar and mobile drawer.',
+      icon: Menu,
+      fields: [],
+      custom: 'nav',
+    },
+    {
+      id: 'home',
+      title: 'Home',
+      description: 'Homepage hero, feature copy, intro rail, and closing banner.',
+      icon: Home,
+      fields: getFieldsByPrefix('home_'),
+    },
+    {
+      id: 'menu',
+      title: 'Menu',
+      description: 'Menu page hero, browsing copy, filters, cards, and menu detail copy.',
+      icon: ShoppingCart,
+      fields: getFieldsByPrefix('menu_'),
+    },
+    {
+      id: 'build',
+      title: 'Build',
+      description: 'Pizza builder hero, form labels, and live summary copy.',
+      icon: ChefHat,
+      fields: getFieldsByPrefix('build_'),
+    },
+    {
+      id: 'cart',
+      title: 'Cart',
+      description: 'Cart page labels, delivery prompts, scheduling, and WhatsApp handoff copy.',
+      icon: ShoppingCart,
+      fields: getFieldsByPrefix('cart_'),
+    },
+    {
+      id: 'about',
+      title: 'About',
+      description: 'About page hero, summary rail labels, and workflow copy.',
+      icon: Store,
+      fields: getFieldsByPrefix('about_'),
+    },
+    {
+      id: 'contact',
+      title: 'Contact',
+      description: 'Contact page hero, contact summary rail, and action copy.',
+      icon: Contact2,
+      fields: getFieldsByPrefix('contact_'),
+    },
+    {
+      id: 'delivery',
+      title: 'Delivery',
+      description: 'Delivery page hero, radius, address, and minimum-order copy.',
+      icon: Globe2,
+      fields: getFieldsByPrefix('delivery_'),
+    },
+    {
+      id: 'status',
+      title: 'Status',
+      description: 'Open, closed, after-hours, and maintenance messaging.',
+      icon: Activity,
+      fields: getFieldsByPrefix('status_'),
+    },
+    {
+      id: 'faq',
+      title: 'FAQ',
+      description: 'FAQ page hero copy and structured FAQ blocks.',
+      icon: ListChecks,
+      fields: getFieldsByPrefix('faq_'),
+      extra: {
+        key: 'faq_items',
+        title: 'FAQ blocks',
+        description: 'Structured FAQ entries shown on the FAQ page.',
+      },
+    },
+    {
+      id: 'privacy',
+      title: 'Privacy',
+      description: 'Privacy page hero copy and structured privacy blocks.',
+      icon: Shield,
+      fields: getFieldsByPrefix('privacy_'),
+      extra: {
+        key: 'privacy_sections',
+        title: 'Privacy sections',
+        description: 'Structured privacy content shown on the Privacy page.',
+      },
+    },
+    {
+      id: 'terms',
+      title: 'Terms',
+      description: 'Terms page hero copy and structured terms blocks.',
+      icon: Shield,
+      fields: getFieldsByPrefix('terms_'),
+      extra: {
+        key: 'terms_sections',
+        title: 'Terms sections',
+        description: 'Structured terms content shown on the Terms page.',
+      },
+    },
+    {
+      id: 'not-found',
+      title: '404 Page',
+      description: 'Not-found page copy for dead-end routes and missing pages.',
+      icon: X,
+      fields: getFieldsByPrefix('not_found_'),
+    },
+  ];
   const managedKeys = new Set<string>([
     'dashboard_live_mode',
     'is_open',
@@ -768,42 +913,10 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
     'faq_items',
     'privacy_sections',
     'terms_sections',
-    ...cmsGroups.flatMap((group) => ('fields' in group ? group.fields.map((field) => field.key) : [])),
+    ...allManagedFields.map((field) => field.key),
   ]);
-  const sectionAnchors: Array<{
-    id: string;
-    title: string;
-    description: string;
-    count: number;
-  }> = cmsGroups.map((group) => ({
-    id: slugify(group.title),
-    title: group.title,
-    description: group.description,
-    count: 'fields' in group ? group.fields.length : 1,
-  }));
-  sectionAnchors.push({
-    id: 'legal-content',
-    title: 'FAQ & legal blocks',
-    description: 'Structured content for FAQ, privacy, and terms.',
-    count: 3,
-  });
   const managedCount = configs.filter((config) => managedKeys.has(config.key)).length;
   const advancedCount = configs.length - managedCount;
-  const visibleCmsGroups = cmsGroups
-    .map((group) => {
-      if ('custom' in group) {
-        const navConfig = getField('nav_links');
-        const navValue = navConfig?.value || '';
-        return matchesSearch(group.title, group.description, navValue) ? group : null;
-      }
-
-      const fields = group.fields.filter((field) =>
-        matchesSearch(field.key, field.label, field.description, getField(field.key)?.value, group.title, group.description)
-      );
-
-      return fields.length ? { ...group, fields } : null;
-    })
-    .filter(Boolean);
   const visibleManagedCount = configs.filter(
     (config) => managedKeys.has(config.key) && matchesSearch(config.key, config.label, config.description, config.value)
   ).length;
@@ -817,10 +930,45 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
     [configs, normalizedSearch]
   );
   const visibleAdvancedCount = visibleAdvancedConfigs.length;
-  const visibleSectionAnchors = useMemo(
-    () => sectionAnchors.filter((section) => matchesSearch(section.title, section.description, String(section.count))),
-    [normalizedSearch, sectionAnchors]
+  const sectionAnchors: Array<{
+    id: string;
+    title: string;
+    description: string;
+    count: number;
+  }> = [
+    ...pageSectionSpecs.map((section) => ({
+      id: section.id,
+      title: section.title,
+      description: section.description,
+      count: section.fields.length + (section.custom === 'nav' ? 1 : 0) + (section.extra ? 1 : 0),
+    })),
+    {
+      id: 'advanced-config',
+      title: 'Advanced config',
+      description: 'Manual keys and fallback entries not covered by the guided panels.',
+      count: advancedCount,
+    },
+  ];
+  const visibleSectionAnchors = sectionAnchors.filter((section) =>
+    matchesSearch(section.title, section.description, String(section.count))
   );
+  const visiblePageSections = pageSectionSpecs.filter((section) => {
+    const values: Array<string | null | undefined> = [section.title, section.description];
+
+    section.fields.forEach((field) => {
+      values.push(field.key, field.label, field.description, getField(field.key)?.value);
+    });
+
+    if (section.custom === 'nav') {
+      values.push(getField('nav_links')?.value);
+    }
+
+    if (section.extra) {
+      values.push(getField(section.extra.key)?.value, section.extra.title, section.extra.description);
+    }
+
+    return matchesSearch(...values);
+  });
 
   // Render value editor based on type
   const renderValueEditor = (config: SiteConfigItem) => {
@@ -859,7 +1007,9 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
             type="button"
             onClick={() => handleConfigValueChange(config.key, powerStates[config.key] ? 'false' : 'true')}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              powerStates[config.key] ? 'bg-[#E8540A] text-white' : 'bg-gray-200 text-gray-700'
+              powerStates[config.key]
+                ? 'bg-[var(--ember)] text-white'
+                : 'border border-[var(--border-default)] bg-[var(--surface-secondary)] text-[var(--stone)]'
             }`}
             disabled={isPending}
           >
@@ -981,7 +1131,7 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
                     </div>
                     <span className="rounded-full border border-[var(--border-default)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em]" style={{ color: 'var(--stone)' }}>
                       {section.count}{' '}
-                      {section.id === 'legal-content'
+                      {section.id.endsWith('-blocks')
                         ? 'blocks'
                         : section.id === 'navigation'
                           ? 'panel'
@@ -1058,7 +1208,9 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
                   onClick={() => handlePowerToggle(key, label)}
                   disabled={isPending}
                   className={`w-full rounded-xl py-3.5 font-bold transition-colors ${
-                    value ? 'bg-[#E8540A] text-white hover:bg-[#c94607]' : 'bg-gray-600 text-white hover:bg-gray-700'
+                    value
+                      ? 'bg-[var(--ember)] text-white hover:bg-[var(--ember-dark)]'
+                      : 'border border-[var(--border-default)] bg-[var(--surface-secondary)] text-[var(--ink)] hover:bg-white'
                   }`}
                 >
                   {value ? 'OPEN' : 'CLOSED'}
@@ -1067,46 +1219,67 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
             ))}
           </div>
 
-          <div className="grid gap-6 xl:grid-cols-2">
-            {visibleCmsGroups.length ? (
-              visibleCmsGroups.map((group: any) =>
-                group.custom === 'nav' ? (
-                  <NavLinksEditor
-                    key={group.title}
-                    config={getField('nav_links')}
-                    pending={isPending}
-                    onSave={(value) =>
-                      saveCmsSetting('nav_links', 'Navigation links', 'json', value, 'Primary site navigation', true)
-                    }
-                  />
-                ) : (
-                  <SettingsPanel
-                    key={group.title}
-                    id={slugify(group.title)}
-                    title={group.title}
-                    description={group.description}
-                    icon={group.icon}
-                    prefersReducedMotion={prefersReducedMotion}
-                  >
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      {group.fields.map((field: any) => (
-                        <EditableConfigField
-                          key={field.key}
-                          config={getField(field.key)}
-                          field={field}
-                          pending={isPending}
-                          onSave={saveCmsSetting}
-                        />
-                      ))}
-                    </div>
-                  </SettingsPanel>
-                )
-              )
+          <div className="space-y-6">
+            {visiblePageSections.length ? (
+              visiblePageSections.map((section) => (
+                <div key={section.id} className="space-y-6">
+                  {section.custom === 'nav' ? (
+                    <NavLinksEditor
+                      config={getField('nav_links')}
+                      pending={isPending}
+                      onSave={(value) =>
+                        saveCmsSetting('nav_links', 'Navigation links', 'json', value, 'Primary site navigation', true)
+                      }
+                    />
+                  ) : (
+                    <SettingsPanel
+                      id={section.id}
+                      title={section.title}
+                      description={section.description}
+                      icon={section.icon}
+                      prefersReducedMotion={prefersReducedMotion}
+                    >
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        {section.fields.map((field) => (
+                          <EditableConfigField
+                            key={field.key}
+                            config={getField(field.key)}
+                            field={field}
+                            pending={isPending}
+                            onSave={saveCmsSetting}
+                          />
+                        ))}
+                      </div>
+                    </SettingsPanel>
+                  )}
+
+                  {section.extra ? (
+                    <ContentBlocksEditor
+                      id={`${section.id}-blocks`}
+                      title={section.extra!.title}
+                      description={section.extra!.description}
+                      config={getField(section.extra!.key)}
+                      pending={isPending}
+                      prefersReducedMotion={prefersReducedMotion}
+                      onSave={(value) =>
+                        saveCmsSetting(
+                          section.extra!.key,
+                          section.extra!.title,
+                          'json',
+                          value,
+                          section.extra!.description,
+                          true
+                        )
+                      }
+                    />
+                  ) : null}
+                </div>
+              ))
             ) : (
-              <section className="rounded-3xl border border-dashed border-[var(--border-default)] bg-white/90 p-8 shadow-sm xl:col-span-2">
+              <section className="rounded-3xl border border-dashed border-[var(--border-default)] bg-white/90 p-8 shadow-sm">
                 <p className="mono-label">No matches</p>
                 <h3 className="mt-2 text-2xl font-semibold" style={{ color: 'var(--ink)' }}>
-                  Nothing matches “{search}”
+                  Nothing matches â€œ{search}â€
                 </h3>
                 <p className="mt-2 max-w-2xl text-sm" style={{ color: 'var(--stone)' }}>
                   Try a different keyword or clear the search to return to the full settings catalog.
@@ -1114,50 +1287,6 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
               </section>
             )}
           </div>
-
-          <section
-            id="legal-content"
-            className="grid gap-6 xl:grid-cols-3"
-            style={{ scrollMarginTop: '6rem' }}
-          >
-            <ContentBlocksEditor
-              title="FAQ blocks"
-              description="Manage the FAQ page as a structured list."
-              config={getField('faq_items')}
-              pending={isPending}
-              prefersReducedMotion={prefersReducedMotion}
-              onSave={(value) =>
-                saveCmsSetting('faq_items', 'FAQ Items', 'json', value, 'Structured FAQ blocks', true)
-              }
-            />
-            <ContentBlocksEditor
-              title="Privacy sections"
-              description="Control the privacy page as structured legal blocks."
-              config={getField('privacy_sections')}
-              pending={isPending}
-              prefersReducedMotion={prefersReducedMotion}
-              onSave={(value) =>
-                saveCmsSetting(
-                  'privacy_sections',
-                  'Privacy Sections',
-                  'json',
-                  value,
-                  'Structured privacy blocks',
-                  true
-                )
-              }
-            />
-            <ContentBlocksEditor
-              title="Terms sections"
-              description="Control the terms page as structured legal blocks."
-              config={getField('terms_sections')}
-              pending={isPending}
-              prefersReducedMotion={prefersReducedMotion}
-              onSave={(value) =>
-                saveCmsSetting('terms_sections', 'Terms Sections', 'json', value, 'Structured terms blocks', true)
-              }
-            />
-          </section>
 
           <details
             id="advanced-config"
@@ -1397,7 +1526,7 @@ function EditableConfigField({
   field: {
     key: string;
     label: string;
-    kind: 'text' | 'textarea' | 'url' | 'image' | 'number' | 'time';
+    kind: 'text' | 'textarea' | 'url' | 'image' | 'number' | 'time' | 'boolean' | 'json';
     fallback: string;
     description: string;
   };
@@ -1420,6 +1549,15 @@ function EditableConfigField({
   }, [initialValue]);
 
   const handleSave = () => {
+    if (field.kind === 'json') {
+      try {
+        JSON.parse(draft || 'null');
+      } catch {
+        toast.error(`Invalid JSON for ${field.label.toLowerCase()}`);
+        return;
+      }
+    }
+
     onSave(field.key, field.label, field.kind, draft, field.description, true);
   };
 
@@ -1451,6 +1589,28 @@ function EditableConfigField({
           className="input-base w-full"
           disabled={pending}
           placeholder={field.fallback}
+        />
+      ) : field.kind === 'boolean' ? (
+        <button
+          type="button"
+          onClick={() => setDraft((current) => (current === 'true' ? 'false' : 'true'))}
+          className={`inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold transition-colors ${
+            draft === 'true'
+              ? 'bg-[var(--ember)] text-white'
+              : 'border border-[var(--border-default)] bg-[var(--surface-secondary)] text-[var(--ink)]'
+          }`}
+          disabled={pending}
+        >
+          {draft === 'true' ? 'TRUE' : 'FALSE'}
+        </button>
+      ) : field.kind === 'json' ? (
+        <textarea
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          rows={5}
+          className="input-base w-full font-mono text-sm"
+          disabled={pending}
+          placeholder='[{"label":"Home","href":"/home"}]'
         />
       ) : field.kind === 'image' ? (
         <MenuImageField
@@ -1595,6 +1755,7 @@ function NavLinksEditor({
 }
 
 function ContentBlocksEditor({
+  id,
   title,
   description,
   config,
@@ -1602,6 +1763,7 @@ function ContentBlocksEditor({
   onSave,
   prefersReducedMotion,
 }: {
+  id?: string;
   title: string;
   description: string;
   config?: SiteConfigItem;
@@ -1661,7 +1823,13 @@ function ContentBlocksEditor({
   const save = () => onSave(JSON.stringify(rows));
 
   return (
-    <SettingsPanel title={title} description={description} icon={ListChecks} prefersReducedMotion={prefersReducedMotion}>
+    <SettingsPanel
+      id={id}
+      title={title}
+      description={description}
+      icon={ListChecks}
+      prefersReducedMotion={prefersReducedMotion}
+    >
       <div className="space-y-3">
         {rows.map((row, index) => (
           <motion.div
@@ -1751,3 +1919,4 @@ function slugify(value: string) {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
 }
+

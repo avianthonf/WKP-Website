@@ -62,55 +62,9 @@ export function ImmersiveHome({
     []
   );
 
-  const introCards = [
-    {
-      href: getConfigValue(bundle.config, 'home_step_1_href', '/menu'),
-      title: getConfigValue(bundle.config, 'home_step_1_title', 'Crave something now'),
-      copy: getConfigValue(bundle.config, 'home_step_1_copy', 'Scroll the menu and tap into a signature pizza in seconds.'),
-      label: getConfigValue(bundle.config, 'home_step_1_label', 'Browse menu'),
-    },
-    {
-      href: getConfigValue(bundle.config, 'home_step_2_href', '/build'),
-      title: getConfigValue(bundle.config, 'home_step_2_title', 'Make it yours'),
-      copy: getConfigValue(bundle.config, 'home_step_2_copy', 'Start with a base, add extras, and build the exact bite you want.'),
-      label: getConfigValue(bundle.config, 'home_step_2_label', 'Build custom'),
-    },
-    {
-      href: orderPrimaryHref,
-      title:
-        isOpenNow
-          ? getConfigValue(bundle.config, 'home_step_3_title', 'Send it fast')
-          : isAfterHours
-            ? getConfigValue(bundle.config, 'home_step_3_after_hours_title', 'Schedule it for later')
-          : getConfigValue(bundle.config, 'home_step_3_paused_title', 'Check live status'),
-      copy:
-        isOpenNow
-          ? getConfigValue(bundle.config, 'home_step_3_copy', 'Checkout flows into a clean order handoff with the summary already prepared.')
-          : isAfterHours
-            ? getConfigValue(
-                bundle.config,
-                'home_step_3_after_hours_copy',
-                'Pick a later time, confirm the delivery pin, and the order will be queued for the next service window.'
-              )
-          : getConfigValue(bundle.config, 'home_step_3_paused_copy', storefrontState.summary),
-      label:
-        isOpenNow
-          ? getConfigValue(bundle.config, 'home_step_3_label', 'Review cart')
-          : isAfterHours
-            ? getConfigValue(bundle.config, 'home_step_3_after_hours_label', 'Schedule order')
-          : getConfigValue(bundle.config, 'home_step_3_paused_label', 'View live status'),
-    },
-  ];
-  const introEyebrow = getConfigValue(bundle.config, 'home_steps_eyebrow', 'Start here');
   const heroImageUrl = getHomeFeaturedImageUrl(bundle);
   const heroBackgroundImageUrl = getHeroBackgroundImageUrl(bundle);
   const featurePrimaryLabel = orderPrimaryLabel;
-  const introTitle = getConfigValue(
-    bundle.config,
-    'home_steps_title',
-    'A three-step flow people actually enjoy using'
-  );
-  const introCta = getConfigValue(bundle.config, 'home_steps_cta', 'View all items');
   const signatureEyebrow = getConfigValue(bundle.config, 'home_signature_eyebrow', 'Signature picks');
   const signatureTitle = getConfigValue(
     bundle.config,
@@ -143,7 +97,7 @@ export function ImmersiveHome({
           prefersReducedMotion
             ? heroBackgroundImageUrl
               ? {
-                  backgroundImage: `linear-gradient(135deg, rgba(7, 5, 4, 0.88), rgba(7, 5, 4, 0.72)), url(${heroBackgroundImageUrl})`,
+                  backgroundImage: `linear-gradient(135deg, rgba(247, 241, 231, 0.92), rgba(247, 241, 231, 0.76)), url(${heroBackgroundImageUrl})`,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                 }
@@ -154,7 +108,7 @@ export function ImmersiveHome({
                 willChange: 'transform',
                 ...(heroBackgroundImageUrl
                   ? {
-                      backgroundImage: `linear-gradient(135deg, rgba(7, 5, 4, 0.88), rgba(7, 5, 4, 0.72)), url(${heroBackgroundImageUrl})`,
+                      backgroundImage: `linear-gradient(135deg, rgba(247, 241, 231, 0.92), rgba(247, 241, 231, 0.76)), url(${heroBackgroundImageUrl})`,
                       backgroundSize: 'cover',
                       backgroundPosition: 'center',
                     }
@@ -319,40 +273,7 @@ export function ImmersiveHome({
         </div>
       </motion.section>
 
-      <section className="section section--immersive">
-        <div className="section__header section__header--immersive">
-          <div>
-            <div className="section__eyebrow">{introEyebrow}</div>
-            <h2 className="section__title">{introTitle}</h2>
-          </div>
-          <Link href="/menu" className="button-ghost button-ghost--hero">
-            {introCta}
-          </Link>
-        </div>
-
-        <div className="intro-grid">
-          {introCards.map((item, index) => (
-            <motion.div
-              key={item.title}
-              className="intro-card"
-              initial={prefersReducedMotion ? false : { opacity: 0, y: 20, scale: 0.95 }}
-              whileInView={prefersReducedMotion ? {} : { opacity: 1, y: 0, scale: 1 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.5, delay: index * 0.12, ease: [0.16, 1, 0.3, 1] }}
-              whileHover={prefersReducedMotion ? {} : { y: -8, scale: 1.03 }}
-            >
-              <div className="intro-card__eyebrow">{String(index + 1).padStart(2, '0')}</div>
-              <div className="intro-card__title">{item.title}</div>
-              <p className="intro-card__copy">{item.copy}</p>
-              <Link href={item.href} className="intro-card__link">
-                {item.label}
-                <ArrowRight size={14} />
-              </Link>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
+      
       <section className="section section--immersive">
         <div className="section__header section__header--immersive">
           <div>

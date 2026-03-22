@@ -93,7 +93,7 @@ export function getSiteMetaDescription(bundle: StorefrontBundle) {
 }
 
 export function getThemeColor(bundle: StorefrontBundle) {
-  return getConfigValue(bundle.config, 'site_theme_color', '#050403');
+  return getConfigValue(bundle.config, 'site_theme_color', '#F5F0E8');
 }
 
 export function getDashboardLiveMode(bundle: StorefrontBundle) {

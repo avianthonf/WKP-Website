@@ -15,7 +15,7 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
-        <meta name="theme-color" content="#1A1712" />
+        <meta name="theme-color" content="#F5F0E8" />
       </head>
       <body className="admin-app antialiased">{children}</body>
     </html>

@@ -402,7 +402,7 @@ export default function NotificationsClient({ initialNotifications }: Notificati
       {/* Delete Confirmation Dialog */}
       {deleteConfirmId && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(88,65,38,0.18)] backdrop-blur-sm"
           onClick={() => setDeleteConfirmId(null)}
         >
           <div

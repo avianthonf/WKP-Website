@@ -26,6 +26,7 @@ const fallbackBundle: StorefrontBundle = {
     hero_subtitle: 'Hand-tossed pizza, warm sides, and a guided order flow.',
     announcement_bar: 'Freshly made daily.',
     whatsapp_number: '918484802540',
+    site_theme_color: '#F5F0E8',
     dashboard_live_mode: 'true',
     store_timezone: 'Asia/Kolkata',
     opening_time: '11:00',
