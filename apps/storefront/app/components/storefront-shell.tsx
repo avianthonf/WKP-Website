@@ -10,6 +10,7 @@ import {
   getAddressLine,
   getBrandLogoUrl,
   getFooterCopy,
+  getConfigValue,
   getHeroTitle,
   getHeroSubtitle,
   getDashboardLiveMode,
@@ -116,7 +117,7 @@ export function StorefrontShell({
             </span>
             <span>
               <span className="brand__name">{storeName}</span>
-              <span className="brand__tag">{bundle.config.brand_tagline || getHeroSubtitle(bundle)}</span>
+              <span className="brand__tag">{getConfigValue(bundle.config, 'brand_tagline', getHeroSubtitle(bundle))}</span>
             </span>
           </Link>
 
@@ -201,7 +202,7 @@ export function StorefrontShell({
                   </span>
                   <span>
                     <span className="brand__name">{getHeroTitle(bundle)}</span>
-                    <span className="brand__tag">{bundle.config.brand_tagline || getHeroSubtitle(bundle)}</span>
+                    <span className="brand__tag">{getConfigValue(bundle.config, 'brand_tagline', getHeroSubtitle(bundle))}</span>
                   </span>
                 </Link>
                 <button

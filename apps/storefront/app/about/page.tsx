@@ -47,7 +47,9 @@ export default async function AboutPage() {
                     <span className="summary-row__label">
                       {getConfigValue(bundle.config, 'about_min_order_label', 'Min order')}
                     </span>
-                    <span className="summary-row__value">{money(Number(bundle.config.min_order_amount || 0))}</span>
+                    <span className="summary-row__value">
+                      {money(Number(getConfigValue(bundle.config, 'min_order_amount', '0')))}
+                    </span>
                   </div>
                   <div className="summary-row">
                     <span className="summary-row__label">
@@ -100,8 +102,8 @@ export default async function AboutPage() {
               <MapPin size={16} /> {getAddressLine(bundle)}
             </div>
               <div className="info-card__copy">
-                {bundle.config.google_maps_link ? (
-                  <Link href={bundle.config.google_maps_link} className="footer__link" target="_blank">
+                {getConfigValue(bundle.config, 'google_maps_link', '') ? (
+                  <Link href={getConfigValue(bundle.config, 'google_maps_link', '')} className="footer__link" target="_blank">
                   {getConfigValue(bundle.config, 'about_map_action_label', 'Open map')}
                   </Link>
                 ) : (

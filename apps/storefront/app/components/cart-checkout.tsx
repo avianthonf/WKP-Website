@@ -16,6 +16,7 @@ import {
   getOrderLink,
   getSizeLabel,
   getSizeName,
+  getStoreName,
   getStorefrontState,
   money,
 } from '../lib/catalog';
@@ -191,7 +192,7 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
                 <img src={cartHeroImageUrl as string} alt={cartCopy.previewImageAlt} className="hero-preview__image" />
               ) : (
                 <div className="hero-preview__image hero-preview__image--empty">
-                  <span>{bundle.config.store_name || 'Live checkout'}</span>
+                  <span>{getStoreName(bundle) || 'Live checkout'}</span>
                 </div>
               )}
               <div className="hero-preview__overlay">

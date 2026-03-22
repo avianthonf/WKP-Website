@@ -15,6 +15,7 @@ import {
   getPizzaPrice,
   getSizeLabel,
   getSizeName,
+  getStoreName,
   getStorefrontState,
   getMenuBrowserCopy,
   money,
@@ -162,7 +163,7 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
               {menuHeroImageUrl ? (
                 <img
                   src={menuHeroImageUrl as string}
-                  alt={bundle.pizzas[0]?.name || bundle.config.store_name || menuCopy.heroPreviewFallbackAlt}
+                  alt={bundle.pizzas[0]?.name || getStoreName(bundle) || menuCopy.heroPreviewFallbackAlt}
                   className="hero-preview__image"
                 />
               ) : (

@@ -81,8 +81,8 @@ export default async function ContactPage() {
             <div className="info-card__title">{getConfigValue(bundle.config, 'contact_map_title', 'Map')}</div>
             <div className="info-card__body">{getConfigValue(bundle.config, 'contact_map_body', 'Find us easily.')}</div>
             <div className="info-card__copy">
-              {bundle.config.google_maps_link ? (
-                <Link href={bundle.config.google_maps_link} target="_blank" className="footer__link">
+                {getConfigValue(bundle.config, 'google_maps_link', '') ? (
+                <Link href={getConfigValue(bundle.config, 'google_maps_link', '')} target="_blank" className="footer__link">
                   {getConfigValue(bundle.config, 'contact_map_action_label', 'Open in Maps')}
                 </Link>
               ) : (

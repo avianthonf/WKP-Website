@@ -67,8 +67,8 @@ export default async function DeliveryPage() {
               <MapPin size={16} /> {getAddressLine(bundle)}
             </div>
             <div className="info-card__copy">
-              {bundle.config.google_maps_link ? (
-                <a href={bundle.config.google_maps_link} target="_blank" rel="noreferrer" className="footer__link">
+              {getConfigValue(bundle.config, 'google_maps_link', '') ? (
+                <a href={getConfigValue(bundle.config, 'google_maps_link', '')} target="_blank" rel="noreferrer" className="footer__link">
                   {getConfigValue(bundle.config, 'delivery_map_action_label', 'Open map')}
                 </a>
               ) : (
@@ -82,7 +82,13 @@ export default async function DeliveryPage() {
           </div>
           <div className="info-card">
             <div className="info-card__title">{getConfigValue(bundle.config, 'delivery_min_title', 'Minimum')}</div>
-            <div className="info-card__body">{Number(bundle.config.min_order_amount || 0).toLocaleString('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 })}</div>
+            <div className="info-card__body">
+              {Number(getConfigValue(bundle.config, 'min_order_amount', '0')).toLocaleString('en-IN', {
+                style: 'currency',
+                currency: 'INR',
+                maximumFractionDigits: 0,
+              })}
+            </div>
             <div className="info-card__copy">
               {getConfigValue(
                 bundle.config,

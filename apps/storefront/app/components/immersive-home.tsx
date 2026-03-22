@@ -190,7 +190,7 @@ export function ImmersiveHome({
               </div>
               <div className="hero-orbit__item">
                 <span className="hero-orbit__label">{getConfigValue(bundle.config, 'home_orbit_minimum_label', 'Minimum')}</span>
-                <strong>{money(Number(bundle.config.min_order_amount || 0))}</strong>
+                <strong>{money(Number(getConfigValue(bundle.config, 'min_order_amount', '0')))}</strong>
               </div>
             </motion.div>
           </div>
