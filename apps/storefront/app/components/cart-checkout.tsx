@@ -175,7 +175,7 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
                   {cartCopy.viewLiveStatusLabel}
                 </Link>
               ) : (
-                <Link href={getOrderLink(bundle, 'Hi, I would like to place an order from the website.')} className="button">
+                <Link href={getOrderLink(bundle, cartCopy.openOrderPrefillMessage)} className="button">
                   <PhoneCall size={16} />
                   {cartCopy.openOrderChatLabel}
                 </Link>

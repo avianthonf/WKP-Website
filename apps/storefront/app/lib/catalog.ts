@@ -128,7 +128,7 @@ export function getFooterCopy(bundle: StorefrontBundle) {
 }
 
 export function getBrandLogoUrl(bundle: StorefrontBundle) {
-  return getConfigImageValue(bundle.config, 'brand_logo_image_url');
+  return getConfigImageValue(bundle.config, 'brand_logo_image_url') || getConfigImageValue(bundle.config, 'logo_url');
 }
 
 export function getSupportEmail(bundle: StorefrontBundle) {
@@ -184,7 +184,15 @@ export function getFeaturedImageUrl(bundle: StorefrontBundle) {
 }
 
 export function getHomeFeaturedImageUrl(bundle: StorefrontBundle) {
-  return getConfigImageValue(bundle.config, 'home_feature_image_url') || getFeaturedImageUrl(bundle);
+  return (
+    getConfigImageValue(bundle.config, 'home_feature_image_url') ||
+    getConfigImageValue(bundle.config, 'hero_bg_url') ||
+    getFeaturedImageUrl(bundle)
+  );
+}
+
+export function getHeroBackgroundImageUrl(bundle: StorefrontBundle) {
+  return getConfigImageValue(bundle.config, 'hero_bg_url') || getHomeFeaturedImageUrl(bundle);
 }
 
 export function getMenuHeroImageUrl(bundle: StorefrontBundle) {
@@ -205,6 +213,10 @@ export function getMenuDetailFallbackImageUrl(bundle: StorefrontBundle) {
 
 export function getMinimumOrder(bundle: StorefrontBundle) {
   return Number(getConfigValue(bundle.config, 'min_order_amount', '0')) || 0;
+}
+
+export function getDeliveryRadiusKm(bundle: StorefrontBundle) {
+  return Number(getConfigValue(bundle.config, 'delivery_radius_km', '0')) || 0;
 }
 
 export function getOpeningWindow(bundle: StorefrontBundle) {
@@ -481,6 +493,11 @@ export function getCartCopy(bundle: StorefrontBundle) {
       'cart_paused_closed_message',
       'Orders are currently closed. Please try again when the store is open.'
     ),
+    openOrderPrefillMessage: getConfigValue(
+      bundle.config,
+      'cart_open_order_prefill_message',
+      'Hi, I would like to place an order from the website.'
+    ),
     missingCustomerMessage: getConfigValue(
       bundle.config,
       'cart_missing_customer_message',
@@ -496,6 +513,30 @@ export function getCartCopy(bundle: StorefrontBundle) {
       'cart_general_error_message',
       'We could not place the order.'
     ),
+    missingStoreNameMessage: getConfigValue(
+      bundle.config,
+      'cart_missing_store_name_message',
+      'Store name is missing. Please try again in a moment.'
+    ),
+    missingWhatsappNumberMessage: getConfigValue(
+      bundle.config,
+      'cart_missing_whatsapp_number_message',
+      'Order chat is not configured yet. Please contact the store directly.'
+    ),
+    pickupRequestedNote: getConfigValue(bundle.config, 'cart_pickup_requested_note', 'Pickup requested'),
+    whatsappHeadingLabel: getConfigValue(bundle.config, 'cart_whatsapp_heading_label', 'Order'),
+    whatsappOrderNumberPrefix: getConfigValue(bundle.config, 'cart_whatsapp_order_number_prefix', '#'),
+    whatsappNameLabel: getConfigValue(bundle.config, 'cart_whatsapp_name_label', 'Name'),
+    whatsappFulfillmentLabel: getConfigValue(bundle.config, 'cart_whatsapp_fulfillment_label', 'Fulfillment'),
+    whatsappDeliveryLabel: getConfigValue(bundle.config, 'cart_whatsapp_delivery_label', 'Delivery'),
+    whatsappPickupLabel: getConfigValue(bundle.config, 'cart_whatsapp_pickup_label', 'Pickup'),
+    whatsappPhoneLabel: getConfigValue(bundle.config, 'cart_whatsapp_phone_label', 'Phone'),
+    whatsappAddressLabel: getConfigValue(bundle.config, 'cart_whatsapp_address_label', 'Address'),
+    whatsappPickupNoteLabel: getConfigValue(bundle.config, 'cart_whatsapp_pickup_note_label', 'Pickup note'),
+    whatsappNotesLabel: getConfigValue(bundle.config, 'cart_whatsapp_notes_label', 'Notes'),
+    whatsappItemsHeading: getConfigValue(bundle.config, 'cart_whatsapp_items_heading', 'Items'),
+    whatsappTotalLabel: getConfigValue(bundle.config, 'cart_whatsapp_total_label', 'Total'),
+    whatsappCurrencyLabel: getConfigValue(bundle.config, 'cart_whatsapp_currency_label', 'INR'),
   };
 }
 

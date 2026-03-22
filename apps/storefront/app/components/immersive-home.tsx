@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight, Flame, Sparkles, ShoppingBag, Wand2 } from 'lucide-react';
 import { useMemo, useRef } from 'react';
-import { getConfigValue, getHomeFeaturedImageUrl, getStorefrontState, money } from '../lib/catalog';
+import { getConfigValue, getHeroBackgroundImageUrl, getHomeFeaturedImageUrl, getStorefrontState, money } from '../lib/catalog';
 import type { StorefrontBundle } from '../lib/types';
 
 export function ImmersiveHome({
@@ -75,6 +75,7 @@ export function ImmersiveHome({
   ];
   const introEyebrow = getConfigValue(bundle.config, 'home_steps_eyebrow', 'Start here');
   const heroImageUrl = getHomeFeaturedImageUrl(bundle);
+  const heroBackgroundImageUrl = getHeroBackgroundImageUrl(bundle);
   const featurePrimaryLabel = storefrontState.mode === 'open'
     ? getConfigValue(bundle.config, 'home_feature_primary_label', 'Checkout now')
     : getConfigValue(bundle.config, 'home_feature_paused_label', 'View live status');
@@ -114,11 +115,24 @@ export function ImmersiveHome({
         transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
         style={
           prefersReducedMotion
-            ? undefined
+            ? heroBackgroundImageUrl
+              ? {
+                  backgroundImage: `linear-gradient(135deg, rgba(7, 5, 4, 0.88), rgba(7, 5, 4, 0.72)), url(${heroBackgroundImageUrl})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                }
+              : undefined
             : {
                 y: heroTranslateY,
                 scale: heroScale,
                 willChange: 'transform',
+                ...(heroBackgroundImageUrl
+                  ? {
+                      backgroundImage: `linear-gradient(135deg, rgba(7, 5, 4, 0.88), rgba(7, 5, 4, 0.72)), url(${heroBackgroundImageUrl})`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                    }
+                  : {}),
               }
         }
       >

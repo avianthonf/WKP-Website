@@ -68,18 +68,29 @@ export async function createWhatsAppOrder(payload: z.infer<typeof orderSchema>) 
     acc[row.key] = row.value;
     return acc;
   }, {});
+  const getConfig = (key: string, fallback = '') => config[key] || fallback;
 
   const orderNumber = await nextOrderNumber(supabase);
-  const storeName = config.store_name || config.hero_title;
-  const whatsappNumber = config.whatsapp_number;
+  const storeName = getConfig('store_name', getConfig('hero_title'));
+  const whatsappNumber = getConfig('whatsapp_number');
 
   if (!storeName) {
-    throw new Error('Missing store name in site_config');
+    throw new Error(
+      getConfig('cart_missing_store_name_message', 'Store name is missing. Please try again in a moment.')
+    );
   }
 
   if (!whatsappNumber) {
-    throw new Error('Missing WhatsApp number in site_config');
+    throw new Error(
+      getConfig(
+        'cart_missing_whatsapp_number_message',
+        'Order chat is not configured yet. Please contact the store directly.'
+      )
+    );
   }
+
+  const pickupNoteLabel = getConfig('cart_pickup_note_label', 'Pickup note');
+  const pickupRequestedNote = getConfig('cart_pickup_requested_note', 'Pickup requested');
 
   const { data: order, error: orderError } = await supabase
     .from('orders')
@@ -97,8 +108,8 @@ export async function createWhatsAppOrder(payload: z.infer<typeof orderSchema>) 
           data.notes?.trim() || null,
           data.fulfillment === 'pickup'
             ? data.pickupNote?.trim()
-              ? `Pickup note: ${data.pickupNote.trim()}`
-              : 'Pickup requested'
+              ? `${pickupNoteLabel}: ${data.pickupNote.trim()}`
+              : pickupRequestedNote
             : null,
         ]
           .filter(Boolean)
@@ -136,6 +147,26 @@ export async function createWhatsAppOrder(payload: z.infer<typeof orderSchema>) 
     items: data.items,
     total: data.total,
     storeName,
+    sizeNames: {
+      small: getConfig('size_small_name', 'Small'),
+      medium: getConfig('size_medium_name', 'Medium'),
+      large: getConfig('size_large_name', 'Large'),
+    },
+    copy: {
+      headingLabel: getConfig('cart_whatsapp_heading_label', 'Order'),
+      orderNumberPrefix: getConfig('cart_whatsapp_order_number_prefix', '#'),
+      nameLabel: getConfig('cart_whatsapp_name_label', 'Name'),
+      fulfillmentLabel: getConfig('cart_whatsapp_fulfillment_label', 'Fulfillment'),
+      deliveryLabel: getConfig('cart_whatsapp_delivery_label', 'Delivery'),
+      pickupLabel: getConfig('cart_whatsapp_pickup_label', 'Pickup'),
+      phoneLabel: getConfig('cart_whatsapp_phone_label', 'Phone'),
+      addressLabel: getConfig('cart_whatsapp_address_label', 'Address'),
+      pickupNoteLabel: getConfig('cart_whatsapp_pickup_note_label', 'Pickup note'),
+      notesLabel: getConfig('cart_whatsapp_notes_label', 'Notes'),
+      itemsHeading: getConfig('cart_whatsapp_items_heading', 'Items'),
+      totalLabel: getConfig('cart_whatsapp_total_label', 'Total'),
+      currencyLabel: getConfig('cart_whatsapp_currency_label', 'INR'),
+    },
   });
 
   return {

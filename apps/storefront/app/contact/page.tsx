@@ -63,7 +63,17 @@ export default async function ContactPage() {
                   </div>
                 </div>
                 <div className="hero-actions">
-                  <Link href={getOrderLink(bundle, 'Hi, I would like to place an order or ask a question.')} className="button">
+                  <Link
+                    href={getOrderLink(
+                      bundle,
+                      getConfigValue(
+                        bundle.config,
+                        'contact_order_prefill_message',
+                        'Hi, I would like to place an order or ask a question.'
+                      )
+                    )}
+                    className="button"
+                  >
                     <PhoneCall size={16} />
                     {getConfigValue(bundle.config, 'contact_message_label', 'Message us')}
                   </Link>

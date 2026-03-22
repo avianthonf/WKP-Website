@@ -2,13 +2,14 @@ import Link from 'next/link';
 import { MapPin, Truck, TimerReset } from 'lucide-react';
 import { StorefrontShell } from '../components/storefront-shell';
 import { fetchStorefrontBundle } from '../lib/storefront';
-import { getAddressLine, getConfigValue, getOpeningWindow, getOrderLink, getStorefrontState } from '../lib/catalog';
+import { getAddressLine, getConfigValue, getDeliveryRadiusKm, getOpeningWindow, getOrderLink, getStorefrontState } from '../lib/catalog';
 
 export const dynamic = 'force-dynamic';
 
 export default async function DeliveryPage() {
   const bundle = await fetchStorefrontBundle();
   const storefrontState = getStorefrontState(bundle);
+  const deliveryRadiusKm = getDeliveryRadiusKm(bundle);
 
   return (
     <StorefrontShell bundle={bundle}>
@@ -35,7 +36,14 @@ export default async function DeliveryPage() {
                   {storefrontState.primaryAction.label}
                 </Link>
                 <Link
-                  href={getOrderLink(bundle, 'Hi, I would like to check delivery details for my order.')}
+                  href={getOrderLink(
+                    bundle,
+                    getConfigValue(
+                      bundle.config,
+                      'delivery_order_prefill_message',
+                      'Hi, I would like to check delivery details for my order.'
+                    )
+                  )}
                   className="button-secondary"
                   target="_blank"
                   rel="noreferrer"
@@ -97,6 +105,19 @@ export default async function DeliveryPage() {
               )}
             </div>
           </div>
+          {deliveryRadiusKm > 0 ? (
+            <div className="info-card">
+              <div className="info-card__title">{getConfigValue(bundle.config, 'delivery_radius_title', 'Radius')}</div>
+              <div className="info-card__body">{deliveryRadiusKm} km</div>
+              <div className="info-card__copy">
+                {getConfigValue(
+                  bundle.config,
+                  'delivery_radius_copy',
+                  'Approximate delivery coverage from the store.'
+                )}
+              </div>
+            </div>
+          ) : null}
         </section>
       </div>
     </StorefrontShell>

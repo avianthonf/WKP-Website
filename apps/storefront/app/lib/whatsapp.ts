@@ -1,10 +1,22 @@
 import type { CartLine } from './types';
 
-function getSizeName(size?: CartLine['size']) {
-  return size === 'small' ? 'Small' : size === 'medium' ? 'Medium' : 'Large';
-}
-
 type WhatsAppFulfillment = 'delivery' | 'pickup';
+
+type WhatsAppCopy = {
+  headingLabel: string;
+  orderNumberPrefix: string;
+  nameLabel: string;
+  fulfillmentLabel: string;
+  deliveryLabel: string;
+  pickupLabel: string;
+  phoneLabel: string;
+  addressLabel: string;
+  pickupNoteLabel: string;
+  notesLabel: string;
+  itemsHeading: string;
+  totalLabel: string;
+  currencyLabel: string;
+};
 
 export function buildWhatsAppMessage(input: {
   orderNumber?: number;
@@ -16,28 +28,34 @@ export function buildWhatsAppMessage(input: {
   items: CartLine[];
   total: number;
   storeName?: string;
+  sizeNames: Record<'small' | 'medium' | 'large', string>;
+  copy: WhatsAppCopy;
 }) {
-  const fulfillmentLabel = input.fulfillment === 'pickup' ? 'Pickup' : 'Delivery';
+  const fulfillmentValue =
+    input.fulfillment === 'pickup' ? input.copy.pickupLabel : input.copy.deliveryLabel;
   const addressLabel =
-    input.fulfillment === 'pickup' ? 'Pickup note' : 'Address';
+    input.fulfillment === 'pickup' ? input.copy.pickupNoteLabel : input.copy.addressLabel;
+  const orderNumberSuffix = input.orderNumber
+    ? ` ${input.copy.orderNumberPrefix}${input.orderNumber}`
+    : '';
 
   const lines = [
-    `*${input.storeName || 'We Knead Pizza'} Order${input.orderNumber ? ` #${input.orderNumber}` : ''}*`,
+    `*${input.storeName || 'We Knead Pizza'} ${input.copy.headingLabel}${orderNumberSuffix}*`,
     '',
-    `Name: ${input.customerName}`,
-    `Fulfillment: ${fulfillmentLabel}`,
-    input.customerPhone ? `Phone: ${input.customerPhone}` : null,
+    `${input.copy.nameLabel}: ${input.customerName}`,
+    `${input.copy.fulfillmentLabel}: ${fulfillmentValue}`,
+    input.customerPhone ? `${input.copy.phoneLabel}: ${input.customerPhone}` : null,
     input.deliveryAddress ? `${addressLabel}: ${input.deliveryAddress}` : null,
-    input.notes ? `Notes: ${input.notes}` : null,
+    input.notes ? `${input.copy.notesLabel}: ${input.notes}` : null,
     '',
-    '*Items*',
+    `*${input.copy.itemsHeading}*`,
     ...input.items.map((item) => {
-      const size = item.size ? ` (${getSizeName(item.size)})` : '';
+      const size = item.size ? ` (${input.sizeNames[item.size]})` : '';
       const extras = item.extras?.length ? ` + ${item.extras.map((extra) => extra.name).join(', ')}` : '';
-      return `${item.quantity}x ${item.name}${size}${extras} - INR ${Math.round(item.unitPrice * item.quantity)}`;
+      return `${item.quantity}x ${item.name}${size}${extras} - ${input.copy.currencyLabel} ${Math.round(item.unitPrice * item.quantity)}`;
     }),
     '',
-    `*Total*: INR ${Math.round(input.total)}`,
+    `*${input.copy.totalLabel}*: ${input.copy.currencyLabel} ${Math.round(input.total)}`,
   ].filter(Boolean);
 
   return lines.join('\n');
