@@ -84,7 +84,7 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
     if (!storefrontState.requiresScheduledTime || !scheduleTime.trim()) return null;
     return resolveScheduledOrderTime(bundle.config, scheduleTime.trim());
   }, [bundle.config, scheduleTime, storefrontState.requiresScheduledTime]);
-  const manualAddressReady = manualAddress.trim().length >= 8;
+  const manualAddressReady = manualAddress.trim().length > 0;
   const locationReady = !deliveryRequired || Boolean(confirmedLocation) || manualAddressReady;
   const isReady =
     items.length > 0 &&
@@ -667,9 +667,128 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
             </p>
           </form>
 
-            {handoff ? (
+          <motion.aside
+            className="content-card"
+            initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
+            whileInView={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.45, delay: 0.08 }}
+          >
+            <div className="section__eyebrow">{cartCopy.orderSummaryTitle}</div>
+            <div className="section__title checkout-summary__title">{cartCopy.cartItemsLabel}</div>
+            <div className="summary-list summary-list--spaced">
+              <AnimatePresence initial={false}>
+                {items.length ? (
+                  items.map((item, index) => (
+                    <motion.div
+                      key={item.id}
+                      layout
+                      className="summary-row summary-row--top summary-row--cart"
+                      initial={prefersReducedMotion ? false : { x: '-100%', opacity: 0 }}
+                      animate={prefersReducedMotion ? false : { x: 0, opacity: 1 }}
+                      exit={prefersReducedMotion ? undefined : { opacity: 0, y: -8, scale: 0.98 }}
+                      transition={{ duration: 0.4, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] }}
+                    >
+                      <div className="cart-line">
+                        <div className="cart-line__media" aria-hidden="true">
+                          {item.imageUrl ? <img src={item.imageUrl} alt="" /> : <ShoppingBag size={14} />}
+                        </div>
+                        <div className="stack cart-line__content">
+                          <span className="summary-row__label">{item.name}</span>
+                          <span className="footnote">
+                            {item.kind === 'pizza'
+                              ? cartCopy.itemKindPizzaLabel
+                              : item.kind === 'addon'
+                                ? cartCopy.itemKindAddonLabel
+                                : item.kind === 'extra'
+                                  ? cartCopy.itemKindExtraLabel
+                                  : cartCopy.itemKindDessertLabel}
+                            {item.size ? ` - ${getSizeLabel(bundle, item.size)}` : ''}
+                          </span>
+                          <div className="menu-tabs cart-line__controls">
+                            <motion.button
+                              type="button"
+                              className="menu-tab"
+                              onClick={() => setQuantity(item.id, item.quantity - 1)}
+                              whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
+                              whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}
+                            >
+                              -
+                            </motion.button>
+                            <span className="menu-tab" data-active="true">
+                              {item.quantity}
+                            </span>
+                            <motion.button
+                              type="button"
+                              className="menu-tab"
+                              onClick={() => setQuantity(item.id, item.quantity + 1)}
+                              whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
+                              whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}
+                            >
+                              +
+                            </motion.button>
+                            <motion.button
+                              type="button"
+                              className="menu-tab"
+                              onClick={() => removeItem(item.id)}
+                              initial={prefersReducedMotion ? false : { width: 40 }}
+                              whileHover={prefersReducedMotion ? undefined : { width: 80 }}
+                              whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
+                              style={{ overflow: 'hidden' }}
+                            >
+                              <Trash2 size={14} />
+                              <motion.span
+                                initial={prefersReducedMotion ? false : { opacity: 0 }}
+                                animate={prefersReducedMotion ? false : { opacity: 1 }}
+                                exit={prefersReducedMotion ? undefined : { opacity: 0 }}
+                                transition={{ duration: 0.2 }}
+                              >
+                                {cartCopy.removeLabel}
+                              </motion.span>
+                            </motion.button>
+                          </div>
+                        </div>
+                      </div>
+                      <span className="summary-row__value">{money(getLinePrice(item))}</span>
+                    </motion.div>
+                  ))
+                ) : (
+                  <motion.div
+                    className="notice"
+                    data-tone="warning"
+                    initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
+                    animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+                  >
+                    {emptyCartCopy}
+                  </motion.div>
+                )}
+              </AnimatePresence>
               <motion.div
-              className="content-card order-handoff"
+                initial={prefersReducedMotion ? false : { y: 20, opacity: 0 }}
+                animate={prefersReducedMotion ? false : { y: 0, opacity: 1 }}
+                transition={{ duration: 0.4, delay: 0 * 0.06, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <div className="summary-row">
+                  <span className="summary-row__label">{cartCopy.subtotalLabel}</span>
+                  <span className="summary-row__value">{money(total)}</span>
+                </div>
+              </motion.div>
+              <motion.div
+                initial={prefersReducedMotion ? false : { y: 20, opacity: 0 }}
+                animate={prefersReducedMotion ? false : { y: 0, opacity: 1 }}
+                transition={{ duration: 0.4, delay: 1 * 0.06, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <div className="summary-row">
+                  <span className="summary-row__label">{cartCopy.itemsLabel}</span>
+                  <span className="summary-row__value">{totalItems}</span>
+                </div>
+              </motion.div>
+            </div>
+
+          </motion.aside>
+          {handoff ? (
+            <motion.div
+              className="content-card order-handoff order-handoff--below"
               initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
               animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
               transition={{ duration: 0.35 }}
@@ -679,9 +798,7 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
                 {cartCopy.handoffOrderPrefix}
                 {handoff.orderNumber}
               </div>
-              <p className="hero-copy hero-copy--tight">
-                {cartCopy.scanQrLabel}
-              </p>
+              <p className="hero-copy hero-copy--tight">{cartCopy.scanQrLabel}</p>
               <div className="order-handoff__qr">
                 <img
                   src={`https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${encodeURIComponent(handoff.whatsappUrl)}`}
@@ -699,152 +816,6 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
               </div>
             </motion.div>
           ) : null}
-
-          <motion.aside
-            className="content-card"
-            initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
-            whileInView={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.45, delay: 0.08 }}
-          >
-            {handoff ? (
-              <div className="summary-list summary-list--spaced">
-                <div className="notice" data-tone="success">
-                  <CheckCircle2 size={16} />
-                  {cartCopy.orderSavedLabel}
-                </div>
-                <div className="summary-row">
-                  <span className="summary-row__label">{cartCopy.orderNumberLabel}</span>
-                  <span className="summary-row__value">#{handoff.orderNumber}</span>
-                </div>
-                <div className="summary-row">
-                  <span className="summary-row__label">{cartCopy.nextStepLabel}</span>
-                  <span className="summary-row__value">{cartCopy.nextStepCopy}</span>
-                </div>
-                <div className="hero-actions">
-                  <Link href={handoff.whatsappUrl} className="button" target="_blank" rel="noreferrer">
-                    {cartCopy.openPcLabel}
-                  </Link>
-                  <Link href="/status" className="button-secondary">
-                    {cartCopy.viewLiveStatusLabel}
-                  </Link>
-                </div>
-              </div>
-            ) : (
-              <>
-                <div className="section__eyebrow">{cartCopy.orderSummaryTitle}</div>
-                <div className="section__title checkout-summary__title">{cartCopy.cartItemsLabel}</div>
-                <div className="summary-list summary-list--spaced">
-                  <AnimatePresence initial={false}>
-                    {items.length ? (
-                      items.map((item, index) => (
-                        <motion.div
-                          key={item.id}
-                          layout
-                          className="summary-row summary-row--top summary-row--cart"
-                          initial={prefersReducedMotion ? false : { x: "-100%", opacity: 0 }}
-                          animate={prefersReducedMotion ? false : { x: 0, opacity: 1 }}
-                          exit={prefersReducedMotion ? undefined : { opacity: 0, y: -8, scale: 0.98 }}
-                          transition={{ duration: 0.4, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] }}
-                        >
-                          <div className="cart-line">
-                            <div className="cart-line__media" aria-hidden="true">
-                              {item.imageUrl ? <img src={item.imageUrl} alt="" /> : <ShoppingBag size={14} />}
-                            </div>
-                            <div className="stack cart-line__content">
-                              <span className="summary-row__label">{item.name}</span>
-                              <span className="footnote">
-                                {item.kind === 'pizza'
-                                  ? cartCopy.itemKindPizzaLabel
-                                  : item.kind === 'addon'
-                                    ? cartCopy.itemKindAddonLabel
-                                    : item.kind === 'extra'
-                                      ? cartCopy.itemKindExtraLabel
-                                      : cartCopy.itemKindDessertLabel}
-                                {item.size ? ` - ${getSizeLabel(bundle, item.size)}` : ''}
-                              </span>
-                              <div className="menu-tabs cart-line__controls">
-                                <motion.button
-                                  type="button"
-                                  className="menu-tab"
-                                  onClick={() => setQuantity(item.id, item.quantity - 1)}
-                                  whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
-                                  whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}
-                                >
-                                  -
-                                </motion.button>
-                                <span className="menu-tab" data-active="true">
-                                  {item.quantity}
-                                </span>
-                                <motion.button
-                                  type="button"
-                                  className="menu-tab"
-                                  onClick={() => setQuantity(item.id, item.quantity + 1)}
-                                  whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
-                                  whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}
-                                >
-                                  +
-                                </motion.button>
-                                <motion.button
-                                  type="button"
-                                  className="menu-tab"
-                                  onClick={() => removeItem(item.id)}
-                                  initial={prefersReducedMotion ? false : { width: 40 }}
-                                  whileHover={prefersReducedMotion ? undefined : { width: 80 }}
-                                  whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
-                                  style={{ overflow: 'hidden' }}
-                                >
-                                  <Trash2 size={14} />
-                                  <motion.span
-                                    initial={prefersReducedMotion ? false : { opacity: 0 }}
-                                    animate={prefersReducedMotion ? false : { opacity: 1 }}
-                                    exit={prefersReducedMotion ? undefined : { opacity: 0 }}
-                                    transition={{ duration: 0.2 }}
-                                  >
-                                    {cartCopy.removeLabel}
-                                  </motion.span>
-                                </motion.button>
-                              </div>
-                            </div>
-                          </div>
-                          <span className="summary-row__value">{money(getLinePrice(item))}</span>
-                        </motion.div>
-                      ))
-                    ) : (
-                      <motion.div
-                        className="notice"
-                        data-tone="warning"
-                        initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
-                        animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
-                      >
-                        {emptyCartCopy}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                  <motion.div
-                    initial={prefersReducedMotion ? false : { y: 20, opacity: 0 }}
-                    animate={prefersReducedMotion ? false : { y: 0, opacity: 1 }}
-                    transition={{ duration: 0.4, delay: 0 * 0.06, ease: [0.16, 1, 0.3, 1] }}
-                  >
-                    <div className="summary-row">
-                      <span className="summary-row__label">{cartCopy.subtotalLabel}</span>
-                      <span className="summary-row__value">{money(total)}</span>
-                    </div>
-                  </motion.div>
-                  <motion.div
-                    initial={prefersReducedMotion ? false : { y: 20, opacity: 0 }}
-                    animate={prefersReducedMotion ? false : { y: 0, opacity: 1 }}
-                    transition={{ duration: 0.4, delay: 1 * 0.06, ease: [0.16, 1, 0.3, 1] }}
-                  >
-                    <div className="summary-row">
-                      <span className="summary-row__label">{cartCopy.itemsLabel}</span>
-                      <span className="summary-row__value">{totalItems}</span>
-                    </div>
-                  </motion.div>
-                </div>
-              </>
-            )}
-          </motion.aside>
         </div>
       </motion.section>
     </div>
