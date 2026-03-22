@@ -65,7 +65,7 @@ export default async function ContactPage() {
                 <div className="hero-actions">
                   <Link href={getOrderLink(bundle, 'Hi, I would like to place an order or ask a question.')} className="button">
                     <PhoneCall size={16} />
-                    Message us
+                    {getConfigValue(bundle.config, 'contact_message_label', 'Message us')}
                   </Link>
                   <Link href={storefrontState.primaryAction.href} className="button-secondary">
                     {storefrontState.primaryAction.label}
@@ -83,10 +83,14 @@ export default async function ContactPage() {
             <div className="info-card__copy">
               {bundle.config.google_maps_link ? (
                 <Link href={bundle.config.google_maps_link} target="_blank" className="footer__link">
-                  Open in Maps
+                  {getConfigValue(bundle.config, 'contact_map_action_label', 'Open in Maps')}
                 </Link>
               ) : (
-                'Set the maps link from the store settings.'
+                getConfigValue(
+                  bundle.config,
+                  'contact_map_missing_copy',
+                  'Set the maps link from the store settings.'
+                )
               )}
             </div>
           </div>

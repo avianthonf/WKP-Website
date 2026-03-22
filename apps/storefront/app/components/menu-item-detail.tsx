@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { motion, useReducedMotion } from 'framer-motion';
 import { ArrowRight, BadgeCheck, ChefHat, ShoppingBag, Sparkles } from 'lucide-react';
 import { getSizeLabel, getSizeName, money } from '../lib/catalog';
-import type { Size } from '../lib/types';
+import type { Size, StorefrontBundle } from '../lib/types';
 
 type SizePrice = {
   size: Size;
@@ -12,6 +12,7 @@ type SizePrice = {
 };
 
 type MenuItemDetailProps = {
+  bundle: StorefrontBundle;
   eyebrow: string;
   title: string;
   heroCopy: string;
@@ -30,6 +31,16 @@ type MenuItemDetailProps = {
   sizePrices?: SizePrice[];
   isPizza?: boolean;
   orderingPaused?: boolean;
+  backToMenuLabel: string;
+  viewStatusLabel: string;
+  viewCartLabel: string;
+  orderingPausedLabel: string;
+  livePriceLabel: string;
+  readyToAddLabel: string;
+  oneTapLabel: string;
+  addFromMenuLabel: string;
+  statusFirstLabel: string;
+  fastLaneLabel: string;
 };
 
 const sectionMotion = {
@@ -38,6 +49,7 @@ const sectionMotion = {
 };
 
 export function MenuItemDetailClient({
+  bundle,
   eyebrow,
   title,
   heroCopy,
@@ -56,6 +68,16 @@ export function MenuItemDetailClient({
   sizePrices,
   isPizza = false,
   orderingPaused = false,
+  backToMenuLabel,
+  viewStatusLabel,
+  viewCartLabel,
+  orderingPausedLabel,
+  livePriceLabel,
+  readyToAddLabel,
+  oneTapLabel,
+  addFromMenuLabel,
+  statusFirstLabel,
+  fastLaneLabel,
 }: MenuItemDetailProps) {
   const prefersReducedMotion = useReducedMotion();
 
@@ -84,11 +106,11 @@ export function MenuItemDetailClient({
 
             <div className="hero-actions menu-detail-hero__actions">
               <Link href="/menu" className="button-secondary">
-                Back to menu
+                {backToMenuLabel}
               </Link>
               <Link href={orderingPaused ? '/status' : '/cart'} className="button">
                 <ShoppingBag size={16} />
-                {orderingPaused ? 'View live status' : 'View cart'}
+                {orderingPaused ? viewStatusLabel : viewCartLabel}
               </Link>
             </div>
 
@@ -110,7 +132,7 @@ export function MenuItemDetailClient({
                 transition={{ duration: 0.35, delay: 0.18 }}
               >
                 <div className="stat-card__label">{statusTitle}</div>
-                <div className="stat-card__value">{orderingPaused ? 'Ordering paused' : statusText}</div>
+                <div className="stat-card__value">{orderingPaused ? orderingPausedLabel : statusText}</div>
                 <div className="stat-card__note">{statusCopy}</div>
               </motion.div>
               <motion.div
@@ -120,9 +142,9 @@ export function MenuItemDetailClient({
                 transition={{ duration: 0.35, delay: 0.24 }}
               >
                 <div className="stat-card__label">{actionTitle}</div>
-                <div className="stat-card__value">{orderingPaused ? 'Status first' : 'Fast lane'}</div>
+                <div className="stat-card__value">{orderingPaused ? statusFirstLabel : fastLaneLabel}</div>
                 <div className="stat-card__note">
-                  {orderingPaused ? 'Ordering is paused until the store reopens.' : actionCopy}
+                  {orderingPaused ? orderingPausedLabel : actionCopy}
                 </div>
               </motion.div>
             </div>
@@ -159,21 +181,21 @@ export function MenuItemDetailClient({
                       transition={{ duration: 0.35, delay: 0.08 + index * 0.05 }}
                       whileHover={prefersReducedMotion ? {} : { y: -3 }}
                     >
-                      <span className="menu-detail-price-chip__label">{getSizeLabel(entry.size)}</span>
+                      <span className="menu-detail-price-chip__label">{getSizeLabel(bundle, entry.size)}</span>
                       <span className="menu-detail-price-chip__value">{money(entry.price)}</span>
-                      <span className="menu-detail-price-chip__note">{getSizeName(entry.size)}</span>
+                      <span className="menu-detail-price-chip__note">{getSizeName(bundle, entry.size)}</span>
                     </motion.div>
                   ))}
                 </div>
               ) : (
                 <div className="menu-detail-mini-stack">
                   <div className="menu-detail-mini-stack__item">
-                    <span className="menu-detail-mini-stack__label">Live price</span>
+                    <span className="menu-detail-mini-stack__label">{livePriceLabel}</span>
                     <strong>{money(primaryPrice)}</strong>
                   </div>
                   <div className="menu-detail-mini-stack__item">
-                    <span className="menu-detail-mini-stack__label">Ready to add</span>
-                    <strong>One tap to cart</strong>
+                    <span className="menu-detail-mini-stack__label">{readyToAddLabel}</span>
+                    <strong>{oneTapLabel}</strong>
                   </div>
                 </div>
               )}
@@ -229,11 +251,11 @@ export function MenuItemDetailClient({
           whileHover={prefersReducedMotion ? {} : { y: -4 }}
         >
           <div className="info-card__title">{actionTitle}</div>
-          <div className="info-card__body">
-            <ArrowRight size={16} /> {orderingPaused ? 'View live status' : 'Add from menu'}
+            <div className="info-card__body">
+            <ArrowRight size={16} /> {orderingPaused ? viewStatusLabel : addFromMenuLabel}
           </div>
           <div className="info-card__copy">
-            {orderingPaused ? 'The kitchen is not accepting new orders at the moment.' : actionCopy}
+            {orderingPaused ? orderingPausedLabel : actionCopy}
           </div>
         </motion.div>
       </section>

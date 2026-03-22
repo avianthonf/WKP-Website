@@ -9,6 +9,7 @@ import {
   getConfigValue,
   getExtraPrice,
   getBuilderHeroImageUrl,
+  getBuilderCopy,
   getPizzaDisplayToppings,
   getPizzaPrice,
   getSizeName,
@@ -30,6 +31,7 @@ export function PizzaBuilder({ bundle, initialPizzaSlug }: { bundle: StorefrontB
   const [notes, setNotes] = useState('');
   const storefrontState = getStorefrontState(bundle);
   const orderingPaused = storefrontState.mode !== 'open';
+  const builderCopy = getBuilderCopy(bundle);
   const builderHeroTitle = getConfigValue(
     bundle.config,
     'build_hero_title',
@@ -61,8 +63,8 @@ export function PizzaBuilder({ bundle, initialPizzaSlug }: { bundle: StorefrontB
   if (!pizza) {
     return (
       <section className="hero-card reveal">
-        <p className="page-title">No pizzas are currently available.</p>
-        <p className="page-subtitle">The menu is empty or all pizzas are disabled.</p>
+        <p className="page-title">{builderCopy.noPizzasTitle}</p>
+        <p className="page-subtitle">{builderCopy.noPizzasBody}</p>
       </section>
     );
   }
@@ -79,14 +81,14 @@ export function PizzaBuilder({ bundle, initialPizzaSlug }: { bundle: StorefrontB
           <div>
             <span className="eyebrow">
               <ChefHat size={12} />
-              Pizza builder
+              {builderCopy.eyebrow}
             </span>
             <h1 className="hero-title">{builderHeroTitle}</h1>
             <p className="hero-copy">{builderHeroCopy}</p>
             <div className="hero-actions">
               {orderingPaused ? (
                 <Link href="/status" className="button">
-                  View live status
+                  {builderCopy.viewStatusLabel}
                 </Link>
               ) : (
                 <button
@@ -117,11 +119,11 @@ export function PizzaBuilder({ bundle, initialPizzaSlug }: { bundle: StorefrontB
                     })
                   }
                 >
-                  Add custom pizza
+                  {builderCopy.addCustomLabel}
                 </button>
               )}
               <Link href="/menu" className="button-secondary">
-                Back to menu
+                {builderCopy.backToMenuLabel}
               </Link>
             </div>
           </div>
@@ -136,18 +138,18 @@ export function PizzaBuilder({ bundle, initialPizzaSlug }: { bundle: StorefrontB
               ) : null}
               <div className="hero-preview__overlay">
                 <div className="hero-preview__title">{pizza.name}</div>
-                <p className="hero-preview__meta">{pizza.description || 'A live recipe from the menu.'}</p>
+                <p className="hero-preview__meta">{pizza.description || builderCopy.previewCopy}</p>
               </div>
             </div>
             <div className="content-card">
               <div className="notice">
                 <Sparkles size={16} />
-                Builder selections flow directly into the cart and order handoff.
+                {builderCopy.noticeCopy}
               </div>
               {orderingPaused ? (
                 <div className="notice" data-tone={storefrontState.tone}>
                   <Sparkles size={16} />
-                  {storefrontState.summary}
+                  {builderCopy.pausedNoticeCopy}
                 </div>
               ) : null}
               <div className="tag-list">
@@ -172,7 +174,7 @@ export function PizzaBuilder({ bundle, initialPizzaSlug }: { bundle: StorefrontB
           <div className="field-grid">
             <div className="field">
               <label className="field__label" htmlFor="pizza-select">
-                Base pizza
+                {builderCopy.basePizzaLabel}
               </label>
               <select
                 id="pizza-select"
@@ -190,7 +192,7 @@ export function PizzaBuilder({ bundle, initialPizzaSlug }: { bundle: StorefrontB
 
             <div className="split">
               <div className="field">
-                <label className="field__label">Size</label>
+                <label className="field__label">{builderCopy.sizeLabel}</label>
                 <div className="menu-tabs">
                   {sizes.map((item, index) => (
                     <motion.button
@@ -212,7 +214,7 @@ export function PizzaBuilder({ bundle, initialPizzaSlug }: { bundle: StorefrontB
               </div>
               <div className="field">
                 <label className="field__label" htmlFor="pizza-qty">
-                  Quantity
+                  {builderCopy.quantityLabel}
                 </label>
                 <input
                   id="pizza-qty"
@@ -227,7 +229,7 @@ export function PizzaBuilder({ bundle, initialPizzaSlug }: { bundle: StorefrontB
             </div>
 
             <div className="field">
-              <label className="field__label">Extras</label>
+              <label className="field__label">{builderCopy.extrasLabel}</label>
               <div className="menu-tabs">
                 {extraItems.map((extra, index) => {
                   const active = selectedExtras.includes(extra.id);
@@ -259,14 +261,14 @@ export function PizzaBuilder({ bundle, initialPizzaSlug }: { bundle: StorefrontB
 
             <div className="field">
               <label className="field__label" htmlFor="pizza-notes">
-                Notes
+                {builderCopy.notesLabel}
               </label>
               <textarea
                 id="pizza-notes"
                 className="field__textarea"
                 value={notes}
                 onChange={(event) => setNotes(event.target.value)}
-                placeholder="Sauce preference, crust notes, or any special instruction"
+                placeholder={builderCopy.notesPlaceholder}
               />
             </div>
           </div>
@@ -278,8 +280,8 @@ export function PizzaBuilder({ bundle, initialPizzaSlug }: { bundle: StorefrontB
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.45, delay: 0.08 }}
           >
-            <div className="side-panel__title">Live summary</div>
-            <p className="side-panel__copy">This is the exact payload that lands in the cart and final handoff.</p>
+            <div className="side-panel__title">{builderCopy.summaryTitle}</div>
+            <p className="side-panel__copy">{builderCopy.summaryCopy}</p>
             <div className="summary-list summary-list--spaced">
               <motion.div
                 initial={prefersReducedMotion ? false : { x: "100%", opacity: 0 }}
@@ -287,7 +289,7 @@ export function PizzaBuilder({ bundle, initialPizzaSlug }: { bundle: StorefrontB
                 exit={prefersReducedMotion ? undefined : { x: "-100%", opacity: 0 }}
                 transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
               >
-                <SummaryRow label="Base pizza" value={pizza.name} />
+                <SummaryRow label={builderCopy.summaryBaseLabel} value={pizza.name} />
               </motion.div>
               <motion.div
                 initial={prefersReducedMotion ? false : { x: "100%", opacity: 0 }}
@@ -295,7 +297,7 @@ export function PizzaBuilder({ bundle, initialPizzaSlug }: { bundle: StorefrontB
                 exit={prefersReducedMotion ? undefined : { x: "-100%", opacity: 0 }}
                 transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
               >
-                <SummaryRow label="Size" value={getSizeName(size)} />
+                <SummaryRow label={builderCopy.summarySizeLabel} value={getSizeName(bundle, size)} />
               </motion.div>
               <motion.div
                 initial={prefersReducedMotion ? false : { x: "100%", opacity: 0 }}
@@ -304,8 +306,8 @@ export function PizzaBuilder({ bundle, initialPizzaSlug }: { bundle: StorefrontB
                 transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
               >
                 <SummaryRow
-                  label="Extras"
-                  value={selectedExtraRecords.length ? selectedExtraRecords.map((item) => item.name).join(', ') : 'None'}
+                  label={builderCopy.summaryExtrasLabel}
+                  value={selectedExtraRecords.length ? selectedExtraRecords.map((item) => item.name).join(', ') : builderCopy.summaryNoneLabel}
                 />
               </motion.div>
               <motion.div
@@ -314,7 +316,7 @@ export function PizzaBuilder({ bundle, initialPizzaSlug }: { bundle: StorefrontB
                 exit={prefersReducedMotion ? undefined : { x: "-100%", opacity: 0 }}
                 transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
               >
-                <SummaryRow label="Quantity" value={String(quantity)} />
+                <SummaryRow label={builderCopy.summaryQuantityLabel} value={String(quantity)} />
               </motion.div>
               <motion.div
                 initial={prefersReducedMotion ? false : { x: "100%", opacity: 0 }}
@@ -322,12 +324,12 @@ export function PizzaBuilder({ bundle, initialPizzaSlug }: { bundle: StorefrontB
                 exit={prefersReducedMotion ? undefined : { x: "-100%", opacity: 0 }}
                 transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
               >
-                <SummaryRow label="Total" value={money(total)} accent />
+                <SummaryRow label={builderCopy.summaryTotalLabel} value={money(total)} accent />
               </motion.div>
             </div>
             {orderingPaused ? (
               <Link href="/status" className="button">
-                View live status
+                {builderCopy.viewStatusLabel}
                 <ArrowRight size={16} />
               </Link>
             ) : (
@@ -359,7 +361,7 @@ export function PizzaBuilder({ bundle, initialPizzaSlug }: { bundle: StorefrontB
                   })
                 }
               >
-                Add to cart
+                {builderCopy.addToCartLabel}
                 <ArrowRight size={16} />
               </button>
             )}

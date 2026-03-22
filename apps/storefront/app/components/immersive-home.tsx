@@ -49,26 +49,35 @@ export function ImmersiveHome({
       href: getConfigValue(bundle.config, 'home_step_1_href', '/menu'),
       title: getConfigValue(bundle.config, 'home_step_1_title', 'Crave something now'),
       copy: getConfigValue(bundle.config, 'home_step_1_copy', 'Scroll the menu and tap into a signature pizza in seconds.'),
+      label: getConfigValue(bundle.config, 'home_step_1_label', 'Browse menu'),
     },
     {
       href: getConfigValue(bundle.config, 'home_step_2_href', '/build'),
       title: getConfigValue(bundle.config, 'home_step_2_title', 'Make it yours'),
       copy: getConfigValue(bundle.config, 'home_step_2_copy', 'Start with a base, add extras, and build the exact bite you want.'),
+      label: getConfigValue(bundle.config, 'home_step_2_label', 'Build custom'),
     },
     {
       href: storefrontState.mode === 'open' ? getConfigValue(bundle.config, 'home_step_3_href', '/cart') : '/status',
       title:
         storefrontState.mode === 'open'
           ? getConfigValue(bundle.config, 'home_step_3_title', 'Send it fast')
-          : 'Check live status',
+          : getConfigValue(bundle.config, 'home_step_3_paused_title', 'Check live status'),
       copy:
         storefrontState.mode === 'open'
           ? getConfigValue(bundle.config, 'home_step_3_copy', 'Checkout flows into a clean order handoff with the summary already prepared.')
-          : storefrontState.summary,
+          : getConfigValue(bundle.config, 'home_step_3_paused_copy', storefrontState.summary),
+      label:
+        storefrontState.mode === 'open'
+          ? getConfigValue(bundle.config, 'home_step_3_label', 'Review cart')
+          : getConfigValue(bundle.config, 'home_step_3_paused_label', 'View live status'),
     },
   ];
   const introEyebrow = getConfigValue(bundle.config, 'home_steps_eyebrow', 'Start here');
   const heroImageUrl = getHomeFeaturedImageUrl(bundle);
+  const featurePrimaryLabel = storefrontState.mode === 'open'
+    ? getConfigValue(bundle.config, 'home_feature_primary_label', 'Checkout now')
+    : getConfigValue(bundle.config, 'home_feature_paused_label', 'View live status');
   const introTitle = getConfigValue(
     bundle.config,
     'home_steps_title',
@@ -150,16 +159,18 @@ export function ImmersiveHome({
               transition={{ duration: 0.55, delay: 0.18 }}
             >
               <Link href="/menu" className="button button--hero">
-                Browse the menu
+                {getConfigValue(bundle.config, 'home_hero_menu_label', 'Browse the menu')}
                 <ArrowRight size={16} />
               </Link>
               <Link href="/build" className="button-secondary button-secondary--hero">
                 <Wand2 size={16} />
-                Build your pizza
+                {getConfigValue(bundle.config, 'home_hero_build_label', 'Build your pizza')}
               </Link>
               <Link href={storefrontState.mode === 'open' ? '/cart' : '/status'} className="button-ghost button-ghost--hero">
                 <ShoppingBag size={16} />
-                {storefrontState.mode === 'open' ? 'Checkout now' : 'View live status'}
+                {storefrontState.mode === 'open'
+                  ? getConfigValue(bundle.config, 'home_hero_checkout_label', 'Checkout now')
+                  : getConfigValue(bundle.config, 'home_feature_paused_label', 'View live status')}
               </Link>
             </motion.div>
 
@@ -170,15 +181,15 @@ export function ImmersiveHome({
               transition={{ duration: 0.55, delay: 0.22 }}
             >
               <div className="hero-orbit__item">
-                <span className="hero-orbit__label">State</span>
+                <span className="hero-orbit__label">{getConfigValue(bundle.config, 'home_orbit_state_label', 'State')}</span>
                 <strong>{storefrontState.label}</strong>
               </div>
               <div className="hero-orbit__item">
-                <span className="hero-orbit__label">Tonight</span>
+                <span className="hero-orbit__label">{getConfigValue(bundle.config, 'home_orbit_tonight_label', 'Tonight')}</span>
                 <strong>{bundle.pizzas.length ? `${bundle.pizzas[0].name}` : storeName}</strong>
               </div>
               <div className="hero-orbit__item">
-                <span className="hero-orbit__label">Minimum</span>
+                <span className="hero-orbit__label">{getConfigValue(bundle.config, 'home_orbit_minimum_label', 'Minimum')}</span>
                 <strong>{money(Number(bundle.config.min_order_amount || 0))}</strong>
               </div>
             </motion.div>
@@ -207,9 +218,11 @@ export function ImmersiveHome({
                 <div className="hero-showcase__overlay">
                   <div className="hero-showcase__eyebrow">
                     <Flame size={13} />
-                    Chef&apos;s pick
+                    {getConfigValue(bundle.config, 'home_feature_eyebrow_label', "Chef's pick")}
                   </div>
-                  <div className="hero-showcase__title">{bundle.pizzas[0]?.name || 'Signature pizza'}</div>
+                  <div className="hero-showcase__title">
+                    {bundle.pizzas[0]?.name || getConfigValue(bundle.config, 'home_feature_fallback_title', 'Signature pizza')}
+                  </div>
                   <p className="hero-showcase__copy">
                     {getConfigValue(
                       bundle.config,
@@ -217,6 +230,13 @@ export function ImmersiveHome({
                       'Rich, hot, and ready to slide from discovery to order with almost no friction.'
                     )}
                   </p>
+                  <Link
+                    href={storefrontState.mode === 'open' ? '/cart' : '/status'}
+                    className="button-secondary button-secondary--hero hero-showcase__cta"
+                  >
+                    {featurePrimaryLabel}
+                    <ArrowRight size={15} />
+                  </Link>
                 </div>
               </div>
 
@@ -229,7 +249,9 @@ export function ImmersiveHome({
                     animate={prefersReducedMotion ? {} : { opacity: 1, x: 0 }}
                     transition={{ duration: 0.45, delay: 0.18 + index * 0.08 }}
                   >
-                    <span className="hero-showcase__mini-label">Pair it with</span>
+                    <span className="hero-showcase__mini-label">
+                      {getConfigValue(bundle.config, 'home_showcase_pair_label', 'Pair it with')}
+                    </span>
                     <strong>{item.name}</strong>
                   </motion.div>
                 ))}
@@ -285,7 +307,7 @@ export function ImmersiveHome({
               <div className="intro-card__title">{item.title}</div>
               <p className="intro-card__copy">{item.copy}</p>
               <Link href={item.href} className="intro-card__link">
-                {storefrontState.mode === 'open' ? 'Open now' : item.href === '/status' ? 'View live status' : 'Browse now'}
+                {item.label}
                 <ArrowRight size={14} />
               </Link>
             </motion.div>
@@ -318,17 +340,28 @@ export function ImmersiveHome({
               </div>
               <div className="signature-card__body">
                 <div className="signature-card__top">
-                  <span className="signature-card__tag">{pizza.is_bestseller ? 'Bestseller' : 'Signature'}</span>
+                  <span className="signature-card__tag">
+                    {pizza.is_bestseller
+                      ? getConfigValue(bundle.config, 'home_signature_tag_bestseller_label', 'Bestseller')
+                      : getConfigValue(bundle.config, 'home_signature_tag_signature_label', 'Signature')}
+                  </span>
                   <span className="signature-card__price">{money(pizza.price_medium)}</span>
                 </div>
                 <div className="signature-card__title">{pizza.name}</div>
-                <p className="signature-card__copy">{pizza.description || 'A crowd-pleasing favorite from the live menu.'}</p>
+                <p className="signature-card__copy">
+                  {pizza.description ||
+                    getConfigValue(
+                      bundle.config,
+                      'home_signature_fallback_copy',
+                      'A crowd-pleasing favorite from the live menu.'
+                    )}
+                </p>
                 <div className="signature-card__actions">
                   <Link href={`/menu/${pizza.slug}`} className="button-secondary button-secondary--hero">
-                    Details
+                    {getConfigValue(bundle.config, 'home_signature_details_label', 'Details')}
                   </Link>
                   <Link href="/cart" className="button button--hero">
-                    Order
+                    {getConfigValue(bundle.config, 'home_signature_order_label', 'Order')}
                   </Link>
                 </div>
               </div>
@@ -351,10 +384,14 @@ export function ImmersiveHome({
           </div>
           <div className="closing-banner__actions">
             <Link href={storefrontState.mode === 'open' ? '/menu' : '/status'} className="button button--hero">
-              {storefrontState.mode === 'open' ? closingPrimary : 'View live status'}
+              {storefrontState.mode === 'open'
+                ? closingPrimary
+                : getConfigValue(bundle.config, 'home_closing_primary_paused_label', 'View live status')}
             </Link>
             <Link href="/build" className="button-secondary button-secondary--hero">
-              {storefrontState.mode === 'open' ? closingSecondary : 'Plan ahead'}
+              {storefrontState.mode === 'open'
+                ? closingSecondary
+                : getConfigValue(bundle.config, 'home_closing_secondary_paused_label', 'Plan ahead')}
             </Link>
           </div>
         </motion.div>

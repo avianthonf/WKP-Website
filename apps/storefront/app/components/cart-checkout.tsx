@@ -9,6 +9,7 @@ import { createWhatsAppOrder } from '../actions';
 import {
   getConfigValue,
   getCartHeroImageUrl,
+  getCartCopy,
   getLinePrice,
   getMinimumOrder,
   getOpeningWindow,
@@ -33,6 +34,7 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
   const [deviceMode, setDeviceMode] = useState<'mobile' | 'desktop' | null>(null);
   const [isPending, startTransition] = useTransition();
   const storefrontState = getStorefrontState(bundle);
+  const cartCopy = getCartCopy(bundle);
 
   useEffect(() => {
     const coarsePointer = window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 768;
@@ -57,7 +59,7 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
   const cartHeroImageUrl = getCartHeroImageUrl(bundle);
   const checkoutHoursCopy = getConfigValue(bundle.config, 'cart_hours_copy', 'Store hours:');
   const checkoutMinimumCopy = getConfigValue(bundle.config, 'cart_minimum_copy', 'Minimum order');
-  const emptyCartCopy = getConfigValue(bundle.config, 'cart_empty_copy', 'Your cart is empty. Add items from Menu or Build first.');
+  const emptyCartCopy = getConfigValue(bundle.config, 'cart_empty_copy', cartCopy.emptySummaryCopy);
   const isReady =
     items.length > 0 &&
     customerName.trim().length >= 2 &&
@@ -77,7 +79,7 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
   const pizzaTotalCount = pizzaSizeTotals.small + pizzaSizeTotals.medium + pizzaSizeTotals.large;
   const pizzaSizesInCart = (['small', 'medium', 'large'] as Size[])
     .filter((size) => pizzaSizeTotals[size] > 0)
-    .map((size) => getSizeName(size));
+    .map((size) => getSizeName(bundle, size));
   const statusTone =
     status &&
     (status.toLowerCase().includes('could not') || status.toLowerCase().includes('paused') || status.toLowerCase().includes('closed'))
@@ -91,18 +93,18 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
       if (orderingPaused) {
         setStatus(
           bundle.maintenanceMode
-            ? 'Orders are paused while the storefront is in maintenance mode.'
-            : 'Orders are currently closed. Please try again when the store is open.'
+            ? cartCopy.pausedMaintenanceMessage
+            : cartCopy.pausedClosedMessage
         );
         return;
       }
 
-      setStatus('Please fill the customer details before sending the order.');
+      setStatus(cartCopy.missingCustomerMessage);
       return;
     }
 
     if (deliveryRequired && deliveryAddress.trim().length < 8) {
-      setStatus('Please add a delivery address or switch to pickup.');
+      setStatus(cartCopy.missingAddressMessage);
       return;
     }
 
@@ -142,9 +144,9 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
         }
 
         setHandoff({ orderNumber: response.orderNumber, whatsappUrl: response.whatsappUrl });
-        setStatus(`Order #${response.orderNumber} is ready. Scan the QR with your phone to send it.`);
+        setStatus(`${cartCopy.orderNumberLabel} #${response.orderNumber} ${cartCopy.scanQrLabel}`);
       } catch (error) {
-        setStatus(error instanceof Error ? error.message : 'We could not place the order.');
+        setStatus(error instanceof Error ? error.message : cartCopy.generalErrorMessage);
       }
     });
   };
@@ -169,16 +171,16 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
               {orderingPaused ? (
                 <Link href="/status" className="button">
                   <PhoneCall size={16} />
-                  View live status
+                  {cartCopy.viewLiveStatusLabel}
                 </Link>
               ) : (
                 <Link href={getOrderLink(bundle, 'Hi, I would like to place an order from the website.')} className="button">
                   <PhoneCall size={16} />
-                  Open order chat
+                  {cartCopy.openOrderChatLabel}
                 </Link>
               )}
               <Link href="/menu" className="button-secondary">
-                Continue browsing
+                {cartCopy.continueBrowsingLabel}
               </Link>
             </div>
           </div>
@@ -186,7 +188,7 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
           <div className="hero-aside">
             <div className="hero-preview">
               {cartHeroImageUrl ? (
-                <img src={cartHeroImageUrl as string} alt="Live menu preview" className="hero-preview__image" />
+                <img src={cartHeroImageUrl as string} alt={cartCopy.previewImageAlt} className="hero-preview__image" />
               ) : (
                 <div className="hero-preview__image hero-preview__image--empty">
                   <span>{bundle.config.store_name || 'Live checkout'}</span>
@@ -204,30 +206,33 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
               </div>
               <div className="notice" data-tone={total < minimumOrder ? 'warning' : 'success'}>
                 <ShoppingBag size={16} />
-                {checkoutMinimumCopy} {minimumOrder ? money(minimumOrder) : 'not set'}.
+                {checkoutMinimumCopy} {minimumOrder ? money(minimumOrder) : cartCopy.minimumNotSetLabel}.
               </div>
               <div className="cart-size-summary">
-                <div className="pizza-card__section-label">Pizza sizes in cart</div>
+                <div className="pizza-card__section-label">{cartCopy.cartSizeSummaryLabel}</div>
                 <div className="pizza-card__cart-pills">
                   {(['small', 'medium', 'large'] as Size[]).map((size) => (
                     <span key={size} className="cart-size-pill">
                       <strong>{pizzaSizeTotals[size]}</strong>
-                      <span>{getSizeLabel(size)}</span>
+                      <span>{getSizeLabel(bundle, size)}</span>
                     </span>
                   ))}
                 </div>
                 <div className="pizza-card__price-note">
                   {pizzaTotalCount > 0
-                    ? `${pizzaTotalCount} pizza${pizzaTotalCount === 1 ? '' : 's'} across ${pizzaSizesInCart.join(', ')}`
-                    : 'No pizzas in the cart yet'}
+                    ? cartCopy.pizzaSummaryTemplate
+                        .replace('{count}', String(pizzaTotalCount))
+                        .replace('{plural}', pizzaTotalCount === 1 ? '' : 's')
+                        .replace('{sizes}', pizzaSizesInCart.join(', '))
+                    : cartCopy.emptySummaryCopy}
                 </div>
               </div>
               {orderingPaused ? (
                 <div className="notice" data-tone="warning">
                   <ShoppingBag size={16} />
                   {bundle.maintenanceMode
-                    ? 'Checkout is paused while maintenance mode is active.'
-                    : 'Checkout is paused until the store reopens.'}
+                    ? cartCopy.pausedMaintenanceMessage
+                    : cartCopy.pausedClosedMessage}
                 </div>
               ) : null}
             </div>
@@ -244,35 +249,35 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
         <div className="check-panel__grid">
           <form className="field-grid" onSubmit={handleSubmit}>
             <div className="split">
-              <div className="field">
-                <label className="field__label" htmlFor="customerName">
-                  Name
-                </label>
+            <div className="field">
+              <label className="field__label" htmlFor="customerName">
+                  {cartCopy.customerNameLabel}
+              </label>
                 <input
                   id="customerName"
                   className="field__control"
                   value={customerName}
                   onChange={(event) => setCustomerName(event.target.value)}
-                  placeholder="Customer name"
+                  placeholder={cartCopy.customerNamePlaceholder}
                 />
               </div>
               <div className="field">
                 <label className="field__label" htmlFor="customerPhone">
-                  Phone
+                  {cartCopy.customerPhoneLabel}
                 </label>
                 <input
                   id="customerPhone"
                   className="field__control"
                   value={customerPhone}
                   onChange={(event) => setCustomerPhone(event.target.value)}
-                  placeholder="+91 ..."
+                  placeholder={cartCopy.customerPhonePlaceholder}
                 />
               </div>
             </div>
 
             <div className="field">
               <label className="field__label" htmlFor="fulfillment">
-                Fulfillment
+                {cartCopy.fulfillmentLabel}
               </label>
               <select
                 id="fulfillment"
@@ -280,34 +285,34 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
                 value={fulfillment}
                 onChange={(event) => setFulfillment(event.target.value as 'delivery' | 'pickup')}
               >
-                <option value="delivery">Delivery</option>
-                <option value="pickup">Pickup</option>
+                <option value="delivery">{cartCopy.deliveryOptionLabel}</option>
+                <option value="pickup">{cartCopy.pickupOptionLabel}</option>
               </select>
             </div>
 
             <div className="field">
               <label className="field__label" htmlFor="deliveryAddress">
-                {deliveryRequired ? 'Delivery address' : 'Pickup note'}
+                {deliveryRequired ? cartCopy.deliveryAddressLabel : cartCopy.pickupNoteLabel}
               </label>
               <textarea
                 id="deliveryAddress"
                 className="field__textarea"
                 value={deliveryAddress}
                 onChange={(event) => setDeliveryAddress(event.target.value)}
-                placeholder={deliveryRequired ? 'House, street, landmark' : 'Pickup timing or note'}
+                placeholder={deliveryRequired ? cartCopy.deliveryAddressPlaceholder : cartCopy.pickupNotePlaceholder}
               />
             </div>
 
             <div className="field">
               <label className="field__label" htmlFor="orderNotes">
-                Notes
+                {cartCopy.notesLabel}
               </label>
               <textarea
                 id="orderNotes"
                 className="field__textarea"
                 value={notes}
                 onChange={(event) => setNotes(event.target.value)}
-                placeholder="Allergies, sauce preference, or timing notes"
+                placeholder={cartCopy.notesPlaceholder}
               />
             </div>
 
@@ -336,39 +341,42 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
                   : undefined
               }
             >
-              {isPending ? 'Sending...' : orderingPaused ? 'View live status' : 'Place order'}
+              {isPending ? cartCopy.sendingLabel : orderingPaused ? cartCopy.viewLiveStatusLabel : cartCopy.placeOrderLabel}
               <ArrowRight size={16} />
             </motion.button>
             <p className="footnote">
-              The order is saved for kitchen tracking and reporting before the handoff opens.
+              {cartCopy.orderSavedCopy}
             </p>
           </form>
 
-          {handoff ? (
-            <motion.div
+            {handoff ? (
+              <motion.div
               className="content-card order-handoff"
               initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
               animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
               transition={{ duration: 0.35 }}
             >
-              <div className="section__eyebrow">Send from your phone</div>
-              <div className="section__title checkout-summary__title">Order #{handoff.orderNumber}</div>
+              <div className="section__eyebrow">{cartCopy.handoffTitle}</div>
+              <div className="section__title checkout-summary__title">
+                {cartCopy.handoffOrderPrefix}
+                {handoff.orderNumber}
+              </div>
               <p className="hero-copy hero-copy--tight">
-                Scan the QR code with your phone to open the exact order message, then send it from there.
+                {cartCopy.scanQrLabel}
               </p>
               <div className="order-handoff__qr">
                 <img
                   src={`https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${encodeURIComponent(handoff.whatsappUrl)}`}
-                  alt={`QR code for order ${handoff.orderNumber}`}
+                  alt={`${cartCopy.qrAltPrefix} ${handoff.orderNumber}`}
                   className="order-handoff__qr-image"
                 />
               </div>
               <div className="hero-actions">
                 <Link href={handoff.whatsappUrl} className="button-secondary" target="_blank" rel="noreferrer">
-                  Open on this computer
+                  {cartCopy.openPcLabel}
                 </Link>
                 <Link href="/menu" className="button">
-                  Back to menu
+                  {cartCopy.backToMenuLabel}
                 </Link>
               </div>
             </motion.div>
@@ -385,29 +393,29 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
               <div className="summary-list summary-list--spaced">
                 <div className="notice" data-tone="success">
                   <CheckCircle2 size={16} />
-                  The order is saved and ready to send.
+                  {cartCopy.orderSavedLabel}
                 </div>
                 <div className="summary-row">
-                  <span className="summary-row__label">Order number</span>
+                  <span className="summary-row__label">{cartCopy.orderNumberLabel}</span>
                   <span className="summary-row__value">#{handoff.orderNumber}</span>
                 </div>
                 <div className="summary-row">
-                  <span className="summary-row__label">Next step</span>
-                  <span className="summary-row__value">Scan the QR or open the link</span>
+                  <span className="summary-row__label">{cartCopy.nextStepLabel}</span>
+                  <span className="summary-row__value">{cartCopy.nextStepCopy}</span>
                 </div>
                 <div className="hero-actions">
                   <Link href={handoff.whatsappUrl} className="button" target="_blank" rel="noreferrer">
-                    Open on this computer
+                    {cartCopy.openPcLabel}
                   </Link>
                   <Link href="/status" className="button-secondary">
-                    View status
+                    {cartCopy.viewLiveStatusLabel}
                   </Link>
                 </div>
               </div>
             ) : (
               <>
-                <div className="section__eyebrow">Order summary</div>
-                <div className="section__title checkout-summary__title">Cart items</div>
+                <div className="section__eyebrow">{cartCopy.orderSummaryTitle}</div>
+                <div className="section__title checkout-summary__title">{cartCopy.cartItemsLabel}</div>
                 <div className="summary-list summary-list--spaced">
                   <AnimatePresence initial={false}>
                     {items.length ? (
@@ -428,8 +436,14 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
                             <div className="stack cart-line__content">
                               <span className="summary-row__label">{item.name}</span>
                               <span className="footnote">
-                                {item.kind.charAt(0).toUpperCase() + item.kind.slice(1)}
-                                {item.size ? ` - ${getSizeLabel(item.size)}` : ''}
+                                {item.kind === 'pizza'
+                                  ? cartCopy.itemKindPizzaLabel
+                                  : item.kind === 'addon'
+                                    ? cartCopy.itemKindAddonLabel
+                                    : item.kind === 'extra'
+                                      ? cartCopy.itemKindExtraLabel
+                                      : cartCopy.itemKindDessertLabel}
+                                {item.size ? ` - ${getSizeLabel(bundle, item.size)}` : ''}
                               </span>
                               <div className="menu-tabs cart-line__controls">
                                 <motion.button
@@ -469,7 +483,7 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
                                     exit={prefersReducedMotion ? undefined : { opacity: 0 }}
                                     transition={{ duration: 0.2 }}
                                   >
-                                    Remove
+                                    {cartCopy.removeLabel}
                                   </motion.span>
                                 </motion.button>
                               </div>
@@ -495,7 +509,7 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
                     transition={{ duration: 0.4, delay: 0 * 0.06, ease: [0.16, 1, 0.3, 1] }}
                   >
                     <div className="summary-row">
-                      <span className="summary-row__label">Subtotal</span>
+                      <span className="summary-row__label">{cartCopy.subtotalLabel}</span>
                       <span className="summary-row__value">{money(total)}</span>
                     </div>
                   </motion.div>
@@ -505,7 +519,7 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
                     transition={{ duration: 0.4, delay: 1 * 0.06, ease: [0.16, 1, 0.3, 1] }}
                   >
                     <div className="summary-row">
-                      <span className="summary-row__label">Items</span>
+                      <span className="summary-row__label">{cartCopy.itemsLabel}</span>
                       <span className="summary-row__value">{totalItems}</span>
                     </div>
                   </motion.div>

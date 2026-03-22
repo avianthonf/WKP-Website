@@ -50,10 +50,10 @@ export default async function MenuItemPage({ params }: { params: Promise<{ slug:
     pizza ? 'Medium price shown here. Use the size ladder for the full range.' : 'Pulled live from the menu.'
   );
   const orderingPaused = bundle.maintenanceMode || !bundle.isOpen;
-
   return (
     <StorefrontShell bundle={bundle}>
-      <MenuItemDetailClient
+    <MenuItemDetailClient
+        bundle={bundle}
         eyebrow={detailEyebrow}
         title={title}
         heroCopy={getConfigValue(bundle.config, 'menu_detail_hero_copy', description || detailCopy)}
@@ -63,8 +63,20 @@ export default async function MenuItemPage({ params }: { params: Promise<{ slug:
         priceTitle={priceTitle}
         priceCopy={priceCopy}
         statusTitle={statusTitle}
-        statusText={pizza?.is_sold_out || addon?.is_sold_out || dessert?.is_sold_out || extra?.is_sold_out ? 'Sold out' : 'Available'}
-        statusCopy={orderingPaused ? 'Ordering is paused while the storefront is closed or in maintenance mode.' : statusCopy}
+        statusText={
+          pizza?.is_sold_out || addon?.is_sold_out || dessert?.is_sold_out || extra?.is_sold_out
+            ? getConfigValue(bundle.config, 'menu_detail_sold_out_label', 'Sold out')
+            : getConfigValue(bundle.config, 'menu_detail_available_label', 'Available')
+        }
+        statusCopy={
+          orderingPaused
+            ? getConfigValue(
+                bundle.config,
+                'menu_detail_paused_copy',
+                'Ordering is paused while the storefront is closed or in maintenance mode.'
+              )
+            : statusCopy
+        }
         actionTitle={actionTitle}
         actionCopy={actionCopy}
         notice={getConfigValue(
@@ -72,6 +84,20 @@ export default async function MenuItemPage({ params }: { params: Promise<{ slug:
           'menu_detail_notice',
           pizza ? 'Customizable pizza with live toppings and sizes.' : 'Single menu item with one-tap add to cart.'
         )}
+        backToMenuLabel={getConfigValue(bundle.config, 'menu_detail_back_to_menu_label', 'Back to menu')}
+        viewStatusLabel={getConfigValue(bundle.config, 'menu_detail_view_status_label', 'View live status')}
+        viewCartLabel={getConfigValue(bundle.config, 'menu_detail_view_cart_label', 'View cart')}
+        orderingPausedLabel={getConfigValue(
+          bundle.config,
+          'menu_detail_ordering_paused_label',
+          'Ordering is paused until the store reopens.'
+        )}
+        livePriceLabel={getConfigValue(bundle.config, 'menu_detail_live_price_label', 'Live price')}
+        readyToAddLabel={getConfigValue(bundle.config, 'menu_detail_ready_to_add_label', 'Ready to add')}
+        oneTapLabel={getConfigValue(bundle.config, 'menu_detail_one_tap_label', 'One tap to cart')}
+        addFromMenuLabel={getConfigValue(bundle.config, 'menu_detail_add_from_menu_label', 'Add from menu')}
+        statusFirstLabel={getConfigValue(bundle.config, 'menu_detail_status_first_label', 'Status first')}
+        fastLaneLabel={getConfigValue(bundle.config, 'menu_detail_fast_lane_label', 'Fast lane')}
         toppings={pizza ? getPizzaDisplayToppings(pizza) : []}
         isPizza={Boolean(pizza)}
         orderingPaused={orderingPaused}

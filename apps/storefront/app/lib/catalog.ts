@@ -230,21 +230,293 @@ export type StorefrontState = {
   };
 };
 
+export function getShellCopy(bundle: StorefrontBundle) {
+  return {
+    primaryNavLabel: getConfigValue(bundle.config, 'shell_primary_nav_label', 'Primary'),
+    openNavigationLabel: getConfigValue(bundle.config, 'shell_open_navigation_label', 'Open navigation menu'),
+    closeNavigationLabel: getConfigValue(bundle.config, 'shell_close_navigation_label', 'Close navigation menu'),
+    mobileNavigationLabel: getConfigValue(bundle.config, 'shell_mobile_navigation_label', 'Mobile navigation'),
+    orderChatLabel: getConfigValue(bundle.config, 'shell_order_chat_label', 'Order chat'),
+    locationLabel: getConfigValue(bundle.config, 'shell_location_label', 'Location'),
+    hoursLabel: getConfigValue(bundle.config, 'shell_hours_label', 'Hours'),
+    orderLabel: getConfigValue(bundle.config, 'shell_order_label', 'Order'),
+    syncLabel: getConfigValue(bundle.config, 'shell_sync_label', 'Control room sync'),
+    liveLabel: getConfigValue(bundle.config, 'shell_live_label', 'Live'),
+    pausedLabel: getConfigValue(bundle.config, 'shell_paused_label', 'Paused'),
+    cartAriaLabelTemplate: getConfigValue(bundle.config, 'shell_cart_aria_label_template', 'Cart with {count} items'),
+  };
+}
+
+export function getMenuBrowserCopy(bundle: StorefrontBundle) {
+  return {
+    heroEyebrow: getConfigValue(bundle.config, 'menu_hero_eyebrow', "Tonight's selection"),
+    whatsShowingLabel: getConfigValue(bundle.config, 'menu_whats_showing_label', "What's showing"),
+    whatsShowingCopy: getConfigValue(bundle.config, 'menu_whats_showing_copy', 'A live selection from the kitchen.'),
+    pizzaMoodsLabel: getConfigValue(bundle.config, 'menu_pizza_moods_label', 'Pizza moods'),
+    pizzaMoodsCopy: getConfigValue(bundle.config, 'menu_pizza_moods_copy', 'Each one is a different craving lane.'),
+    freshPairingsLabel: getConfigValue(bundle.config, 'menu_fresh_pairings_label', 'Fresh pairings'),
+    freshPairingsCopy: getConfigValue(bundle.config, 'menu_fresh_pairings_copy', 'Everything that makes the pizza sing.'),
+    browseLabel: getConfigValue(bundle.config, 'menu_browse_label', 'Browse the menu'),
+    learnMoreLabel: getConfigValue(bundle.config, 'menu_learn_more_label', 'Learn more'),
+    searchLabel: getConfigValue(bundle.config, 'menu_search_label', 'Search'),
+    searchPlaceholder: getConfigValue(bundle.config, 'menu_search_placeholder', 'Search by craving, topping, or favorite'),
+    allFilterLabel: getConfigValue(bundle.config, 'menu_filter_all_label', 'All'),
+    pizzasFilterLabel: getConfigValue(bundle.config, 'menu_filter_pizzas_label', 'Pizzas'),
+    addonsFilterLabel: getConfigValue(bundle.config, 'menu_filter_addons_label', 'Addons'),
+    extrasFilterLabel: getConfigValue(bundle.config, 'menu_filter_extras_label', 'Extras'),
+    dessertsFilterLabel: getConfigValue(bundle.config, 'menu_filter_desserts_label', 'Desserts'),
+    menuSectionEyebrow: getConfigValue(bundle.config, 'menu_section_eyebrow', 'Browse the menu'),
+    sectionTitle: getConfigValue(bundle.config, 'menu_section_title', 'Find the thing that feels right'),
+    sectionCopy: getConfigValue(
+      bundle.config,
+      'menu_section_copy',
+      'Search the live menu and add items with one tap. Pizzas can also be customized in the builder.'
+    ),
+    countsTemplate: getConfigValue(
+      bundle.config,
+      'menu_counts_template',
+      '{pizzas} pizzas, {addons} addons, {extras} extras, {desserts} desserts'
+    ),
+    emptyMatchesTitle: getConfigValue(bundle.config, 'menu_empty_matches_title', 'No matches found'),
+    emptyMatchesBody: getConfigValue(bundle.config, 'menu_empty_matches_body', 'Try a different search term or clear the filters.'),
+    emptyNoneTitle: getConfigValue(bundle.config, 'menu_empty_none_title', 'No menu items yet'),
+    emptyOpenBody: getConfigValue(
+      bundle.config,
+      'menu_empty_open_body',
+      'The menu is waiting for the kitchen to publish items.'
+    ),
+    emptyClosedBody: getConfigValue(
+      bundle.config,
+      'menu_empty_closed_body',
+      'The menu is live, but ordering is paused until the store reopens.'
+    ),
+    emptyOpenAction: getConfigValue(bundle.config, 'menu_empty_open_action', 'Open builder'),
+    emptyClosedAction: getConfigValue(bundle.config, 'menu_empty_closed_action', 'View live status'),
+    heroOpenBuilderLabel: getConfigValue(bundle.config, 'menu_hero_open_builder_label', 'Open Builder'),
+    heroViewStatusLabel: getConfigValue(bundle.config, 'menu_hero_view_status_label', 'View live status'),
+    heroContactLabel: getConfigValue(bundle.config, 'menu_hero_contact_label', 'Contact us'),
+    heroReviewCartLabel: getConfigValue(bundle.config, 'menu_hero_review_cart_label', 'Review Cart'),
+    heroPreviewFallbackTitle: getConfigValue(bundle.config, 'menu_hero_preview_fallback_title', 'Chef Special'),
+    heroPreviewFallbackCopy: getConfigValue(
+      bundle.config,
+      'menu_hero_preview_fallback_copy',
+      'A signature bite from the kitchen right now.'
+    ),
+    heroPreviewFallbackAlt: getConfigValue(bundle.config, 'menu_hero_preview_fallback_alt', 'Live menu'),
+    pairingsEyebrow: getConfigValue(bundle.config, 'menu_pairings_eyebrow', 'Pairings'),
+    pairingsTitle: getConfigValue(bundle.config, 'menu_pairings_title', 'The little things that complete the bite'),
+    pairingsCopy: getConfigValue(
+      bundle.config,
+      'menu_pairings_copy',
+      'Toppings are shown as a live ingredient library so customers can see what rounds out the menu.'
+    ),
+    pairingsNoneTitle: getConfigValue(bundle.config, 'menu_pairings_none_title', 'No pairings yet'),
+    pairingsNoneCopy: getConfigValue(
+      bundle.config,
+      'menu_pairings_none_copy',
+      'The kitchen has not published pairings yet. Once they do, they will appear here.'
+    ),
+    vegIngredientLabel: getConfigValue(bundle.config, 'menu_ingredient_veg_label', 'Vegetarian ingredient'),
+    nonVegIngredientLabel: getConfigValue(bundle.config, 'menu_ingredient_nonveg_label', 'Non-veg ingredient'),
+    cardBestsellerLabel: getConfigValue(bundle.config, 'menu_card_bestseller_label', 'Bestseller'),
+    cardNewLabel: getConfigValue(bundle.config, 'menu_card_new_label', 'New'),
+    cardSpicyLabel: getConfigValue(bundle.config, 'menu_card_spicy_label', 'Spicy'),
+    cardSoldOutLabel: getConfigValue(bundle.config, 'menu_card_soldout_label', 'Sold out'),
+    cardVegLabel: getConfigValue(bundle.config, 'menu_card_veg_label', 'Veg'),
+    cardNonVegLabel: getConfigValue(bundle.config, 'menu_card_nonveg_label', 'Non-veg'),
+    cardSelectedPriceLabel: getConfigValue(bundle.config, 'menu_card_selected_price_label', 'Selected price'),
+    cardPriceNoteTemplate: getConfigValue(bundle.config, 'menu_card_price_note_template', '{size} size, ready to add'),
+    cardPickSizeLabel: getConfigValue(bundle.config, 'menu_card_pick_size_label', 'Pick a size'),
+    cardInCartLabel: getConfigValue(bundle.config, 'menu_card_in_cart_label', 'In cart'),
+    cardDetailsLabel: getConfigValue(bundle.config, 'menu_card_details_label', 'Details'),
+    cardAddTemplate: getConfigValue(bundle.config, 'menu_card_add_template', 'Add {size}'),
+    cardAddToCartLabel: getConfigValue(bundle.config, 'menu_card_add_to_cart_label', 'Add to cart'),
+    cardHouseRecipeCopy: getConfigValue(bundle.config, 'menu_card_house_recipe_copy', 'House recipe from the live menu.'),
+    cardAddonCopy: getConfigValue(bundle.config, 'menu_card_addon_copy', 'Flat-price side item'),
+    cardExtraCopy: getConfigValue(bundle.config, 'menu_card_extra_copy', 'Sized topping add-on'),
+    cardDessertCopy: getConfigValue(bundle.config, 'menu_card_dessert_copy', 'Sweet finish to the meal'),
+    cardAddonKindLabel: getConfigValue(bundle.config, 'menu_card_addon_kind_label', 'Addon'),
+    cardExtraKindLabel: getConfigValue(bundle.config, 'menu_card_extra_kind_label', 'Extra'),
+    cardDessertKindLabel: getConfigValue(bundle.config, 'menu_card_dessert_kind_label', 'Dessert'),
+    cardOrderingPausedLabel: getConfigValue(bundle.config, 'menu_card_ordering_paused_label', 'Ordering paused'),
+    cardCartAriaLabel: getConfigValue(bundle.config, 'menu_card_cart_aria_label', 'Pizza sizes already in cart'),
+  };
+}
+
+export function getMenuDetailCopy(bundle: StorefrontBundle) {
+  return {
+    backToMenuLabel: getConfigValue(bundle.config, 'menu_detail_back_to_menu_label', 'Back to menu'),
+    viewStatusLabel: getConfigValue(bundle.config, 'menu_detail_view_status_label', 'View live status'),
+    viewCartLabel: getConfigValue(bundle.config, 'menu_detail_view_cart_label', 'View cart'),
+    livePriceLabel: getConfigValue(bundle.config, 'menu_detail_live_price_label', 'Live price'),
+    readyToAddLabel: getConfigValue(bundle.config, 'menu_detail_ready_to_add_label', 'Ready to add'),
+    oneTapLabel: getConfigValue(bundle.config, 'menu_detail_one_tap_label', 'One tap to cart'),
+    addFromMenuLabel: getConfigValue(bundle.config, 'menu_detail_add_from_menu_label', 'Add from menu'),
+    orderingPausedLabel: getConfigValue(bundle.config, 'menu_detail_ordering_paused_label', 'Ordering paused'),
+    statusPausedLabel: getConfigValue(bundle.config, 'menu_detail_status_paused_label', 'Ordering paused while the storefront is closed or in maintenance mode.'),
+  };
+}
+
+export function getBuilderCopy(bundle: StorefrontBundle) {
+  return {
+    eyebrow: getConfigValue(bundle.config, 'builder_eyebrow', 'Pizza builder'),
+    noPizzasTitle: getConfigValue(bundle.config, 'builder_no_pizzas_title', 'No pizzas are currently available.'),
+    noPizzasBody: getConfigValue(bundle.config, 'builder_no_pizzas_body', 'The menu is empty or all pizzas are disabled.'),
+    viewStatusLabel: getConfigValue(bundle.config, 'builder_view_status_label', 'View live status'),
+    backToMenuLabel: getConfigValue(bundle.config, 'builder_back_to_menu_label', 'Back to menu'),
+    addCustomLabel: getConfigValue(bundle.config, 'builder_add_custom_label', 'Add custom pizza'),
+    noticeCopy: getConfigValue(
+      bundle.config,
+      'builder_notice_copy',
+      'Builder selections flow directly into the cart and order handoff.'
+    ),
+    pausedNoticeCopy: getConfigValue(
+      bundle.config,
+      'builder_paused_notice_copy',
+      'The storefront is paused, so builder changes will wait until the store reopens.'
+    ),
+    basePizzaLabel: getConfigValue(bundle.config, 'builder_base_pizza_label', 'Base pizza'),
+    sizeLabel: getConfigValue(bundle.config, 'builder_size_label', 'Size'),
+    quantityLabel: getConfigValue(bundle.config, 'builder_quantity_label', 'Quantity'),
+    extrasLabel: getConfigValue(bundle.config, 'builder_extras_label', 'Extras'),
+    notesLabel: getConfigValue(bundle.config, 'builder_notes_label', 'Notes'),
+    notesPlaceholder: getConfigValue(
+      bundle.config,
+      'builder_notes_placeholder',
+      'Sauce preference, crust notes, or any special instruction'
+    ),
+    previewCopy: getConfigValue(bundle.config, 'builder_preview_copy', 'A live recipe from the menu.'),
+    summaryTitle: getConfigValue(bundle.config, 'builder_summary_title', 'Live summary'),
+    summaryCopy: getConfigValue(
+      bundle.config,
+      'builder_summary_copy',
+      'This is the exact payload that lands in the cart and final handoff.'
+    ),
+    summaryBaseLabel: getConfigValue(bundle.config, 'builder_summary_base_label', 'Base pizza'),
+    summarySizeLabel: getConfigValue(bundle.config, 'builder_summary_size_label', 'Size'),
+    summaryExtrasLabel: getConfigValue(bundle.config, 'builder_summary_extras_label', 'Extras'),
+    summaryNoneLabel: getConfigValue(bundle.config, 'builder_summary_none_label', 'None'),
+    summaryQuantityLabel: getConfigValue(bundle.config, 'builder_summary_quantity_label', 'Quantity'),
+    summaryTotalLabel: getConfigValue(bundle.config, 'builder_summary_total_label', 'Total'),
+    addToCartLabel: getConfigValue(bundle.config, 'builder_add_to_cart_label', 'Add to cart'),
+  };
+}
+
+export function getCartCopy(bundle: StorefrontBundle) {
+  return {
+    openOrderChatLabel: getConfigValue(bundle.config, 'cart_open_order_chat_label', 'Open order chat'),
+    viewLiveStatusLabel: getConfigValue(bundle.config, 'cart_view_live_status_label', 'View live status'),
+    continueBrowsingLabel: getConfigValue(bundle.config, 'cart_continue_browsing_label', 'Continue browsing'),
+    customerNameLabel: getConfigValue(bundle.config, 'cart_customer_name_label', 'Name'),
+    customerPhoneLabel: getConfigValue(bundle.config, 'cart_customer_phone_label', 'Phone'),
+    customerNamePlaceholder: getConfigValue(bundle.config, 'cart_customer_name_placeholder', 'Customer name'),
+    customerPhonePlaceholder: getConfigValue(bundle.config, 'cart_customer_phone_placeholder', '+91 ...'),
+    fulfillmentLabel: getConfigValue(bundle.config, 'cart_fulfillment_label', 'Fulfillment'),
+    deliveryOptionLabel: getConfigValue(bundle.config, 'cart_delivery_option_label', 'Delivery'),
+    pickupOptionLabel: getConfigValue(bundle.config, 'cart_pickup_option_label', 'Pickup'),
+    deliveryAddressLabel: getConfigValue(bundle.config, 'cart_delivery_address_label', 'Delivery address'),
+    pickupNoteLabel: getConfigValue(bundle.config, 'cart_pickup_note_label', 'Pickup note'),
+    deliveryAddressPlaceholder: getConfigValue(
+      bundle.config,
+      'cart_delivery_address_placeholder',
+      'House, street, landmark'
+    ),
+    pickupNotePlaceholder: getConfigValue(bundle.config, 'cart_pickup_note_placeholder', 'Pickup timing or note'),
+    notesLabel: getConfigValue(bundle.config, 'cart_notes_label', 'Notes'),
+    notesPlaceholder: getConfigValue(
+      bundle.config,
+      'cart_notes_placeholder',
+      'Allergies, sauce preference, or timing notes'
+    ),
+    placeOrderLabel: getConfigValue(bundle.config, 'cart_place_order_label', 'Place order'),
+    sendingLabel: getConfigValue(bundle.config, 'cart_sending_label', 'Sending...'),
+    emptySummaryTitle: getConfigValue(bundle.config, 'cart_empty_summary_title', 'Your cart is empty'),
+    emptySummaryCopy: getConfigValue(
+      bundle.config,
+      'cart_empty_summary_copy',
+      'Add items from Menu or Build first.'
+    ),
+    orderSummaryTitle: getConfigValue(bundle.config, 'cart_order_summary_title', 'Order summary'),
+    cartItemsLabel: getConfigValue(bundle.config, 'cart_items_label', 'Cart items'),
+    subtotalLabel: getConfigValue(bundle.config, 'cart_subtotal_label', 'Subtotal'),
+    itemsLabel: getConfigValue(bundle.config, 'cart_items_count_label', 'Items'),
+    removeLabel: getConfigValue(bundle.config, 'cart_remove_label', 'Remove'),
+    itemKindPizzaLabel: getConfigValue(bundle.config, 'cart_item_kind_pizza_label', 'Pizza'),
+    itemKindAddonLabel: getConfigValue(bundle.config, 'cart_item_kind_addon_label', 'Addon'),
+    itemKindExtraLabel: getConfigValue(bundle.config, 'cart_item_kind_extra_label', 'Extra'),
+    itemKindDessertLabel: getConfigValue(bundle.config, 'cart_item_kind_dessert_label', 'Dessert'),
+    orderSavedLabel: getConfigValue(bundle.config, 'cart_order_saved_label', 'The order is saved and ready to send.'),
+    orderNumberLabel: getConfigValue(bundle.config, 'cart_order_number_label', 'Order number'),
+    nextStepLabel: getConfigValue(bundle.config, 'cart_next_step_label', 'Next step'),
+    nextStepCopy: getConfigValue(bundle.config, 'cart_next_step_copy', 'Scan the QR or open the link'),
+    scanQrLabel: getConfigValue(bundle.config, 'cart_scan_qr_label', 'Scan the QR code with your phone to open the exact order message, then send it from there.'),
+    openPcLabel: getConfigValue(bundle.config, 'cart_open_pc_label', 'Open on this computer'),
+    backToMenuLabel: getConfigValue(bundle.config, 'cart_back_to_menu_label', 'Back to menu'),
+    viewStatusLabel: getConfigValue(bundle.config, 'cart_view_status_label', 'View status'),
+    handoffTitle: getConfigValue(bundle.config, 'cart_handoff_title', 'Send from your phone'),
+    handoffOrderPrefix: getConfigValue(bundle.config, 'cart_handoff_order_prefix', 'Order #'),
+    cartSizeSummaryLabel: getConfigValue(bundle.config, 'cart_size_summary_label', 'Pizza sizes in cart'),
+    handoffReadyCopy: getConfigValue(bundle.config, 'cart_handoff_ready_copy', 'The order is saved and ready to send.'),
+    handoffOpenPcCopy: getConfigValue(bundle.config, 'cart_handoff_open_pc_copy', 'Open on this computer'),
+    orderSavedCopy: getConfigValue(
+      bundle.config,
+      'cart_order_saved_copy',
+      'The order is saved for kitchen tracking and reporting before the handoff opens.'
+    ),
+    previewImageAlt: getConfigValue(bundle.config, 'cart_preview_image_alt', 'Live menu preview'),
+    qrAltPrefix: getConfigValue(bundle.config, 'cart_qr_alt_prefix', 'QR code for order'),
+    minimumNotSetLabel: getConfigValue(bundle.config, 'cart_minimum_not_set_label', 'not set'),
+    pizzaSummaryTemplate: getConfigValue(
+      bundle.config,
+      'cart_pizza_summary_template',
+      '{count} pizza{plural} across {sizes}'
+    ),
+    pausedMaintenanceMessage: getConfigValue(
+      bundle.config,
+      'cart_paused_maintenance_message',
+      'Orders are paused while the storefront is in maintenance mode.'
+    ),
+    pausedClosedMessage: getConfigValue(
+      bundle.config,
+      'cart_paused_closed_message',
+      'Orders are currently closed. Please try again when the store is open.'
+    ),
+    missingCustomerMessage: getConfigValue(
+      bundle.config,
+      'cart_missing_customer_message',
+      'Please fill the customer details before sending the order.'
+    ),
+    missingAddressMessage: getConfigValue(
+      bundle.config,
+      'cart_missing_address_message',
+      'Please add a delivery address or switch to pickup.'
+    ),
+    generalErrorMessage: getConfigValue(
+      bundle.config,
+      'cart_general_error_message',
+      'We could not place the order.'
+    ),
+  };
+}
+
 export function getStorefrontState(bundle: StorefrontBundle): StorefrontState {
   if (bundle.maintenanceMode) {
     return {
       mode: 'maintenance',
       tone: 'warning',
-      label: 'Maintenance mode',
-      summary:
-        'The storefront is being updated. Browsing still works, but checkout is paused until maintenance ends.',
+      label: getConfigValue(bundle.config, 'storefront_maintenance_label', 'Maintenance mode'),
+      summary: getConfigValue(
+        bundle.config,
+        'storefront_maintenance_summary',
+        'The storefront is being updated. Browsing still works, but checkout is paused until maintenance ends.'
+      ),
       primaryAction: {
         href: '/status',
-        label: 'View status',
+        label: getConfigValue(bundle.config, 'storefront_maintenance_primary_label', 'View status'),
       },
       secondaryAction: {
         href: '/contact',
-        label: 'Contact us',
+        label: getConfigValue(bundle.config, 'storefront_maintenance_secondary_label', 'Contact us'),
       },
     };
   }
@@ -253,16 +525,19 @@ export function getStorefrontState(bundle: StorefrontBundle): StorefrontState {
     return {
       mode: 'closed',
       tone: 'danger',
-      label: 'Closed',
-      summary:
-        'Orders are closed right now. Browse the menu and check the live status for the next open window.',
+      label: getConfigValue(bundle.config, 'storefront_closed_label', 'Closed'),
+      summary: getConfigValue(
+        bundle.config,
+        'storefront_closed_summary',
+        'Orders are closed right now. Browse the menu and check the live status for the next open window.'
+      ),
       primaryAction: {
         href: '/status',
-        label: 'View status',
+        label: getConfigValue(bundle.config, 'storefront_closed_primary_label', 'View status'),
       },
       secondaryAction: {
         href: '/menu',
-        label: 'Browse menu',
+        label: getConfigValue(bundle.config, 'storefront_closed_secondary_label', 'Browse menu'),
       },
     };
   }
@@ -270,16 +545,19 @@ export function getStorefrontState(bundle: StorefrontBundle): StorefrontState {
   return {
     mode: 'open',
     tone: 'success',
-    label: 'Open now',
-    summary:
-      `Orders are live now. Checkout is available and the live window is ${getOpeningWindow(bundle)}.`,
+    label: getConfigValue(bundle.config, 'storefront_open_label', 'Open now'),
+    summary: getConfigValue(
+      bundle.config,
+      'storefront_open_summary',
+      `Orders are live now. Checkout is available and the live window is ${getOpeningWindow(bundle)}.`
+    ),
     primaryAction: {
       href: '/cart',
-      label: 'View cart',
+      label: getConfigValue(bundle.config, 'storefront_open_primary_label', 'View cart'),
     },
     secondaryAction: {
       href: '/menu',
-      label: 'Browse menu',
+      label: getConfigValue(bundle.config, 'storefront_open_secondary_label', 'Browse menu'),
     },
   };
 }
@@ -288,12 +566,20 @@ export function isOrderingPaused(bundle: StorefrontBundle) {
   return getStorefrontState(bundle).mode !== 'open';
 }
 
-export function getSizeLabel(size: Size) {
-  return size === 'small' ? 'S' : size === 'medium' ? 'M' : 'L';
+export function getSizeLabel(bundle: StorefrontBundle, size: Size) {
+  return size === 'small'
+    ? getConfigValue(bundle.config, 'size_small_label', 'S')
+    : size === 'medium'
+      ? getConfigValue(bundle.config, 'size_medium_label', 'M')
+      : getConfigValue(bundle.config, 'size_large_label', 'L');
 }
 
-export function getSizeName(size: Size) {
-  return size === 'small' ? 'Small' : size === 'medium' ? 'Medium' : 'Large';
+export function getSizeName(bundle: StorefrontBundle, size: Size) {
+  return size === 'small'
+    ? getConfigValue(bundle.config, 'size_small_name', 'Small')
+    : size === 'medium'
+      ? getConfigValue(bundle.config, 'size_medium_name', 'Medium')
+      : getConfigValue(bundle.config, 'size_large_name', 'Large');
 }
 
 export function getOrderLink(bundle: StorefrontBundle, message?: string) {

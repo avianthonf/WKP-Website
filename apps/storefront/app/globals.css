@@ -732,6 +732,11 @@ img {
   line-height: 1.65;
 }
 
+.hero-showcase__cta {
+  margin-top: 0.9rem;
+  width: fit-content;
+}
+
 .hero-showcase__stack {
   position: absolute;
   right: 1rem;

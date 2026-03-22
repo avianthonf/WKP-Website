@@ -99,15 +99,19 @@ export default async function AboutPage() {
             <div className="info-card__body">
               <MapPin size={16} /> {getAddressLine(bundle)}
             </div>
-            <div className="info-card__copy">
-              {bundle.config.google_maps_link ? (
-                <Link href={bundle.config.google_maps_link} className="footer__link" target="_blank">
-                  Open map
-                </Link>
-              ) : (
-                'Map link is set in the store settings.'
-              )}
-            </div>
+              <div className="info-card__copy">
+                {bundle.config.google_maps_link ? (
+                  <Link href={bundle.config.google_maps_link} className="footer__link" target="_blank">
+                  {getConfigValue(bundle.config, 'about_map_action_label', 'Open map')}
+                  </Link>
+                ) : (
+                  getConfigValue(
+                    bundle.config,
+                    'about_map_missing_copy',
+                    'Map link is set in the store settings.'
+                  )
+                )}
+              </div>
           </div>
         </section>
       </div>

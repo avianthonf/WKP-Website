@@ -35,7 +35,11 @@ export default async function StatusPage() {
           <div className="info-card">
             <div className="info-card__title">{getConfigValue(bundle.config, 'status_state_title', 'State')}</div>
             <div className="info-card__body">
-              {bundle.maintenanceMode ? 'Maintenance' : bundle.isOpen ? 'Open' : 'Closed'}
+              {bundle.maintenanceMode
+                ? getConfigValue(bundle.config, 'status_state_maintenance_label', 'Maintenance')
+                : bundle.isOpen
+                ? getConfigValue(bundle.config, 'status_state_open_label', 'Open')
+                : getConfigValue(bundle.config, 'status_state_closed_label', 'Closed')}
             </div>
             <div className="info-card__copy">
               {getConfigValue(bundle.config, 'status_state_copy', 'The state is live from the store settings.')}

@@ -40,7 +40,7 @@ export default async function DeliveryPage() {
                   target="_blank"
                   rel="noreferrer"
                 >
-                  Open order chat
+                  {getConfigValue(bundle.config, 'delivery_order_chat_label', 'Open order chat')}
                 </Link>
               </div>
             </div>
@@ -69,10 +69,14 @@ export default async function DeliveryPage() {
             <div className="info-card__copy">
               {bundle.config.google_maps_link ? (
                 <a href={bundle.config.google_maps_link} target="_blank" rel="noreferrer" className="footer__link">
-                  Open map
+                  {getConfigValue(bundle.config, 'delivery_map_action_label', 'Open map')}
                 </a>
               ) : (
-                'Map link is managed from the store settings.'
+                getConfigValue(
+                  bundle.config,
+                  'delivery_map_missing_copy',
+                  'Map link is managed from the store settings.'
+                )
               )}
             </div>
           </div>

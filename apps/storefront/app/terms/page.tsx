@@ -52,7 +52,7 @@ export default async function TermsPage() {
         </section>
         <section className="section">
           <Link href="/contact" className="button-secondary">
-            Contact us
+            {getConfigValue(bundle.config, 'terms_contact_us_label', 'Contact us')}
           </Link>
         </section>
       </div>

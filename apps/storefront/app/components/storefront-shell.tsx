@@ -18,6 +18,7 @@ import {
   getStoreName,
   getStorePhone,
   getStorefrontState,
+  getShellCopy,
 } from '../lib/catalog';
 import type { StorefrontBundle } from '../lib/types';
 
@@ -35,6 +36,7 @@ export function StorefrontShell({
   const notification = bundle.notifications[0];
   const navLinks = getNavLinks(bundle);
   const storefrontState = getStorefrontState(bundle);
+  const shellCopy = getShellCopy(bundle);
 
   useEffect(() => {
     document.body.style.overflow = drawerOpen ? 'hidden' : '';
@@ -118,7 +120,7 @@ export function StorefrontShell({
             </span>
           </Link>
 
-          <nav className="site-nav" aria-label="Primary">
+          <nav className="site-nav" aria-label={shellCopy.primaryNavLabel}>
             {navLinks.map((item) => (
               <Link key={item.href} href={item.href} className="site-nav__link" data-active={currentHref === item.href}>
                 {item.label}
@@ -135,7 +137,7 @@ export function StorefrontShell({
               href="/cart"
               className="shell-cart"
               data-has-items={totalItems > 0 ? "true" : "false"}
-              aria-label={`Cart with ${totalItems} items`}
+              aria-label={shellCopy.cartAriaLabelTemplate.replace('{count}', String(totalItems))}
             >
               <ShoppingBag size={17} />
               {totalItems > 0 ? <span className="shell-cart__count">{totalItems}</span> : null}
@@ -144,7 +146,7 @@ export function StorefrontShell({
               type="button"
               className="pill shell-cta menu-toggle"
               onClick={() => setDrawerOpen(true)}
-              aria-label="Open navigation menu"
+              aria-label={shellCopy.openNavigationLabel}
             >
               <Menu size={16} />
             </button>
@@ -179,7 +181,7 @@ export function StorefrontShell({
               type="button"
               className="drawer-backdrop"
               onClick={() => setDrawerOpen(false)}
-              aria-label="Close navigation menu"
+              aria-label={shellCopy.closeNavigationLabel}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -206,13 +208,13 @@ export function StorefrontShell({
                   type="button"
                   className="shell-cart"
                   onClick={() => setDrawerOpen(false)}
-                  aria-label="Close navigation menu"
+                  aria-label={shellCopy.closeNavigationLabel}
                 >
                   <X size={17} />
                 </button>
               </div>
 
-              <nav className="site-shell__drawer-nav" aria-label="Mobile navigation">
+              <nav className="site-shell__drawer-nav" aria-label={shellCopy.mobileNavigationLabel}>
                 {navLinks.map((item, index) => (
                   <motion.nav
                     key={item.href}
@@ -236,14 +238,14 @@ export function StorefrontShell({
               <div className="drawer-footer">
                 <div className="drawer-card">
                   <div className="stack">
-                    <span className="section__eyebrow">Order chat</span>
+                    <span className="section__eyebrow">{shellCopy.orderChatLabel}</span>
                     <strong>{storePhone}</strong>
                     <span className="muted">{getOpeningWindow(bundle)}</span>
                   </div>
                 </div>
                 <div className="drawer-card">
                   <div className="stack">
-                    <span className="section__eyebrow">Location</span>
+                    <span className="section__eyebrow">{shellCopy.locationLabel}</span>
                     <strong>{getAddressLine(bundle)}</strong>
                   </div>
                 </div>
@@ -305,19 +307,21 @@ export function StorefrontShell({
               <p className="footer__copy">{getFooterCopy(bundle)}</p>
             </div>
             <div>
-              <p className="section__eyebrow">Hours</p>
+              <p className="section__eyebrow">{shellCopy.hoursLabel}</p>
               <p className="footer__copy">{getOpeningWindow(bundle)}</p>
             </div>
             <div>
-              <p className="section__eyebrow">Order</p>
+              <p className="section__eyebrow">{shellCopy.orderLabel}</p>
               <p className="footer__copy">{storePhone}</p>
               <Link href={storefrontState.primaryAction.href} className="footer__link">
                 {storefrontState.primaryAction.label}
               </Link>
-              <p className="footer__copy">Control room sync: {dashboardLiveMode ? 'Live' : 'Paused'}</p>
+              <p className="footer__copy">
+                {shellCopy.syncLabel}: {dashboardLiveMode ? shellCopy.liveLabel : shellCopy.pausedLabel}
+              </p>
             </div>
             <div>
-              <p className="section__eyebrow">Location</p>
+              <p className="section__eyebrow">{shellCopy.locationLabel}</p>
               <p className="footer__copy">{getAddressLine(bundle)}</p>
             </div>
           </div>

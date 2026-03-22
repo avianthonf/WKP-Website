@@ -58,7 +58,7 @@ export default async function PrivacyPage() {
         </section>
         <section className="section">
           <Link href="/menu" className="button-secondary">
-            Back to menu
+            {getConfigValue(bundle.config, 'privacy_back_to_menu_label', 'Back to menu')}
           </Link>
         </section>
       </div>

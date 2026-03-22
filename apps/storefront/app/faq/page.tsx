@@ -60,7 +60,7 @@ export default async function FaqPage() {
 
         <section className="section">
           <Link href="/menu" className="button">
-            Back to menu
+            {getConfigValue(bundle.config, 'faq_back_to_menu_label', 'Back to menu')}
           </Link>
         </section>
       </div>

@@ -16,6 +16,7 @@ import {
   getSizeLabel,
   getSizeName,
   getStorefrontState,
+  getMenuBrowserCopy,
   money,
 } from '../lib/catalog';
 import type { Pizza, Size, StorefrontBundle } from '../lib/types';
@@ -23,14 +24,6 @@ import type { CSSProperties, MouseEvent } from 'react';
 
 type FilterKey = 'all' | 'pizza' | 'addon' | 'extra' | 'dessert';
 const pizzaSizes: Size[] = ['small', 'medium', 'large'];
-
-const filters: Array<{ key: FilterKey; label: string }> = [
-  { key: 'all', label: 'All' },
-  { key: 'pizza', label: 'Pizzas' },
-  { key: 'addon', label: 'Addons' },
-  { key: 'extra', label: 'Extras' },
-  { key: 'dessert', label: 'Desserts' },
-];
 
 export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
   const { addItem, items } = useCart();
@@ -40,6 +33,7 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
   const prefersReducedMotion = useReducedMotion();
   const storefrontState = getStorefrontState(bundle);
   const orderingPaused = storefrontState.mode !== 'open';
+  const menuCopy = getMenuBrowserCopy(bundle);
   const menuHeroTitle = getConfigValue(
     bundle.config,
     'menu_hero_title',
@@ -50,17 +44,16 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
     'menu_hero_copy',
     'Slide through the menu, find the thing that clicks, and move from discovery to checkout without breaking the mood.'
   );
-  const menuSectionTitle = getConfigValue(
-    bundle.config,
-    'menu_section_title',
-    'Find the thing that feels right'
-  );
-  const menuSectionCopy = getConfigValue(
-    bundle.config,
-    'menu_section_copy',
-    'Search the live menu and add items with one tap. Pizzas can also be customized in the builder.'
-  );
+  const menuSectionTitle = menuCopy.sectionTitle;
+  const menuSectionCopy = menuCopy.sectionCopy;
   const menuHeroImageUrl = getMenuHeroImageUrl(bundle);
+  const filters: Array<{ key: FilterKey; label: string }> = [
+    { key: 'all', label: menuCopy.allFilterLabel },
+    { key: 'pizza', label: menuCopy.pizzasFilterLabel },
+    { key: 'addon', label: menuCopy.addonsFilterLabel },
+    { key: 'extra', label: menuCopy.extrasFilterLabel },
+    { key: 'dessert', label: menuCopy.dessertsFilterLabel },
+  ];
   const activeFilterIndex = Math.max(0, filters.findIndex((item) => item.key === filter));
 
   useEffect(() => {
@@ -102,6 +95,11 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
   }, [bundle.addons, bundle.desserts, bundle.extras, bundle.pizzas, filter, query]);
 
   const totalVisible = menuItems.pizzas.length + menuItems.addons.length + menuItems.extras.length + menuItems.desserts.length;
+  const countsSummary = menuCopy.countsTemplate
+    .replace('{pizzas}', String(bundle.pizzas.length))
+    .replace('{addons}', String(bundle.addons.length))
+    .replace('{extras}', String(bundle.extras.length))
+    .replace('{desserts}', String(bundle.desserts.length));
 
   return (
     <div className="page-wrap">
@@ -110,7 +108,7 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
           <div>
             <span className="eyebrow">
               <Sparkles size={12} />
-              Tonight&apos;s selection
+              {menuCopy.heroEyebrow}
             </span>
             <h1 className="hero-title">{menuHeroTitle}</h1>
             <p className="hero-copy">{menuHeroCopy}</p>
@@ -118,10 +116,10 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
             <div className="hero-actions">
               <Link href={orderingPaused ? '/status' : '/build'} className="button">
                 <ChefHat size={16} />
-                {orderingPaused ? 'View live status' : 'Open Builder'}
+                {orderingPaused ? menuCopy.heroViewStatusLabel : menuCopy.heroOpenBuilderLabel}
               </Link>
               <Link href={orderingPaused ? '/contact' : '/cart'} className="button-secondary">
-                {orderingPaused ? 'Contact us' : 'Review Cart'}
+                {orderingPaused ? menuCopy.heroContactLabel : menuCopy.heroReviewCartLabel}
               </Link>
             </div>
 
@@ -132,9 +130,9 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
                 animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
                 transition={{ duration: 0.35, delay: 0.12 }}
               >
-                <div className="stat-card__label">What&apos;s showing</div>
+                <div className="stat-card__label">{menuCopy.whatsShowingLabel}</div>
                 <div className="stat-card__value">{totalVisible}</div>
-                <div className="stat-card__note">A live selection from the kitchen.</div>
+                <div className="stat-card__note">{menuCopy.whatsShowingCopy}</div>
               </motion.div>
               <motion.div
                 className="stat-card"
@@ -142,9 +140,9 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
                 animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
                 transition={{ duration: 0.35, delay: 0.18 }}
               >
-                <div className="stat-card__label">Pizza moods</div>
+                <div className="stat-card__label">{menuCopy.pizzaMoodsLabel}</div>
                 <div className="stat-card__value">{pizzaCategoryOptions.length}</div>
-                <div className="stat-card__note">Each one is a different craving lane.</div>
+                <div className="stat-card__note">{menuCopy.pizzaMoodsCopy}</div>
               </motion.div>
               <motion.div
                 className="stat-card"
@@ -152,9 +150,9 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
                 animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
                 transition={{ duration: 0.35, delay: 0.24 }}
               >
-                <div className="stat-card__label">Fresh pairings</div>
+                <div className="stat-card__label">{menuCopy.freshPairingsLabel}</div>
                 <div className="stat-card__value">{bundle.toppings.length}</div>
-                <div className="stat-card__note">Everything that makes the pizza sing.</div>
+                <div className="stat-card__note">{menuCopy.freshPairingsCopy}</div>
               </motion.div>
             </div>
           </div>
@@ -164,25 +162,25 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
               {menuHeroImageUrl ? (
                 <img
                   src={menuHeroImageUrl as string}
-                  alt={bundle.pizzas[0]?.name || bundle.config.store_name || 'Live menu'}
+                  alt={bundle.pizzas[0]?.name || bundle.config.store_name || menuCopy.heroPreviewFallbackAlt}
                   className="hero-preview__image"
                 />
               ) : (
                 <div className="hero-preview__image hero-preview__image--empty">
-                  <span>Live menu</span>
+                  <span>{menuCopy.heroPreviewFallbackAlt}</span>
                 </div>
               )}
               <div className="hero-preview__overlay">
-                <div className="hero-preview__title">{bundle.pizzas[0]?.name || 'Chef Special'}</div>
+                <div className="hero-preview__title">{bundle.pizzas[0]?.name || menuCopy.heroPreviewFallbackTitle}</div>
                 <p className="hero-preview__meta">
-                  {bundle.pizzas[0]?.description || 'A signature bite from the kitchen right now.'}
+                  {bundle.pizzas[0]?.description || menuCopy.heroPreviewFallbackCopy}
                 </p>
               </div>
             </div>
             <div className="content-card">
             <div className="notice">
               <Sparkles size={16} />
-              The menu flows straight into the kitchen handoff.
+              {menuCopy.sectionCopy}
             </div>
               {orderingPaused ? (
                 <div className="notice" data-tone={storefrontState.tone}>
@@ -205,7 +203,7 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
       <section className="section">
         <div className="section__header">
           <div>
-            <div className="section__eyebrow">Browse the menu</div>
+            <div className="section__eyebrow">{menuCopy.menuSectionEyebrow}</div>
             <h2 className="section__title">{menuSectionTitle}</h2>
             <p className="section__copy">{menuSectionCopy}</p>
           </div>
@@ -214,7 +212,7 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
               {storefrontState.label}
             </span>
             <span className="muted">
-              {bundle.pizzas.length} pizzas, {bundle.addons.length} addons, {bundle.extras.length} extras, {bundle.desserts.length} desserts
+              {countsSummary}
             </span>
           </div>
         </div>
@@ -223,14 +221,14 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
           <div className="stack">
             <div className="field">
               <label className="field__label" htmlFor="menu-search">
-                Search
+                {menuCopy.searchLabel}
               </label>
               <div className="search-field">
                 <Search size={16} className="search-field__icon" />
                 <input
                   id="menu-search"
                   className="field__control search-field__input"
-                  placeholder="Search by craving, topping, or favorite"
+                  placeholder={menuCopy.searchPlaceholder}
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
                 />
@@ -271,6 +269,8 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
                 <PizzaCard
                   key={pizza.id}
                   index={index}
+                  bundle={bundle}
+                  copy={menuCopy}
                   pizza={pizza}
                   disabled={orderingPaused || pizza.is_sold_out}
                   cartCounts={pizzaCartCounts.get(pizza.id) || { small: 0, medium: 0, large: 0 }}
@@ -292,10 +292,11 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
                 <SimpleCard
                   key={addon.id}
                   index={index}
+                  copy={menuCopy}
                   title={addon.name}
-                  description={addon.description || 'Flat-price side item'}
+                  description={addon.description || menuCopy.cardAddonCopy}
                   price={getAddonPrice(addon)}
-                  kindLabel="Addon"
+                  kindLabel={menuCopy.cardAddonKindLabel}
                   tone="warning"
                   href={`/menu/${addon.slug}`}
                   disabled={orderingPaused || addon.is_sold_out}
@@ -315,10 +316,11 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
                 <SimpleCard
                   key={extra.id}
                   index={index}
+                  copy={menuCopy}
                   title={extra.name}
-                  description="Sized topping add-on"
+                  description={menuCopy.cardExtraCopy}
                   price={getExtraPrice(extra, 'medium')}
-                  kindLabel="Extra"
+                  kindLabel={menuCopy.cardExtraKindLabel}
                   tone="success"
                   href={`/menu/${extra.slug}`}
                   disabled={orderingPaused || extra.is_sold_out}
@@ -338,10 +340,11 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
                 <SimpleCard
                   key={dessert.id}
                   index={index}
+                  copy={menuCopy}
                   title={dessert.name}
-                  description={dessert.description || 'Sweet finish to the meal'}
+                  description={dessert.description || menuCopy.cardDessertCopy}
                   price={getDessertPrice(dessert)}
-                  kindLabel="Dessert"
+                  kindLabel={menuCopy.cardDessertKindLabel}
                   tone="danger"
                   href={`/menu/${dessert.slug}`}
                   disabled={orderingPaused || dessert.is_sold_out}
@@ -359,16 +362,17 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
 
               {totalVisible === 0 ? (
                 <EmptyMenuState
-                  title={query ? 'No matches found' : 'No menu items yet'}
+                  copy={menuCopy}
+                  title={query ? menuCopy.emptyMatchesTitle : menuCopy.emptyNoneTitle}
                   body={
                     query
-                      ? 'Try a different search term or clear the filters.'
+                      ? menuCopy.emptyMatchesBody
                       : orderingPaused
-                      ? 'The menu is live, but ordering is paused until the store reopens.'
-                      : 'The menu is waiting for the kitchen to publish items.'
+                      ? menuCopy.emptyClosedBody
+                      : menuCopy.emptyOpenBody
                   }
                   actionHref={orderingPaused ? '/status' : '/build'}
-                  actionLabel={orderingPaused ? 'View live status' : 'Open builder'}
+                  actionLabel={orderingPaused ? menuCopy.emptyClosedAction : menuCopy.emptyOpenAction}
                 />
               ) : null}
             </div>
@@ -379,11 +383,9 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
       <section className="section">
         <div className="section__header">
           <div>
-            <div className="section__eyebrow">Pairings</div>
-            <h2 className="section__title">The little things that complete the bite</h2>
-            <p className="section__copy">
-              Toppings are shown as a live ingredient library so customers can see what rounds out the menu.
-            </p>
+            <div className="section__eyebrow">{menuCopy.pairingsEyebrow}</div>
+            <h2 className="section__title">{menuCopy.pairingsTitle}</h2>
+            <p className="section__copy">{menuCopy.pairingsCopy}</p>
           </div>
         </div>
         <div className="menu-grid">
@@ -400,7 +402,9 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
               >
                 <div className="info-card__title">{topping.category}</div>
                 <div className="info-card__body">{topping.name}</div>
-                <div className="info-card__copy">{topping.is_veg ? 'Vegetarian ingredient' : 'Non-veg ingredient'}</div>
+                <div className="info-card__copy">
+                  {topping.is_veg ? menuCopy.vegIngredientLabel : menuCopy.nonVegIngredientLabel}
+                </div>
               </motion.div>
             ))
           ) : (
@@ -411,10 +415,8 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
               whileInView={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.35 }}
             >
-              <div className="info-card__title">No pairings yet</div>
-              <div className="info-card__copy">
-                The kitchen has not published pairings yet. Once they do, they will appear here.
-              </div>
+              <div className="info-card__title">{menuCopy.pairingsNoneTitle}</div>
+              <div className="info-card__copy">{menuCopy.pairingsNoneCopy}</div>
             </motion.div>
           )}
         </div>
@@ -424,12 +426,16 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
 }
 
 function PizzaCard({
+  bundle,
+  copy,
   pizza,
   disabled,
   cartCounts,
   onAdd,
   index,
 }: {
+  bundle: StorefrontBundle;
+  copy: ReturnType<typeof getMenuBrowserCopy>;
   pizza: Pizza;
   disabled: boolean;
   cartCounts: Record<Size, number>;
@@ -495,7 +501,7 @@ function PizzaCard({
           } as CSSProperties
         }
       >
-        <div className="product-card__media">
+          <div className="product-card__media">
           {pizza.image_url ? (
             <motion.img
               src={pizza.image_url}
@@ -508,10 +514,10 @@ function PizzaCard({
           ) : null}
           <div className="product-card__media-overlay">
             <div className="tag-list">
-              {pizza.is_bestseller ? <span className="tag tag--accent">Bestseller</span> : null}
-              {pizza.is_new ? <span className="tag">New</span> : null}
-              {pizza.is_spicy ? <span className="tag">Spicy</span> : null}
-              {pizza.is_sold_out ? <span className="tag">Sold out</span> : null}
+              {pizza.is_bestseller ? <span className="tag tag--accent">{copy.cardBestsellerLabel}</span> : null}
+              {pizza.is_new ? <span className="tag">{copy.cardNewLabel}</span> : null}
+              {pizza.is_spicy ? <span className="tag">{copy.cardSpicyLabel}</span> : null}
+              {pizza.is_sold_out ? <span className="tag">{copy.cardSoldOutLabel}</span> : null}
             </div>
           </div>
         </div>
@@ -519,10 +525,10 @@ function PizzaCard({
           <div className="product-card__title-row">
             <div>
               <div className="product-card__title">{pizza.name}</div>
-              <div className="product-card__meta">{pizza.description || 'House recipe from the live menu.'}</div>
+              <div className="product-card__meta">{pizza.description || copy.cardHouseRecipeCopy}</div>
             </div>
             <span className="badge" data-tone={pizza.is_veg ? 'success' : 'neutral'}>
-              {pizza.is_veg ? 'Veg' : 'Non-veg'}
+              {pizza.is_veg ? copy.cardVegLabel : copy.cardNonVegLabel}
             </span>
           </div>
           <div className="tag-list">
@@ -534,12 +540,12 @@ function PizzaCard({
             ))}
           </div>
           <div className="pizza-card__price-panel">
-            <span className="pizza-card__eyebrow">Selected price</span>
+            <span className="pizza-card__eyebrow">{copy.cardSelectedPriceLabel}</span>
             <div className="pizza-card__price-value">{money(price)}</div>
-            <div className="pizza-card__price-note">{getSizeName(size)} size, ready to add</div>
+            <div className="pizza-card__price-note">{copy.cardPriceNoteTemplate.replace('{size}', getSizeName(bundle, size))}</div>
           </div>
           <div className="pizza-card__size-panel">
-            <span className="pizza-card__section-label">Pick a size</span>
+            <span className="pizza-card__section-label">{copy.cardPickSizeLabel}</span>
             <div className="size-tabs">
               {pizzaSizes.map((item) => (
                 <button
@@ -549,18 +555,18 @@ function PizzaCard({
                   data-active={size === item}
                   onClick={() => setSize(item)}
                 >
-                  <span className="size-tab__label">{getSizeLabel(item)}</span>
-                  <span className="size-tab__meta">{getSizeName(item)}</span>
+                  <span className="size-tab__label">{getSizeLabel(bundle, item)}</span>
+                  <span className="size-tab__meta">{getSizeName(bundle, item)}</span>
                 </button>
               ))}
             </div>
-            <div className="pizza-card__cart-mix" aria-label="Pizza sizes already in cart">
-              <span className="pizza-card__section-label">In cart</span>
+            <div className="pizza-card__cart-mix" aria-label={copy.cardCartAriaLabel}>
+              <span className="pizza-card__section-label">{copy.cardInCartLabel}</span>
               <div className="pizza-card__cart-pills">
                 {pizzaSizes.map((item) => (
                   <span key={item} className="cart-size-pill">
                     <strong>{cartCounts[item]}</strong>
-                    <span>{getSizeLabel(item)}</span>
+                    <span>{getSizeLabel(bundle, item)}</span>
                   </span>
                 ))}
               </div>
@@ -568,10 +574,14 @@ function PizzaCard({
           </div>
           <div className="product-card__actions">
             <Link href={`/menu/${pizza.slug}`} className="button-secondary">
-              Details
+              {copy.cardDetailsLabel}
             </Link>
             <button type="button" className="button" onClick={() => onAdd(size)} disabled={disabled}>
-              {disabled ? (pizza.is_sold_out ? 'Sold out' : 'Ordering paused') : `Add ${getSizeName(size)}`}
+              {disabled
+                ? pizza.is_sold_out
+                  ? copy.cardSoldOutLabel
+                  : copy.cardOrderingPausedLabel
+                : copy.cardAddTemplate.replace('{size}', getSizeName(bundle, size))}
             </button>
           </div>
         </div>
@@ -581,6 +591,7 @@ function PizzaCard({
 }
 
 function SimpleCard({
+  copy,
   title,
   description,
   price,
@@ -591,6 +602,7 @@ function SimpleCard({
   onAdd,
   index,
 }: {
+  copy: ReturnType<typeof getMenuBrowserCopy>;
   title: string;
   description: string;
   price: number;
@@ -637,25 +649,27 @@ function SimpleCard({
           </span>
         </div>
         <div className="product-card__meta">{description}</div>
-        <div className="product-card__actions">
-          <Link href={href} className="button-secondary">
-            Details
-          </Link>
-          <button type="button" className="button" onClick={onAdd} disabled={disabled}>
-            {disabled ? 'Ordering paused' : 'Add to cart'}
-          </button>
+          <div className="product-card__actions">
+            <Link href={href} className="button-secondary">
+            {copy.cardDetailsLabel}
+            </Link>
+            <button type="button" className="button" onClick={onAdd} disabled={disabled}>
+            {disabled ? copy.cardOrderingPausedLabel : copy.cardAddToCartLabel}
+            </button>
+          </div>
         </div>
-      </div>
-    </motion.article>
+      </motion.article>
   );
 }
 
 function EmptyMenuState({
+  copy,
   title,
   body,
   actionHref,
   actionLabel,
 }: {
+  copy: ReturnType<typeof getMenuBrowserCopy>;
   title: string;
   body: string;
   actionHref: string;
@@ -670,7 +684,7 @@ function EmptyMenuState({
           {actionLabel}
         </Link>
         <Link href="/faq" className="button-secondary">
-          Learn more
+          {copy.learnMoreLabel}
         </Link>
       </div>
     </article>
