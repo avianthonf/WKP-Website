@@ -86,6 +86,46 @@ export async function upsertDashboardLiveMode(value: boolean) {
   }
 }
 
+export async function uploadStorefrontAsset(formData: FormData) {
+  try {
+    const file = formData.get('file');
+    const folder = String(formData.get('folder') || 'storefront-images').trim() || 'storefront-images';
+
+    if (!(file instanceof File)) {
+      throw new Error('No image file was provided');
+    }
+
+    if (!file.type.startsWith('image/')) {
+      throw new Error('Only image files are supported');
+    }
+
+    const safeName = file.name
+      .replace(/\.[^/.]+$/, '')
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, '-')
+      .replace(/[^\w-]/g, '') || 'image';
+    const extensionMatch = file.name.match(/\.([^.]+)$/);
+    const extension = extensionMatch ? `.${extensionMatch[1].toLowerCase()}` : '';
+    const uniqueId = crypto.randomUUID();
+    const path = `${folder}/${Date.now()}-${uniqueId}-${safeName}${extension}`;
+
+    const { error } = await supabaseAdmin.storage.from('brand-assets').upload(path, file, {
+      contentType: file.type,
+      upsert: false,
+    });
+
+    if (error) throw error;
+
+    const { data } = supabaseAdmin.storage.from('brand-assets').getPublicUrl(path);
+
+    return { success: true, publicUrl: data.publicUrl };
+  } catch (error: any) {
+    console.error('Failed to upload storefront asset:', error);
+    throw new Error(error.message || 'Failed to upload storefront asset');
+  }
+}
+
 export async function createSiteConfig(key: string, value: string, label: string, type: string) {
   try {
     if (!key.trim() || !label.trim()) {

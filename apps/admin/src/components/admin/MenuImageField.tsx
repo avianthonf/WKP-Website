@@ -1,11 +1,9 @@
 'use client';
 
-import React, { useMemo, useRef, useState } from 'react';
-import { createSupabaseBrowser } from '@/lib/supabaseBrowser';
+import React, { useRef, useState } from 'react';
 import { Image as ImageIcon, Loader2, Upload, X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-
-const MENU_IMAGE_BUCKET = 'menu';
+import { uploadStorefrontAsset } from '@/app/dashboard/settings/actions';
 
 interface MenuImageFieldProps {
   label: string;
@@ -16,20 +14,6 @@ interface MenuImageFieldProps {
   previewAlt: string;
 }
 
-function sanitizeBaseName(name: string) {
-  return name
-    .replace(/\.[^/.]+$/, '')
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, '-')
-    .replace(/[^\w-]/g, '');
-}
-
-function getFileExtension(name: string) {
-  const match = name.match(/\.([^.]+)$/);
-  return match ? `.${match[1].toLowerCase()}` : '';
-}
-
 export function MenuImageField({
   label,
   description,
@@ -38,7 +22,6 @@ export function MenuImageField({
   onChange,
   previewAlt,
 }: MenuImageFieldProps) {
-  const supabase = useMemo(() => createSupabaseBrowser(), []);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -54,23 +37,12 @@ export function MenuImageField({
 
     setIsUploading(true);
     try {
-      const uniqueId = typeof crypto !== 'undefined' && crypto.randomUUID
-        ? crypto.randomUUID()
-        : `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-      const safeName = sanitizeBaseName(file.name) || 'image';
-      const path = `${folder}/${Date.now()}-${uniqueId}-${safeName}${getFileExtension(file.name)}`;
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('folder', folder);
 
-      const { error } = await supabase.storage
-        .from(MENU_IMAGE_BUCKET)
-        .upload(path, file, {
-          contentType: file.type,
-          upsert: false,
-        });
-
-      if (error) throw error;
-
-      const { data } = supabase.storage.from(MENU_IMAGE_BUCKET).getPublicUrl(path);
-      onChange(data.publicUrl);
+      const { publicUrl } = await uploadStorefrontAsset(formData);
+      onChange(publicUrl);
       toast.success('Image uploaded');
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Failed to upload image';
