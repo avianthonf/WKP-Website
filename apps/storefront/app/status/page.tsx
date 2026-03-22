@@ -1,11 +1,12 @@
 import { StorefrontShell } from '../components/storefront-shell';
 import { fetchStorefrontBundle } from '../lib/storefront';
-import { getConfigValue, getOpeningWindow } from '../lib/catalog';
+import { getConfigValue, getOpeningWindow, getStorefrontState } from '../lib/catalog';
 
 export const dynamic = 'force-dynamic';
 
 export default async function StatusPage() {
   const bundle = await fetchStorefrontBundle();
+  const storefrontState = getStorefrontState(bundle);
 
   return (
     <StorefrontShell bundle={bundle}>
@@ -15,10 +16,12 @@ export default async function StatusPage() {
             <div>
               <span className="eyebrow">{getConfigValue(bundle.config, 'status_eyebrow', 'Live status')}</span>
               <h1 className="hero-title">
-                {bundle.maintenanceMode
+                {storefrontState.mode === 'maintenance'
                   ? getConfigValue(bundle.config, 'status_title_maintenance', 'Maintenance mode is active.')
-                  : bundle.isOpen
+                  : storefrontState.mode === 'open'
                   ? getConfigValue(bundle.config, 'status_title_open', 'We are open.')
+                  : storefrontState.mode === 'after_hours'
+                    ? getConfigValue(bundle.config, 'status_title_after_hours', 'We are closed right now, but scheduling is open.')
                   : getConfigValue(bundle.config, 'status_title_closed', 'We are closed right now.')}
               </h1>
               <p className="hero-copy">
@@ -35,10 +38,12 @@ export default async function StatusPage() {
           <div className="info-card">
             <div className="info-card__title">{getConfigValue(bundle.config, 'status_state_title', 'State')}</div>
             <div className="info-card__body">
-              {bundle.maintenanceMode
+              {storefrontState.mode === 'maintenance'
                 ? getConfigValue(bundle.config, 'status_state_maintenance_label', 'Maintenance')
-                : bundle.isOpen
+                : storefrontState.mode === 'open'
                 ? getConfigValue(bundle.config, 'status_state_open_label', 'Open')
+                : storefrontState.mode === 'after_hours'
+                  ? getConfigValue(bundle.config, 'status_state_after_hours_label', 'Scheduling')
                 : getConfigValue(bundle.config, 'status_state_closed_label', 'Closed')}
             </div>
             <div className="info-card__copy">

@@ -114,7 +114,14 @@ export interface Order {
   order_number: number;
   customer_name: string;
   customer_phone?: string | null;
+  fulfillment_type?: 'delivery' | 'pickup' | null;
   delivery_address?: string | null;
+  delivery_location_url?: string | null;
+  delivery_location_source?: 'geolocation' | 'manual' | 'mixed' | null;
+  delivery_location_accuracy_meters?: number | null;
+  delivery_latitude?: number | null;
+  delivery_longitude?: number | null;
+  scheduled_for?: string | null;
   total_price: number;
   status: OrderStatus;
   payment_method: PaymentMethod;

@@ -27,6 +27,7 @@ const fallbackBundle: StorefrontBundle = {
     announcement_bar: 'Freshly made daily.',
     whatsapp_number: '918484802540',
     dashboard_live_mode: 'true',
+    store_timezone: 'Asia/Kolkata',
     opening_time: '11:00',
     closing_time: '23:00',
     min_order_amount: '0',

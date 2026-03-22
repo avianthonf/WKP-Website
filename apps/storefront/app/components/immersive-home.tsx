@@ -23,6 +23,9 @@ export function ImmersiveHome({
   const prefersReducedMotion = useReducedMotion();
   const featuredPizzas = bundle.pizzas.slice(0, 4);
   const storefrontState = getStorefrontState(bundle);
+  const orderingAvailable = storefrontState.orderingEnabled;
+  const isOpenNow = storefrontState.mode === 'open';
+  const isAfterHours = storefrontState.mode === 'after_hours';
   const heroRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
     target: heroRef,
@@ -58,27 +61,39 @@ export function ImmersiveHome({
       label: getConfigValue(bundle.config, 'home_step_2_label', 'Build custom'),
     },
     {
-      href: storefrontState.mode === 'open' ? getConfigValue(bundle.config, 'home_step_3_href', '/cart') : '/status',
+      href: orderingAvailable ? getConfigValue(bundle.config, 'home_step_3_href', '/cart') : '/status',
       title:
-        storefrontState.mode === 'open'
+        isOpenNow
           ? getConfigValue(bundle.config, 'home_step_3_title', 'Send it fast')
+          : isAfterHours
+            ? getConfigValue(bundle.config, 'home_step_3_after_hours_title', 'Schedule it for later')
           : getConfigValue(bundle.config, 'home_step_3_paused_title', 'Check live status'),
       copy:
-        storefrontState.mode === 'open'
+        isOpenNow
           ? getConfigValue(bundle.config, 'home_step_3_copy', 'Checkout flows into a clean order handoff with the summary already prepared.')
+          : isAfterHours
+            ? getConfigValue(
+                bundle.config,
+                'home_step_3_after_hours_copy',
+                'Pick a later time, confirm the delivery pin, and the order will be queued for the next service window.'
+              )
           : getConfigValue(bundle.config, 'home_step_3_paused_copy', storefrontState.summary),
       label:
-        storefrontState.mode === 'open'
+        isOpenNow
           ? getConfigValue(bundle.config, 'home_step_3_label', 'Review cart')
+          : isAfterHours
+            ? getConfigValue(bundle.config, 'home_step_3_after_hours_label', 'Schedule order')
           : getConfigValue(bundle.config, 'home_step_3_paused_label', 'View live status'),
     },
   ];
   const introEyebrow = getConfigValue(bundle.config, 'home_steps_eyebrow', 'Start here');
   const heroImageUrl = getHomeFeaturedImageUrl(bundle);
   const heroBackgroundImageUrl = getHeroBackgroundImageUrl(bundle);
-  const featurePrimaryLabel = storefrontState.mode === 'open'
+  const featurePrimaryLabel = isOpenNow
     ? getConfigValue(bundle.config, 'home_feature_primary_label', 'Checkout now')
-    : getConfigValue(bundle.config, 'home_feature_paused_label', 'View live status');
+    : isAfterHours
+      ? getConfigValue(bundle.config, 'home_feature_after_hours_label', 'Schedule order')
+      : getConfigValue(bundle.config, 'home_feature_paused_label', 'View live status');
   const introTitle = getConfigValue(
     bundle.config,
     'home_steps_title',
@@ -180,11 +195,13 @@ export function ImmersiveHome({
                 <Wand2 size={16} />
                 {getConfigValue(bundle.config, 'home_hero_build_label', 'Build your pizza')}
               </Link>
-              <Link href={storefrontState.mode === 'open' ? '/cart' : '/status'} className="button-ghost button-ghost--hero">
+              <Link href={orderingAvailable ? '/cart' : '/status'} className="button-ghost button-ghost--hero">
                 <ShoppingBag size={16} />
-                {storefrontState.mode === 'open'
+                {isOpenNow
                   ? getConfigValue(bundle.config, 'home_hero_checkout_label', 'Checkout now')
-                  : getConfigValue(bundle.config, 'home_feature_paused_label', 'View live status')}
+                  : isAfterHours
+                    ? getConfigValue(bundle.config, 'home_hero_after_hours_label', 'Schedule order')
+                    : getConfigValue(bundle.config, 'home_feature_paused_label', 'View live status')}
               </Link>
             </motion.div>
 
@@ -245,7 +262,7 @@ export function ImmersiveHome({
                     )}
                   </p>
                   <Link
-                    href={storefrontState.mode === 'open' ? '/cart' : '/status'}
+                    href={orderingAvailable ? '/cart' : '/status'}
                     className="button-secondary button-secondary--hero hero-showcase__cta"
                   >
                     {featurePrimaryLabel}
@@ -374,7 +391,7 @@ export function ImmersiveHome({
                   <Link href={`/menu/${pizza.slug}`} className="button-secondary button-secondary--hero">
                     {getConfigValue(bundle.config, 'home_signature_details_label', 'Details')}
                   </Link>
-                  <Link href="/cart" className="button button--hero">
+                  <Link href={orderingAvailable ? '/cart' : '/status'} className="button button--hero">
                     {getConfigValue(bundle.config, 'home_signature_order_label', 'Order')}
                   </Link>
                 </div>
@@ -397,15 +414,19 @@ export function ImmersiveHome({
             <h2 className="section__title">{closingTitle}</h2>
           </div>
           <div className="closing-banner__actions">
-            <Link href={storefrontState.mode === 'open' ? '/menu' : '/status'} className="button button--hero">
-              {storefrontState.mode === 'open'
+            <Link href={isOpenNow ? '/menu' : isAfterHours ? '/cart' : '/status'} className="button button--hero">
+              {isOpenNow
                 ? closingPrimary
-                : getConfigValue(bundle.config, 'home_closing_primary_paused_label', 'View live status')}
+                : isAfterHours
+                  ? getConfigValue(bundle.config, 'home_closing_primary_after_hours_label', 'Schedule order')
+                  : getConfigValue(bundle.config, 'home_closing_primary_paused_label', 'View live status')}
             </Link>
             <Link href="/build" className="button-secondary button-secondary--hero">
-              {storefrontState.mode === 'open'
+              {isOpenNow
                 ? closingSecondary
-                : getConfigValue(bundle.config, 'home_closing_secondary_paused_label', 'Plan ahead')}
+                : isAfterHours
+                  ? getConfigValue(bundle.config, 'home_closing_secondary_after_hours_label', 'Build for later')
+                  : getConfigValue(bundle.config, 'home_closing_secondary_paused_label', 'Plan ahead')}
             </Link>
           </div>
         </motion.div>

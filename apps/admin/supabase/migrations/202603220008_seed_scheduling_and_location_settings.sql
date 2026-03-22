@@ -1,0 +1,53 @@
+insert into public.site_config (key, value, label, type, description, is_public)
+values
+  ('store_timezone', 'Asia/Kolkata', 'Store timezone', 'text', 'IANA timezone used for open/closed logic and scheduled order validation.', true),
+  ('storefront_after_hours_label', 'Closed now', 'After-hours badge label', 'text', 'Badge shown when the store is outside the live window but can still accept scheduled orders.', true),
+  ('storefront_after_hours_summary', 'The kitchen is outside the live window right now, but you can still schedule an order within 11:00 - 23:00.', 'After-hours summary', 'textarea', 'Summary shown when after-hours scheduling is available.', true),
+  ('storefront_after_hours_primary_label', 'Schedule order', 'After-hours primary button', 'text', 'Primary action shown when after-hours scheduling is available.', true),
+  ('storefront_after_hours_secondary_label', 'View hours', 'After-hours secondary button', 'text', 'Secondary action shown when after-hours scheduling is available.', true),
+  ('home_step_3_after_hours_title', 'Schedule it for later', 'Step 3 after-hours title', 'text', 'Third intro card title when only scheduled orders are available.', true),
+  ('home_step_3_after_hours_copy', 'Pick a later time, confirm the delivery pin, and the order will be queued for the next service window.', 'Step 3 after-hours copy', 'textarea', 'Third intro card copy when after-hours scheduling is available.', true),
+  ('home_step_3_after_hours_label', 'Schedule order', 'Step 3 after-hours button', 'text', 'Third intro card button label when after-hours scheduling is available.', true),
+  ('home_feature_after_hours_label', 'Schedule order', 'Hero after-hours label', 'text', 'Primary label on the hero showcase button when only scheduled orders are available.', true),
+  ('home_closing_primary_after_hours_label', 'Schedule order', 'Closing primary after-hours label', 'text', 'Closing banner primary label when only scheduled orders are available.', true),
+  ('home_closing_secondary_after_hours_label', 'Build for later', 'Closing secondary after-hours label', 'text', 'Closing banner secondary label when only scheduled orders are available.', true),
+  ('home_hero_after_hours_label', 'Schedule order', 'Hero after-hours checkout label', 'text', 'Third action label in the hero button row when only scheduled orders are available.', true),
+  ('cart_schedule_notice_copy', 'The kitchen is currently outside its live window, so this order will be scheduled for a later time.', 'Schedule notice', 'textarea', 'Callout shown when only scheduled orders are available.', true),
+  ('cart_schedule_delivery_label', 'Delivery time', 'Delivery time label', 'text', 'Label for the scheduled delivery time picker.', true),
+  ('cart_schedule_pickup_label', 'Pickup time', 'Pickup time label', 'text', 'Label for the scheduled pickup time picker.', true),
+  ('cart_schedule_placeholder', 'Select a time', 'Schedule placeholder', 'text', 'Placeholder shown in the schedule time picker.', true),
+  ('cart_schedule_helper_copy', 'Choose a time within {hours}.', 'Schedule helper copy', 'textarea', 'Helper copy shown below the schedule time picker. Supports {hours}.', true),
+  ('cart_schedule_confirmed_copy', 'Scheduled for {time}.', 'Schedule confirmed copy', 'textarea', 'Confirmation copy shown after a valid schedule is selected. Supports {time}.', true),
+  ('cart_schedule_required_message', 'Choose a delivery time within {hours} before placing the order.', 'Schedule required message', 'textarea', 'Validation error shown when a schedule time is missing. Supports {hours}.', true),
+  ('cart_schedule_invalid_message', 'Choose a valid delivery time within {hours}.', 'Schedule invalid message', 'textarea', 'Validation error shown when the chosen schedule is outside the open window. Supports {hours}.', true),
+  ('cart_location_section_title', 'Delivery location', 'Location section title', 'text', 'Heading above the delivery location capture section.', true),
+  ('cart_location_section_copy', 'Use your current pin first, then add a typed address only if needed.', 'Location section copy', 'textarea', 'Supporting copy above the delivery location capture controls.', true),
+  ('cart_location_request_label', 'Use current location', 'Use current location button', 'text', 'Button label for requesting geolocation.', true),
+  ('cart_location_refresh_label', 'Refresh location', 'Refresh location button', 'text', 'Button label after a location has already been detected.', true),
+  ('cart_location_detecting_label', 'Finding your current location...', 'Finding location label', 'text', 'Button or status label shown while geolocation is in progress.', true),
+  ('cart_location_detected_label', 'Detected pin', 'Detected location label', 'text', 'Label shown beside the detected coordinates.', true),
+  ('cart_location_accuracy_label', 'Accuracy', 'Location accuracy label', 'text', 'Label shown beside the geolocation accuracy.', true),
+  ('cart_location_detected_copy', 'Check the pin, then confirm it or switch to a typed address.', 'Detected location helper', 'textarea', 'Helper copy shown after a location has been detected.', true),
+  ('cart_location_confirm_label', 'Use this location', 'Confirm location button', 'text', 'Button label for confirming the detected location.', true),
+  ('cart_location_confirmed_label', 'Location confirmed. This pin will be included with the order.', 'Location confirmed copy', 'textarea', 'Success copy shown after confirming the detected location.', true),
+  ('cart_location_map_link_label', 'Open pin in Google Maps', 'Open map pin label', 'text', 'Link label for opening the detected pin in Google Maps.', true),
+  ('cart_location_manual_show_label', 'Type address instead', 'Show manual address button', 'text', 'Button label for revealing the typed address textarea.', true),
+  ('cart_location_manual_hide_label', 'Hide address box', 'Hide manual address button', 'text', 'Button label for hiding the typed address textarea.', true),
+  ('cart_location_manual_label', 'Delivery address', 'Manual address label', 'text', 'Label for the typed address textarea.', true),
+  ('cart_location_manual_placeholder', 'House, street, landmark', 'Manual address placeholder', 'textarea', 'Placeholder for the typed address textarea.', true),
+  ('cart_location_permission_denied_message', 'Location permission was blocked. Type the delivery address instead.', 'Location denied message', 'textarea', 'Validation or helper copy shown when geolocation permission is denied.', true),
+  ('cart_location_unavailable_message', 'We could not read your location. Type the address instead.', 'Location unavailable message', 'textarea', 'Validation or helper copy shown when geolocation cannot return a result.', true),
+  ('cart_location_missing_message', 'Share a pinned location or type the delivery address before sending the order.', 'Location missing message', 'textarea', 'Validation error when neither a confirmed pin nor a typed address is provided.', true),
+  ('cart_whatsapp_location_link_label', 'Location pin', 'WhatsApp location pin label', 'text', 'Label for the location pin row in the generated order message.', true),
+  ('cart_whatsapp_schedule_label', 'Scheduled for', 'WhatsApp schedule label', 'text', 'Label for the scheduled delivery row in the generated order message.', true),
+  ('status_title_after_hours', 'We are closed right now, but scheduling is open.', 'Status after-hours title', 'text', 'Live status page title when the store is outside the live window but scheduled orders are allowed.', true),
+  ('status_state_after_hours_label', 'Scheduling', 'Status after-hours label', 'text', 'Status value shown when only scheduled orders are available.', true)
+on conflict (key) do update
+set
+  label = excluded.label,
+  type = excluded.type,
+  description = excluded.description,
+  is_public = excluded.is_public;
+
+delete from public.site_config
+where key in ('cart_open_order_chat_label', 'cart_open_order_prefill_message');

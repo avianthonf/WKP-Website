@@ -22,6 +22,15 @@ export default function OrderCard({ order }: OrderCardProps) {
   const waitTimeMins = Math.floor((Date.now() - new Date(order.created_at).getTime()) / (1000 * 60));
   const displayItems = ((order.order_items as OrderItem[]) || []).slice(0, 3);
   const moreCount = (order.order_items?.length || 0) - 3;
+  const scheduleLabel = order.scheduled_for
+    ? new Date(order.scheduled_for).toLocaleString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        hour: 'numeric',
+        minute: '2-digit',
+      })
+    : null;
+  const locationLabel = order.delivery_address || (order.delivery_location_url ? 'Pinned location shared' : null);
 
   const getItemName = (item: OrderItem): string => {
     if (item.pizzas?.name) return item.pizzas.name;
@@ -77,14 +86,18 @@ export default function OrderCard({ order }: OrderCardProps) {
         <div className="text-sm font-semibold" style={{ color: 'var(--ink)' }}>
           {order.customer_name}
         </div>
-        {order.delivery_address && (
+        {locationLabel && (
           <div className="mt-1 flex items-center gap-1 truncate text-xs" style={{ color: 'var(--stone)' }}>
             <MapPin size={12} />
             <span className="truncate max-w-[12rem] sm:max-w-[200px]">
-              {typeof order.delivery_address === 'string'
-                ? order.delivery_address
-                : JSON.stringify(order.delivery_address)}
+              {locationLabel}
             </span>
+          </div>
+        )}
+        {scheduleLabel && (
+          <div className="mt-1 flex items-center gap-1 text-xs" style={{ color: 'var(--stone)' }}>
+            <Clock size={12} />
+            <span>Scheduled {scheduleLabel}</span>
           </div>
         )}
       </div>

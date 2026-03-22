@@ -111,6 +111,14 @@ export default async function OrderHistoryPage() {
                   {order.customer_phone && (
                     <div className="text-xs" style={{ color: 'var(--stone)' }}>{order.customer_phone}</div>
                   )}
+                  {order.scheduled_for && (
+                    <div className="text-xs" style={{ color: 'var(--stone)' }}>
+                      Scheduled {formatDate(order.scheduled_for)}
+                    </div>
+                  )}
+                  {order.delivery_location_url && !order.delivery_address && (
+                    <div className="text-xs" style={{ color: 'var(--stone)' }}>Pinned location shared</div>
+                  )}
                 </td>
                 <td data-label="Items">
                   <div className="max-w-xs truncate text-xs" style={{ color: 'var(--stone)' }}>

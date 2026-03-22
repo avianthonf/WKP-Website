@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useEffect, useMemo, useState, useTransition, type FormEvent } from 'react';
-import { ArrowRight, CheckCircle2, PhoneCall, ShoppingBag, Trash2 } from 'lucide-react';
+import { ArrowRight, CheckCircle2, MapPin, Navigation, PhoneCall, ShoppingBag, Trash2 } from 'lucide-react';
 import { useCart } from './cart-provider';
 import { createWhatsAppOrder } from '../actions';
 import {
@@ -13,14 +13,23 @@ import {
   getLinePrice,
   getMinimumOrder,
   getOpeningWindow,
-  getOrderLink,
   getSizeLabel,
   getSizeName,
   getStoreName,
+  getStoreTimeZone,
   getStorefrontState,
   money,
 } from '../lib/catalog';
+import { formatStoreDateTime, getDefaultScheduledTimeValue, resolveScheduledOrderTime } from '../lib/store-hours';
 import type { Size, StorefrontBundle } from '../lib/types';
+
+type DeliveryLocation = {
+  mapUrl: string;
+  latitude: number;
+  longitude: number;
+  accuracyMeters?: number | null;
+  label: string;
+};
 
 export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
   const { items, subtotal, totalItems, clearCart, removeItem, setQuantity } = useCart();
@@ -28,7 +37,16 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
   const [fulfillment, setFulfillment] = useState<'delivery' | 'pickup'>('delivery');
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
-  const [deliveryAddress, setDeliveryAddress] = useState('');
+  const [pickupNote, setPickupNote] = useState('');
+  const [manualAddress, setManualAddress] = useState('');
+  const [showManualAddress, setShowManualAddress] = useState(false);
+  const [scheduleTime, setScheduleTime] = useState('');
+  const [detectedLocation, setDetectedLocation] = useState<DeliveryLocation | null>(null);
+  const [confirmedLocation, setConfirmedLocation] = useState<DeliveryLocation | null>(null);
+  const [locationStatus, setLocationStatus] = useState<
+    'idle' | 'detecting' | 'detected' | 'confirmed' | 'denied' | 'unsupported' | 'error'
+  >('idle');
+  const [locationFeedback, setLocationFeedback] = useState<string | null>(null);
   const [notes, setNotes] = useState('');
   const [status, setStatus] = useState<string | null>(null);
   const [handoff, setHandoff] = useState<{ orderNumber: number; whatsappUrl: string } | null>(null);
@@ -44,7 +62,7 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
 
   const minimumOrder = getMinimumOrder(bundle);
   const deliveryRequired = fulfillment === 'delivery';
-  const orderingPaused = storefrontState.mode !== 'open';
+  const orderingPaused = !storefrontState.orderingEnabled;
   const checkoutHeroTitle = getConfigValue(bundle.config, 'cart_hero_title', 'Send the order and keep moving.');
   const checkoutHeroCopy = getConfigValue(
     bundle.config,
@@ -61,11 +79,20 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
   const checkoutHoursCopy = getConfigValue(bundle.config, 'cart_hours_copy', 'Store hours:');
   const checkoutMinimumCopy = getConfigValue(bundle.config, 'cart_minimum_copy', 'Minimum order');
   const emptyCartCopy = getConfigValue(bundle.config, 'cart_empty_copy', cartCopy.emptySummaryCopy);
+  const openingWindow = getOpeningWindow(bundle);
+  const scheduleResolution = useMemo(() => {
+    if (!storefrontState.requiresScheduledTime || !scheduleTime.trim()) return null;
+    return resolveScheduledOrderTime(bundle.config, scheduleTime.trim());
+  }, [bundle.config, scheduleTime, storefrontState.requiresScheduledTime]);
+  const manualAddressReady = manualAddress.trim().length >= 8;
+  const locationReady = !deliveryRequired || Boolean(confirmedLocation) || manualAddressReady;
   const isReady =
     items.length > 0 &&
     customerName.trim().length >= 2 &&
     customerPhone.trim().length >= 6 &&
-    !orderingPaused;
+    !orderingPaused &&
+    (!storefrontState.requiresScheduledTime || Boolean(scheduleResolution?.valid)) &&
+    locationReady;
   const total = useMemo(() => subtotal, [subtotal]);
   const pizzaSizeTotals = useMemo(() => {
     return items.reduce(
@@ -83,9 +110,113 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
     .map((size) => getSizeName(bundle, size));
   const statusTone =
     status &&
-    (status.toLowerCase().includes('could not') || status.toLowerCase().includes('paused') || status.toLowerCase().includes('closed'))
+    (
+      status.toLowerCase().includes('could not') ||
+      status.toLowerCase().includes('paused') ||
+      status.toLowerCase().includes('closed') ||
+      status.toLowerCase().includes('choose') ||
+      status.toLowerCase().includes('share') ||
+      status.toLowerCase().includes('location')
+    )
       ? 'warning'
       : 'success';
+
+  useEffect(() => {
+    if (storefrontState.requiresScheduledTime && !scheduleTime) {
+      setScheduleTime(getDefaultScheduledTimeValue(bundle.config));
+    }
+  }, [bundle.config, scheduleTime, storefrontState.requiresScheduledTime]);
+
+  const scheduleLabel =
+    fulfillment === 'delivery'
+      ? getConfigValue(bundle.config, 'cart_schedule_delivery_label', 'Delivery time')
+      : getConfigValue(bundle.config, 'cart_schedule_pickup_label', 'Pickup time');
+  const scheduleHelperCopy = getConfigValue(
+    bundle.config,
+    'cart_schedule_helper_copy',
+    'Choose a time within {hours}.'
+  ).replace('{hours}', openingWindow);
+  const scheduleRequiredMessage = getConfigValue(
+    bundle.config,
+    'cart_schedule_required_message',
+    'Choose a delivery time within {hours} before placing the order.'
+  ).replace('{hours}', openingWindow);
+  const scheduleInvalidMessage = getConfigValue(
+    bundle.config,
+    'cart_schedule_invalid_message',
+    'Choose a valid delivery time within {hours}.'
+  ).replace('{hours}', openingWindow);
+
+  const handleDetectLocation = () => {
+    if (!('geolocation' in navigator)) {
+      setLocationStatus('unsupported');
+      setLocationFeedback(
+        getConfigValue(
+          bundle.config,
+          'cart_location_unavailable_message',
+          'Location sharing is not available on this device. Type the address instead.'
+        )
+      );
+      setShowManualAddress(true);
+      return;
+    }
+
+    setLocationStatus('detecting');
+    setLocationFeedback(getConfigValue(bundle.config, 'cart_location_detecting_label', 'Finding your current location...'));
+    setDetectedLocation(null);
+    setConfirmedLocation(null);
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const latitude = Number(position.coords.latitude.toFixed(6));
+        const longitude = Number(position.coords.longitude.toFixed(6));
+        const accuracyMeters = Number.isFinite(position.coords.accuracy)
+          ? Math.round(position.coords.accuracy)
+          : null;
+        const mapUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
+        const label = `${latitude}, ${longitude}`;
+
+        setDetectedLocation({
+          mapUrl,
+          latitude,
+          longitude,
+          accuracyMeters,
+          label,
+        });
+        setLocationStatus('detected');
+        setLocationFeedback(
+          getConfigValue(
+            bundle.config,
+            'cart_location_detected_copy',
+            'Check the pin, then confirm it or switch to a typed address.'
+          )
+        );
+      },
+      (error) => {
+        const denied = error.code === error.PERMISSION_DENIED;
+        setLocationStatus(denied ? 'denied' : 'error');
+        setLocationFeedback(
+          denied
+            ? getConfigValue(
+                bundle.config,
+                'cart_location_permission_denied_message',
+                'Location permission was blocked. Type the delivery address instead.'
+              )
+            : getConfigValue(
+                bundle.config,
+                'cart_location_unavailable_message',
+                'We could not read your location. Type the address instead.'
+              )
+        );
+        setShowManualAddress(true);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 12000,
+        maximumAge: 60000,
+      }
+    );
+  };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -93,10 +224,20 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
     if (!isReady) {
       if (orderingPaused) {
         setStatus(
-          bundle.maintenanceMode
+          storefrontState.mode === 'maintenance'
             ? cartCopy.pausedMaintenanceMessage
             : cartCopy.pausedClosedMessage
         );
+        return;
+      }
+
+      if (storefrontState.requiresScheduledTime && !scheduleTime.trim()) {
+        setStatus(scheduleRequiredMessage);
+        return;
+      }
+
+      if (storefrontState.requiresScheduledTime && scheduleResolution && !scheduleResolution.valid) {
+        setStatus(scheduleInvalidMessage);
         return;
       }
 
@@ -104,8 +245,19 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
       return;
     }
 
-    if (deliveryRequired && deliveryAddress.trim().length < 8) {
-      setStatus(cartCopy.missingAddressMessage);
+    if (deliveryRequired && !confirmedLocation && !manualAddressReady) {
+      if (manualAddress.trim().length > 0) {
+        setStatus(cartCopy.missingAddressMessage);
+        return;
+      }
+
+      setStatus(
+        getConfigValue(
+          bundle.config,
+          'cart_location_missing_message',
+          'Share a pinned location or type the delivery address before sending the order.'
+        )
+      );
       return;
     }
 
@@ -115,8 +267,18 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
           customerName: customerName.trim(),
           customerPhone: customerPhone.trim(),
           fulfillment,
-          deliveryAddress: deliveryRequired ? deliveryAddress.trim() : undefined,
-          pickupNote: fulfillment === 'pickup' ? deliveryAddress.trim() : undefined,
+          manualAddress: deliveryRequired ? manualAddress.trim() || undefined : undefined,
+          scheduledTime: storefrontState.requiresScheduledTime ? scheduleTime.trim() : undefined,
+          deliveryLocation:
+            deliveryRequired && confirmedLocation
+              ? {
+                  mapUrl: confirmedLocation.mapUrl,
+                  latitude: confirmedLocation.latitude,
+                  longitude: confirmedLocation.longitude,
+                  accuracyMeters: confirmedLocation.accuracyMeters ?? null,
+                }
+              : undefined,
+          pickupNote: fulfillment === 'pickup' ? pickupNote.trim() || undefined : undefined,
           notes: notes.trim() || undefined,
           total,
           items: items.map((item) => ({
@@ -135,6 +297,13 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
         });
 
         clearCart();
+        setManualAddress('');
+        setPickupNote('');
+        setConfirmedLocation(null);
+        setDetectedLocation(null);
+        setLocationStatus('idle');
+        setLocationFeedback(null);
+        setScheduleTime(storefrontState.requiresScheduledTime ? getDefaultScheduledTimeValue(bundle.config) : '');
         const shouldOpenOnMobile =
           deviceMode === 'mobile' ||
           (deviceMode === null && (window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 768));
@@ -175,9 +344,9 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
                   {cartCopy.viewLiveStatusLabel}
                 </Link>
               ) : (
-                <Link href={getOrderLink(bundle, cartCopy.openOrderPrefillMessage)} className="button">
+                <Link href="/status" className="button">
                   <PhoneCall size={16} />
-                  {cartCopy.openOrderChatLabel}
+                  {cartCopy.viewLiveStatusLabel}
                 </Link>
               )}
               <Link href="/menu" className="button-secondary">
@@ -203,7 +372,7 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
             <div className="content-card">
               <div className="notice">
                 <CheckCircle2 size={16} />
-                {checkoutHoursCopy} {getOpeningWindow(bundle)}
+                {checkoutHoursCopy} {openingWindow}
               </div>
               <div className="notice" data-tone={total < minimumOrder ? 'warning' : 'success'}>
                 <ShoppingBag size={16} />
@@ -231,9 +400,19 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
               {orderingPaused ? (
                 <div className="notice" data-tone="warning">
                   <ShoppingBag size={16} />
-                  {bundle.maintenanceMode
+                  {storefrontState.mode === 'maintenance'
                     ? cartCopy.pausedMaintenanceMessage
                     : cartCopy.pausedClosedMessage}
+                </div>
+              ) : null}
+              {storefrontState.requiresScheduledTime ? (
+                <div className="notice" data-tone="warning">
+                  <Navigation size={16} />
+                  {getConfigValue(
+                    bundle.config,
+                    'cart_schedule_notice_copy',
+                    'The kitchen is currently outside its live window, so this order will be scheduled for a later time.'
+                  )}
                 </div>
               ) : null}
             </div>
@@ -291,18 +470,156 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
               </select>
             </div>
 
-            <div className="field">
-              <label className="field__label" htmlFor="deliveryAddress">
-                {deliveryRequired ? cartCopy.deliveryAddressLabel : cartCopy.pickupNoteLabel}
-              </label>
-              <textarea
-                id="deliveryAddress"
-                className="field__textarea"
-                value={deliveryAddress}
-                onChange={(event) => setDeliveryAddress(event.target.value)}
-                placeholder={deliveryRequired ? cartCopy.deliveryAddressPlaceholder : cartCopy.pickupNotePlaceholder}
-              />
-            </div>
+            {storefrontState.requiresScheduledTime ? (
+              <div className="field">
+                <label className="field__label" htmlFor="scheduleTime">
+                  {scheduleLabel}
+                </label>
+                <input
+                  id="scheduleTime"
+                  className="field__control"
+                  type="time"
+                  value={scheduleTime}
+                  onChange={(event) => setScheduleTime(event.target.value)}
+                  placeholder={getConfigValue(bundle.config, 'cart_schedule_placeholder', 'Select a time')}
+                />
+                <p className="footnote">{scheduleHelperCopy}</p>
+                {scheduleTime.trim() && scheduleResolution && !scheduleResolution.valid ? (
+                  <div className="notice" data-tone="warning">
+                    {scheduleInvalidMessage}
+                  </div>
+                ) : scheduleResolution?.valid ? (
+                  <div className="notice" data-tone="success">
+                    {getConfigValue(
+                      bundle.config,
+                      'cart_schedule_confirmed_copy',
+                      'Scheduled for {time}.'
+                    ).replace(
+                      '{time}',
+                      formatStoreDateTime(scheduleResolution.scheduledFor, getStoreTimeZone(bundle))
+                    )}
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
+
+            {deliveryRequired ? (
+              <div className="content-card">
+                <div className="section__eyebrow">
+                  {getConfigValue(bundle.config, 'cart_location_section_title', 'Delivery location')}
+                </div>
+                <p className="hero-copy hero-copy--tight">
+                  {getConfigValue(
+                    bundle.config,
+                    'cart_location_section_copy',
+                    'Use your current pin first, then add a typed address only if needed.'
+                  )}
+                </p>
+                <div className="hero-actions">
+                  <button
+                    type="button"
+                    className="button-secondary"
+                    onClick={handleDetectLocation}
+                    disabled={locationStatus === 'detecting'}
+                  >
+                    <MapPin size={16} />
+                    {locationStatus === 'detecting'
+                      ? getConfigValue(bundle.config, 'cart_location_detecting_label', 'Finding your current location...')
+                      : detectedLocation || confirmedLocation
+                        ? getConfigValue(bundle.config, 'cart_location_refresh_label', 'Refresh location')
+                        : getConfigValue(bundle.config, 'cart_location_request_label', 'Use current location')}
+                  </button>
+                  <button
+                    type="button"
+                    className="button-ghost"
+                    onClick={() => setShowManualAddress((current) => !current)}
+                  >
+                    {showManualAddress
+                      ? getConfigValue(bundle.config, 'cart_location_manual_hide_label', 'Hide address box')
+                      : getConfigValue(bundle.config, 'cart_location_manual_show_label', 'Type address instead')}
+                  </button>
+                </div>
+
+                {locationFeedback ? (
+                  <div className="notice" data-tone={locationStatus === 'confirmed' ? 'success' : 'warning'}>
+                    {locationFeedback}
+                  </div>
+                ) : null}
+
+                {detectedLocation ? (
+                  <div className="summary-list summary-list--spaced">
+                    <div className="summary-row">
+                      <span className="summary-row__label">
+                        {getConfigValue(bundle.config, 'cart_location_detected_label', 'Detected pin')}
+                      </span>
+                      <span className="summary-row__value">{detectedLocation.label}</span>
+                    </div>
+                    {detectedLocation.accuracyMeters ? (
+                      <div className="summary-row">
+                        <span className="summary-row__label">
+                          {getConfigValue(bundle.config, 'cart_location_accuracy_label', 'Accuracy')}
+                        </span>
+                        <span className="summary-row__value">{detectedLocation.accuracyMeters} m</span>
+                      </div>
+                    ) : null}
+                    <div className="hero-actions">
+                      <Link href={detectedLocation.mapUrl} className="button-secondary" target="_blank" rel="noreferrer">
+                        {getConfigValue(bundle.config, 'cart_location_map_link_label', 'Open pin in Google Maps')}
+                      </Link>
+                      <button
+                        type="button"
+                        className="button"
+                        onClick={() => {
+                          setConfirmedLocation(detectedLocation);
+                          setLocationStatus('confirmed');
+                          setLocationFeedback(
+                            getConfigValue(
+                              bundle.config,
+                              'cart_location_confirmed_label',
+                              'Location confirmed. This pin will be included with the order.'
+                            )
+                          );
+                        }}
+                      >
+                        {getConfigValue(bundle.config, 'cart_location_confirm_label', 'Use this location')}
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
+
+                {showManualAddress ? (
+                  <div className="field">
+                    <label className="field__label" htmlFor="manualAddress">
+                      {getConfigValue(bundle.config, 'cart_location_manual_label', cartCopy.deliveryAddressLabel)}
+                    </label>
+                    <textarea
+                      id="manualAddress"
+                      className="field__textarea"
+                      value={manualAddress}
+                      onChange={(event) => setManualAddress(event.target.value)}
+                      placeholder={getConfigValue(
+                        bundle.config,
+                        'cart_location_manual_placeholder',
+                        cartCopy.deliveryAddressPlaceholder
+                      )}
+                    />
+                  </div>
+                ) : null}
+              </div>
+            ) : (
+              <div className="field">
+                <label className="field__label" htmlFor="pickupNote">
+                  {cartCopy.pickupNoteLabel}
+                </label>
+                <textarea
+                  id="pickupNote"
+                  className="field__textarea"
+                  value={pickupNote}
+                  onChange={(event) => setPickupNote(event.target.value)}
+                  placeholder={cartCopy.pickupNotePlaceholder}
+                />
+              </div>
+            )}
 
             <div className="field">
               <label className="field__label" htmlFor="orderNotes">
@@ -326,7 +643,7 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
             <motion.button
               type={orderingPaused ? 'button' : 'submit'}
               className="button"
-              disabled={!orderingPaused && (isPending || !isReady || (deliveryRequired && deliveryAddress.trim().length < 8))}
+              disabled={!orderingPaused && (isPending || !isReady)}
               onClick={
                 orderingPaused
                   ? () => {

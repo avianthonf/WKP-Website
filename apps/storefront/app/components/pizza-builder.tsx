@@ -30,7 +30,7 @@ export function PizzaBuilder({ bundle, initialPizzaSlug }: { bundle: StorefrontB
   const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
   const [notes, setNotes] = useState('');
   const storefrontState = getStorefrontState(bundle);
-  const orderingPaused = storefrontState.mode !== 'open';
+  const orderingPaused = !storefrontState.orderingEnabled;
   const builderCopy = getBuilderCopy(bundle);
   const builderHeroTitle = getConfigValue(
     bundle.config,
@@ -146,10 +146,10 @@ export function PizzaBuilder({ bundle, initialPizzaSlug }: { bundle: StorefrontB
                 <Sparkles size={16} />
                 {builderCopy.noticeCopy}
               </div>
-              {orderingPaused ? (
+              {storefrontState.mode !== 'open' ? (
                 <div className="notice" data-tone={storefrontState.tone}>
                   <Sparkles size={16} />
-                  {builderCopy.pausedNoticeCopy}
+                  {orderingPaused ? builderCopy.pausedNoticeCopy : storefrontState.summary}
                 </div>
               ) : null}
               <div className="tag-list">

@@ -11,8 +11,10 @@ type WhatsAppCopy = {
   pickupLabel: string;
   phoneLabel: string;
   addressLabel: string;
+  locationLinkLabel: string;
   pickupNoteLabel: string;
   notesLabel: string;
+  scheduleLabel: string;
   itemsHeading: string;
   totalLabel: string;
   currencyLabel: string;
@@ -23,6 +25,8 @@ export function buildWhatsAppMessage(input: {
   customerName: string;
   customerPhone?: string;
   deliveryAddress?: string;
+  deliveryLocationUrl?: string;
+  scheduledFor?: string;
   notes?: string;
   fulfillment?: WhatsAppFulfillment;
   items: CartLine[];
@@ -46,6 +50,8 @@ export function buildWhatsAppMessage(input: {
     `${input.copy.fulfillmentLabel}: ${fulfillmentValue}`,
     input.customerPhone ? `${input.copy.phoneLabel}: ${input.customerPhone}` : null,
     input.deliveryAddress ? `${addressLabel}: ${input.deliveryAddress}` : null,
+    input.deliveryLocationUrl ? `${input.copy.locationLinkLabel}: ${input.deliveryLocationUrl}` : null,
+    input.scheduledFor ? `${input.copy.scheduleLabel}: ${input.scheduledFor}` : null,
     input.notes ? `${input.copy.notesLabel}: ${input.notes}` : null,
     '',
     `*${input.copy.itemsHeading}*`,

@@ -33,7 +33,7 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
   const [hasFinePointer, setHasFinePointer] = useState(false);
   const prefersReducedMotion = useReducedMotion();
   const storefrontState = getStorefrontState(bundle);
-  const orderingPaused = storefrontState.mode !== 'open';
+  const orderingPaused = !storefrontState.orderingEnabled;
   const menuCopy = getMenuBrowserCopy(bundle);
   const menuHeroTitle = getConfigValue(
     bundle.config,
@@ -183,7 +183,7 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
               <Sparkles size={16} />
               {menuCopy.sectionCopy}
             </div>
-              {orderingPaused ? (
+              {storefrontState.mode !== 'open' ? (
                 <div className="notice" data-tone={storefrontState.tone}>
                   <Sparkles size={16} />
                   {storefrontState.summary}

@@ -2,7 +2,13 @@ import { notFound } from 'next/navigation';
 import { StorefrontShell } from '../../components/storefront-shell';
 import { MenuItemDetailClient } from '../../components/menu-item-detail';
 import { fetchStorefrontBundle, money } from '../../lib/storefront';
-import { getConfigValue, getMenuDetailFallbackImageUrl, getPizzaDisplayToppings, getPizzaPrice } from '../../lib/catalog';
+import {
+  getConfigValue,
+  getMenuDetailFallbackImageUrl,
+  getPizzaDisplayToppings,
+  getPizzaPrice,
+  getStorefrontState,
+} from '../../lib/catalog';
 
 export const dynamic = 'force-dynamic';
 
@@ -49,7 +55,8 @@ export default async function MenuItemPage({ params }: { params: Promise<{ slug:
     'menu_detail_preview_copy',
     pizza ? 'Medium price shown here. Use the size ladder for the full range.' : 'Pulled live from the menu.'
   );
-  const orderingPaused = bundle.maintenanceMode || !bundle.isOpen;
+  const storefrontState = getStorefrontState(bundle);
+  const orderingPaused = !storefrontState.orderingEnabled;
   return (
     <StorefrontShell bundle={bundle}>
     <MenuItemDetailClient
@@ -75,6 +82,8 @@ export default async function MenuItemPage({ params }: { params: Promise<{ slug:
                 'menu_detail_paused_copy',
                 'Ordering is paused while the storefront is closed or in maintenance mode.'
               )
+            : storefrontState.mode === 'after_hours'
+              ? storefrontState.summary
             : statusCopy
         }
         actionTitle={actionTitle}

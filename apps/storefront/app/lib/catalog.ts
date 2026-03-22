@@ -1,4 +1,10 @@
 import type { Addon, CartLine, Dessert, Extra, Pizza, Size, StorefrontBundle } from './types';
+import {
+  getStoreAvailabilityFromConfig,
+  getStoreTimeZoneFromConfig,
+  type StoreAvailability,
+  type StoreAvailabilityMode,
+} from './store-hours';
 import { buildWhatsAppUrl } from './whatsapp';
 
 export function getConfigValue(config: Record<string, string>, key: string, fallback = '') {
@@ -225,13 +231,23 @@ export function getOpeningWindow(bundle: StorefrontBundle) {
   return `${opening} - ${closing}`;
 }
 
-export type StorefrontAvailability = 'open' | 'closed' | 'maintenance';
+export function getStoreTimeZone(bundle: StorefrontBundle) {
+  return getStoreTimeZoneFromConfig(bundle.config);
+}
+
+export function getStoreAvailability(bundle: StorefrontBundle, now = new Date()): StoreAvailability {
+  return getStoreAvailabilityFromConfig(bundle.config, now);
+}
+
+export type StorefrontAvailability = StoreAvailabilityMode;
 
 export type StorefrontState = {
   mode: StorefrontAvailability;
   tone: 'success' | 'warning' | 'danger';
   label: string;
   summary: string;
+  orderingEnabled: boolean;
+  requiresScheduledTime: boolean;
   primaryAction: {
     href: string;
     label: string;
@@ -416,7 +432,6 @@ export function getBuilderCopy(bundle: StorefrontBundle) {
 
 export function getCartCopy(bundle: StorefrontBundle) {
   return {
-    openOrderChatLabel: getConfigValue(bundle.config, 'cart_open_order_chat_label', 'Open order chat'),
     viewLiveStatusLabel: getConfigValue(bundle.config, 'cart_view_live_status_label', 'View live status'),
     continueBrowsingLabel: getConfigValue(bundle.config, 'cart_continue_browsing_label', 'Continue browsing'),
     customerNameLabel: getConfigValue(bundle.config, 'cart_customer_name_label', 'Name'),
@@ -493,11 +508,6 @@ export function getCartCopy(bundle: StorefrontBundle) {
       'cart_paused_closed_message',
       'Orders are currently closed. Please try again when the store is open.'
     ),
-    openOrderPrefillMessage: getConfigValue(
-      bundle.config,
-      'cart_open_order_prefill_message',
-      'Hi, I would like to place an order from the website.'
-    ),
     missingCustomerMessage: getConfigValue(
       bundle.config,
       'cart_missing_customer_message',
@@ -541,7 +551,9 @@ export function getCartCopy(bundle: StorefrontBundle) {
 }
 
 export function getStorefrontState(bundle: StorefrontBundle): StorefrontState {
-  if (bundle.maintenanceMode) {
+  const availability = getStoreAvailability(bundle);
+
+  if (availability.mode === 'maintenance') {
     return {
       mode: 'maintenance',
       tone: 'warning',
@@ -551,6 +563,8 @@ export function getStorefrontState(bundle: StorefrontBundle): StorefrontState {
         'storefront_maintenance_summary',
         'The storefront is being updated. Browsing still works, but checkout is paused until maintenance ends.'
       ),
+      orderingEnabled: false,
+      requiresScheduledTime: false,
       primaryAction: {
         href: '/status',
         label: getConfigValue(bundle.config, 'storefront_maintenance_primary_label', 'View status'),
@@ -562,7 +576,7 @@ export function getStorefrontState(bundle: StorefrontBundle): StorefrontState {
     };
   }
 
-  if (!bundle.isOpen) {
+  if (availability.mode === 'closed') {
     return {
       mode: 'closed',
       tone: 'danger',
@@ -572,6 +586,8 @@ export function getStorefrontState(bundle: StorefrontBundle): StorefrontState {
         'storefront_closed_summary',
         'Orders are closed right now. Browse the menu and check the live status for the next open window.'
       ),
+      orderingEnabled: false,
+      requiresScheduledTime: false,
       primaryAction: {
         href: '/status',
         label: getConfigValue(bundle.config, 'storefront_closed_primary_label', 'View status'),
@@ -579,6 +595,29 @@ export function getStorefrontState(bundle: StorefrontBundle): StorefrontState {
       secondaryAction: {
         href: '/menu',
         label: getConfigValue(bundle.config, 'storefront_closed_secondary_label', 'Browse menu'),
+      },
+    };
+  }
+
+  if (availability.mode === 'after_hours') {
+    return {
+      mode: 'after_hours',
+      tone: 'warning',
+      label: getConfigValue(bundle.config, 'storefront_after_hours_label', 'Closed now'),
+      summary: getConfigValue(
+        bundle.config,
+        'storefront_after_hours_summary',
+        `The kitchen is outside the live window right now, but you can still schedule an order within ${getOpeningWindow(bundle)}.`
+      ),
+      orderingEnabled: true,
+      requiresScheduledTime: true,
+      primaryAction: {
+        href: '/cart',
+        label: getConfigValue(bundle.config, 'storefront_after_hours_primary_label', 'Schedule order'),
+      },
+      secondaryAction: {
+        href: '/status',
+        label: getConfigValue(bundle.config, 'storefront_after_hours_secondary_label', 'View hours'),
       },
     };
   }
@@ -592,6 +631,8 @@ export function getStorefrontState(bundle: StorefrontBundle): StorefrontState {
       'storefront_open_summary',
       `Orders are live now. Checkout is available and the live window is ${getOpeningWindow(bundle)}.`
     ),
+    orderingEnabled: true,
+    requiresScheduledTime: false,
     primaryAction: {
       href: '/cart',
       label: getConfigValue(bundle.config, 'storefront_open_primary_label', 'View cart'),
@@ -604,7 +645,7 @@ export function getStorefrontState(bundle: StorefrontBundle): StorefrontState {
 }
 
 export function isOrderingPaused(bundle: StorefrontBundle) {
-  return getStorefrontState(bundle).mode !== 'open';
+  return !getStorefrontState(bundle).orderingEnabled;
 }
 
 export function getSizeLabel(bundle: StorefrontBundle, size: Size) {
