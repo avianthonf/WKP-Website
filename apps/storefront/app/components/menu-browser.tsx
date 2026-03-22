@@ -27,7 +27,7 @@ type FilterKey = 'all' | 'pizza' | 'addon' | 'extra' | 'dessert';
 const pizzaSizes: Size[] = ['small', 'medium', 'large'];
 
 export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
-  const { addItem, items } = useCart();
+  const { addItem, items, totalItems } = useCart();
   const [filter, setFilter] = useState<FilterKey>('all');
   const [query, setQuery] = useState('');
   const [hasFinePointer, setHasFinePointer] = useState(false);
@@ -48,6 +48,13 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
   const menuSectionTitle = menuCopy.sectionTitle;
   const menuSectionCopy = menuCopy.sectionCopy;
   const menuHeroImageUrl = getMenuHeroImageUrl(bundle);
+  const hasItemsInCart = totalItems > 0;
+  const heroSecondaryHref = hasItemsInCart ? '/cart' : orderingPaused ? '/status' : '/build';
+  const heroSecondaryLabel = hasItemsInCart
+    ? menuCopy.heroReviewCartLabel
+    : orderingPaused
+      ? menuCopy.heroContactLabel
+      : menuCopy.heroOpenBuilderLabel;
   const filters: Array<{ key: FilterKey; label: string }> = [
     { key: 'all', label: menuCopy.allFilterLabel },
     { key: 'pizza', label: menuCopy.pizzasFilterLabel },
@@ -119,8 +126,8 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
                 <ChefHat size={16} />
                 {orderingPaused ? menuCopy.heroViewStatusLabel : menuCopy.heroOpenBuilderLabel}
               </Link>
-              <Link href={orderingPaused ? '/contact' : '/cart'} className="button-secondary">
-                {orderingPaused ? menuCopy.heroContactLabel : menuCopy.heroReviewCartLabel}
+              <Link href={heroSecondaryHref} className="button-secondary">
+                {heroSecondaryLabel}
               </Link>
             </div>
 
@@ -176,25 +183,6 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
                 <p className="hero-preview__meta">
                   {bundle.pizzas[0]?.description || menuCopy.heroPreviewFallbackCopy}
                 </p>
-              </div>
-            </div>
-            <div className="content-card">
-            <div className="notice">
-              <Sparkles size={16} />
-              {menuCopy.sectionCopy}
-            </div>
-              {storefrontState.mode !== 'open' ? (
-                <div className="notice" data-tone={storefrontState.tone}>
-                  <Sparkles size={16} />
-                  {storefrontState.summary}
-                </div>
-              ) : null}
-              <div className="tag-list">
-                {bundle.notifications.slice(0, 4).map((note) => (
-                  <span key={note.id} className="tag tag--accent">
-                    {note.title}
-                  </span>
-                ))}
               </div>
             </div>
           </div>
@@ -420,6 +408,28 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
               <div className="info-card__copy">{menuCopy.pairingsNoneCopy}</div>
             </motion.div>
           )}
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="content-card">
+          <div className="notice">
+            <Sparkles size={16} />
+            {menuCopy.sectionCopy}
+          </div>
+          {storefrontState.mode !== 'open' ? (
+            <div className="notice" data-tone={storefrontState.tone}>
+              <Sparkles size={16} />
+              {storefrontState.summary}
+            </div>
+          ) : null}
+          <div className="tag-list">
+            {bundle.notifications.slice(0, 4).map((note) => (
+              <span key={note.id} className="tag tag--accent">
+                {note.title}
+              </span>
+            ))}
+          </div>
         </div>
       </section>
     </div>

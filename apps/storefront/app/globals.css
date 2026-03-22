@@ -274,8 +274,8 @@ img {
 }
 
 .brand__mark {
-  width: 2.6rem;
-  height: 2.6rem;
+  width: 2.8rem;
+  height: 2.8rem;
   display: grid;
   place-items: center;
   border-radius: 1rem;
@@ -285,13 +285,22 @@ img {
   overflow: hidden;
 }
 
+.brand__mark[data-has-logo="true"] {
+  width: 5rem;
+  height: 5rem;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
 .brand__logo {
   width: 100%;
   height: 100%;
   display: block;
   object-fit: contain;
   object-position: center;
-  padding: 0.18rem;
+  padding: 0;
   box-sizing: border-box;
 }
 
@@ -441,6 +450,36 @@ img {
   font-weight: 800;
   box-shadow: 0 0 12px rgba(212, 175, 55, 0.4);
   transition: transform 400ms var(--ease-squish);
+}
+
+.shell-cart-fab {
+  position: fixed;
+  right: 1.2rem;
+  bottom: 1.2rem;
+  z-index: 85;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.92rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(212, 175, 55, 0.24);
+  background: rgba(10, 8, 6, 0.94);
+  color: var(--text-primary);
+  box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.8), var(--shadow-glow-gold);
+  backdrop-filter: blur(18px);
+}
+
+.shell-cart-fab strong {
+  display: grid;
+  place-items: center;
+  min-width: 1.65rem;
+  height: 1.65rem;
+  padding: 0 0.35rem;
+  border-radius: 999px;
+  background: var(--accent-gold);
+  color: #111;
+  font-size: 0.78rem;
+  font-weight: 800;
 }
 
 .menu-toggle {
@@ -1693,7 +1732,7 @@ img {
 
 .check-panel__grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(20rem, 0.65fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 1rem;
 }
 
@@ -2215,6 +2254,13 @@ img {
 @media (max-width: 640px) {
   .site-shell__topbar-inner {
     min-height: 70px;
+  }
+
+  .shell-cart-fab {
+    left: 50%;
+    right: auto;
+    bottom: 1rem;
+    transform: translateX(-50%);
   }
 
   .brand__tag {

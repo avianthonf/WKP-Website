@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { motion, useReducedMotion } from 'framer-motion';
 import { ArrowRight, BadgeCheck, ChefHat, ShoppingBag, Sparkles } from 'lucide-react';
+import { useCart } from './cart-provider';
 import { getSizeLabel, getSizeName, money } from '../lib/catalog';
 import type { Size, StorefrontBundle } from '../lib/types';
 
@@ -80,6 +81,9 @@ export function MenuItemDetailClient({
   fastLaneLabel,
 }: MenuItemDetailProps) {
   const prefersReducedMotion = useReducedMotion();
+  const { totalItems } = useCart();
+  const detailPrimaryHref = orderingPaused ? '/status' : totalItems > 0 ? '/cart' : '/menu';
+  const detailPrimaryLabel = orderingPaused ? viewStatusLabel : totalItems > 0 ? viewCartLabel : addFromMenuLabel;
 
   return (
     <div className="page-wrap menu-detail-shell">
@@ -108,9 +112,9 @@ export function MenuItemDetailClient({
               <Link href="/menu" className="button-secondary">
                 {backToMenuLabel}
               </Link>
-              <Link href={orderingPaused ? '/status' : '/cart'} className="button">
+              <Link href={detailPrimaryHref} className="button">
                 <ShoppingBag size={16} />
-                {orderingPaused ? viewStatusLabel : viewCartLabel}
+                {detailPrimaryLabel}
               </Link>
             </div>
 

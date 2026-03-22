@@ -64,6 +64,8 @@ export function StorefrontShell({
   const storePhone = getStorePhone(bundle);
   const brandLogoUrl = getBrandLogoUrl(bundle);
   const dashboardLiveMode = getDashboardLiveMode(bundle);
+  const shellPrimaryHref = totalItems > 0 ? storefrontState.primaryAction.href : '/menu';
+  const shellPrimaryLabel = totalItems > 0 ? storefrontState.primaryAction.label : getConfigValue(bundle.config, 'menu_browse_label', 'Browse the menu');
 
   return (
     <div className="site-shell">
@@ -112,7 +114,7 @@ export function StorefrontShell({
       <header className="site-shell__topbar">
         <div className="site-shell__topbar-inner">
           <Link href="/home" className="brand" aria-label={storeName}>
-            <span className="brand__mark">
+            <span className="brand__mark" data-has-logo={brandLogoUrl ? 'true' : 'false'}>
               {brandLogoUrl ? <img src={brandLogoUrl} alt="" className="brand__logo" aria-hidden="true" /> : 'W'}
             </span>
             <span>
@@ -151,8 +153,8 @@ export function StorefrontShell({
             >
               <Menu size={16} />
             </button>
-            <Link href={storefrontState.primaryAction.href} className="pill shell-cta">
-              <span>{storefrontState.primaryAction.label}</span>
+            <Link href={shellPrimaryHref} className="pill shell-cta">
+              <span>{shellPrimaryLabel}</span>
               <ArrowRight size={16} />
             </Link>
           </div>
@@ -174,6 +176,14 @@ export function StorefrontShell({
         ) : null}
 
       </header>
+
+      {totalItems > 0 ? (
+        <Link href="/cart" className="shell-cart-fab" aria-label={shellCopy.cartAriaLabelTemplate.replace('{count}', String(totalItems))}>
+          <ShoppingBag size={16} />
+          <span>Go to cart</span>
+          <strong>{totalItems}</strong>
+        </Link>
+      ) : null}
 
       <AnimatePresence>
         {drawerOpen ? (
@@ -197,7 +207,7 @@ export function StorefrontShell({
             >
               <div className="site-shell__drawer-header">
                 <Link href="/home" className="brand" onClick={() => setDrawerOpen(false)}>
-                  <span className="brand__mark">
+                  <span className="brand__mark" data-has-logo={brandLogoUrl ? 'true' : 'false'}>
                     {brandLogoUrl ? <img src={brandLogoUrl} alt="" className="brand__logo" aria-hidden="true" /> : 'W'}
                   </span>
                   <span>

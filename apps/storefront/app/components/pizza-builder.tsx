@@ -141,25 +141,6 @@ export function PizzaBuilder({ bundle, initialPizzaSlug }: { bundle: StorefrontB
                 <p className="hero-preview__meta">{pizza.description || builderCopy.previewCopy}</p>
               </div>
             </div>
-            <div className="content-card">
-              <div className="notice">
-                <Sparkles size={16} />
-                {builderCopy.noticeCopy}
-              </div>
-              {storefrontState.mode !== 'open' ? (
-                <div className="notice" data-tone={storefrontState.tone}>
-                  <Sparkles size={16} />
-                  {orderingPaused ? builderCopy.pausedNoticeCopy : storefrontState.summary}
-                </div>
-              ) : null}
-              <div className="tag-list">
-                {getPizzaDisplayToppings(pizza).map((item) => (
-                  <span key={item} className="tag tag--accent">
-                    {item}
-                  </span>
-                ))}
-              </div>
-            </div>
           </div>
         </div>
       </motion.section>
@@ -368,6 +349,28 @@ export function PizzaBuilder({ bundle, initialPizzaSlug }: { bundle: StorefrontB
           </motion.aside>
         </div>
       </motion.section>
+
+      <section className="section">
+        <div className="content-card">
+          <div className="notice">
+            <Sparkles size={16} />
+            {builderCopy.noticeCopy}
+          </div>
+          {storefrontState.mode !== 'open' ? (
+            <div className="notice" data-tone={storefrontState.tone}>
+              <Sparkles size={16} />
+              {orderingPaused ? builderCopy.pausedNoticeCopy : storefrontState.summary}
+            </div>
+          ) : null}
+          <div className="tag-list">
+            {getPizzaDisplayToppings(pizza).map((item) => (
+              <span key={item} className="tag tag--accent">
+                {item}
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
