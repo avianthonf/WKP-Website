@@ -98,11 +98,15 @@ export interface Notification {
 }
 
 export interface SiteConfigItem {
+  id: string;
   key: string;
   value: string;
   label?: string | null;
   type: string;
   description?: string | null;
+  is_public?: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Order {

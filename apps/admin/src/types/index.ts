@@ -151,6 +151,7 @@ export interface SiteConfigItem {
   label?: string;
   type: string;
   description?: string;
+  is_public?: boolean;
   created_at: string;
   updated_at: string;
 }
