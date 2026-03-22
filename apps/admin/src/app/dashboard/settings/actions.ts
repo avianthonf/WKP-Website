@@ -99,6 +99,10 @@ export async function uploadStorefrontAsset(formData: FormData) {
       throw new Error('Only image files are supported');
     }
 
+    if (file.size > 16 * 1024 * 1024) {
+      throw new Error('Please choose an image smaller than 16 MB');
+    }
+
     const safeName = file.name
       .replace(/\.[^/.]+$/, '')
       .toLowerCase()
@@ -109,8 +113,9 @@ export async function uploadStorefrontAsset(formData: FormData) {
     const extension = extensionMatch ? `.${extensionMatch[1].toLowerCase()}` : '';
     const uniqueId = crypto.randomUUID();
     const path = `${folder}/${Date.now()}-${uniqueId}-${safeName}${extension}`;
+    const fileBytes = Buffer.from(await file.arrayBuffer());
 
-    const { error } = await supabaseAdmin.storage.from('brand-assets').upload(path, file, {
+    const { error } = await supabaseAdmin.storage.from('brand-assets').upload(path, fileBytes, {
       contentType: file.type,
       upsert: false,
     });
@@ -118,6 +123,9 @@ export async function uploadStorefrontAsset(formData: FormData) {
     if (error) throw error;
 
     const { data } = supabaseAdmin.storage.from('brand-assets').getPublicUrl(path);
+    if (!data.publicUrl) {
+      throw new Error('The image uploaded, but a public URL could not be generated');
+    }
 
     return { success: true, publicUrl: data.publicUrl };
   } catch (error: any) {

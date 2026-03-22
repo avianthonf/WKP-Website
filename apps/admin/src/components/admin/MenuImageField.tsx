@@ -5,6 +5,8 @@ import { Image as ImageIcon, Loader2, Upload, X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { uploadStorefrontAsset } from '@/app/dashboard/settings/actions';
 
+const MAX_UPLOAD_SIZE_BYTES = 16 * 1024 * 1024;
+
 interface MenuImageFieldProps {
   label: string;
   description: string;
@@ -34,6 +36,12 @@ export function MenuImageField({
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+
+    if (file.size > MAX_UPLOAD_SIZE_BYTES) {
+      toast.error('Please choose an image smaller than 16 MB');
+      event.target.value = '';
+      return;
+    }
 
     setIsUploading(true);
     try {
