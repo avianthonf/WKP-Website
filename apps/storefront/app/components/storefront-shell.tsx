@@ -1,6 +1,7 @@
 'use client';
 
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
@@ -115,7 +116,11 @@ export function StorefrontShell({
         <div className="site-shell__topbar-inner">
           <Link href="/home" className="brand" aria-label={storeName}>
             <span className="brand__mark" data-has-logo={brandLogoUrl ? 'true' : 'false'}>
-              {brandLogoUrl ? <img src={brandLogoUrl} alt="" className="brand__logo" aria-hidden="true" /> : 'W'}
+              {brandLogoUrl ? (
+                <Image src={brandLogoUrl} alt="" aria-hidden="true" fill className="brand__logo" sizes="80px" />
+              ) : (
+                'W'
+              )}
             </span>
             <span>
               <span className="brand__name">{storeName}</span>
@@ -208,7 +213,11 @@ export function StorefrontShell({
               <div className="site-shell__drawer-header">
                 <Link href="/home" className="brand" onClick={() => setDrawerOpen(false)}>
                   <span className="brand__mark" data-has-logo={brandLogoUrl ? 'true' : 'false'}>
-                    {brandLogoUrl ? <img src={brandLogoUrl} alt="" className="brand__logo" aria-hidden="true" /> : 'W'}
+                    {brandLogoUrl ? (
+                      <Image src={brandLogoUrl} alt="" aria-hidden="true" fill className="brand__logo" sizes="80px" />
+                    ) : (
+                      'W'
+                    )}
                   </span>
                   <span>
                     <span className="brand__name">{getHeroTitle(bundle)}</span>

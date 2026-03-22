@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useMemo, useState, type ComponentType } from 'react';
 import {
   ArrowRight,
@@ -522,15 +523,16 @@ function PizzaSection({
                 <tr key={pizza.id} className="group transition-all" style={{ animationDelay: `${index * 50}ms` }}>
                   <td data-label="">
                     <div
-                      className="flex aspect-square w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-[var(--border-default)] bg-[var(--surface-secondary)] transition-all group-hover:scale-105 group-hover:rotate-1"
+                      className="relative flex aspect-square w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-[var(--border-default)] bg-[var(--surface-secondary)] transition-all group-hover:scale-105 group-hover:rotate-1"
                       style={{ boxShadow: 'var(--shadow-sm)' }}
                     >
                       {pizza.image_url ? (
-                        <img
+                        <Image
                           src={pizza.image_url}
                           alt={pizza.name}
-                          className="block h-full w-full max-h-full max-w-full object-cover"
-                          loading="lazy"
+                          fill
+                          sizes="48px"
+                          className="object-cover"
                         />
                       ) : (
                         <PizzaIcon size={20} className="text-[var(--stone)]" />
@@ -608,11 +610,12 @@ function PizzaCard({ pizza }: { pizza: Pizza & { categories?: { label: string } 
       <div className="flex items-start gap-4">
         <div className="relative aspect-square w-24 shrink-0 overflow-hidden rounded-[1.1rem] border border-[var(--border-default)] bg-[var(--surface-secondary)]">
           {pizza.image_url ? (
-            <img
+            <Image
               src={pizza.image_url}
               alt={pizza.name}
-              className="block h-full w-full max-h-full max-w-full object-cover"
-              loading="lazy"
+              fill
+              sizes="96px"
+              className="object-cover"
             />
           ) : (
             <div className="grid h-full w-full place-items-center text-[var(--stone)]">

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { ChefHat, Search, Sparkles } from 'lucide-react';
@@ -347,9 +348,11 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
           <div className="hero-aside">
             <div className="hero-preview">
               {menuHeroImageUrl ? (
-                <img
+                <Image
                   src={menuHeroImageUrl as string}
                   alt={bundle.pizzas[0]?.name || getStoreName(bundle) || menuCopy.heroPreviewFallbackAlt}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 34vw"
                   className="hero-preview__image"
                 />
               ) : (

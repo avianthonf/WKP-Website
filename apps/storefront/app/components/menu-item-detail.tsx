@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion, useReducedMotion } from 'framer-motion';
 import { ArrowRight, BadgeCheck, ChefHat, ShoppingBag, Sparkles } from 'lucide-react';
 import { useCart } from './cart-provider';
@@ -161,7 +162,15 @@ export function MenuItemDetailClient({
             transition={{ duration: 0.55, delay: 0.12 }}
           >
               <div className="hero-preview menu-detail-hero__preview">
-                {image ? <img src={image} alt={title} className="hero-preview__image" /> : null}
+                {image ? (
+                  <Image
+                    src={image}
+                    alt={title}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 34vw"
+                    className="hero-preview__image"
+                  />
+                ) : null}
                 <div className="hero-preview__overlay">
                   <div className="hero-preview__title">{money(primaryPrice)}</div>
                   <p className="hero-preview__meta">{previewCopy}</p>

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useCallback, useEffect, useRef, useState, useTransition } from 'react';
+import Image from 'next/image';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { addonSchema, AddonFormData } from '@/lib/validations';
@@ -172,11 +173,11 @@ export function AddonsClient({ initialAddons, createSignal }: AddonsClientProps)
               <tr key={addon.id}>
                 <td>
                   <div
-                    className="w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center shrink-0"
+                    className="relative w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center shrink-0"
                     style={{ background: 'var(--surface-secondary)', border: '1px solid var(--border-default)' }}
                   >
                     {addon.image_url ? (
-                      <img src={addon.image_url} alt={addon.name} className="w-full h-full object-cover" loading="lazy" />
+                      <Image src={addon.image_url} alt={addon.name} fill sizes="40px" className="object-cover" />
                     ) : (
                       <Package size={16} style={{ color: 'var(--stone)' }} />
                     )}

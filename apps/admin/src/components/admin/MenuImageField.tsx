@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useRef, useState } from 'react';
+import Image from 'next/image';
 import { Image as ImageIcon, Loader2, Upload, X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { uploadStorefrontAsset } from '@/app/dashboard/settings/actions';
@@ -69,15 +70,16 @@ export function MenuImageField({
     <section className="rounded-2xl border border-[var(--border-default)] bg-[var(--surface-secondary)] p-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
         <div
-          className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-[var(--border-default)] bg-white"
+          className="relative flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-[var(--border-default)] bg-white"
           style={{ boxShadow: 'var(--shadow-sm)' }}
         >
           {currentValue ? (
-            <img
+            <Image
               src={currentValue}
               alt={previewAlt}
-              className="block h-full w-full max-h-full max-w-full object-cover"
-              loading="lazy"
+              fill
+              sizes="96px"
+              className="object-cover"
             />
           ) : (
             <ImageIcon size={26} className="text-[var(--stone)]" />

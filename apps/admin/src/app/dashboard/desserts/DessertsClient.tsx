@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useCallback, useEffect, useRef, useState, useTransition } from 'react';
+import Image from 'next/image';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { dessertSchema, DessertFormData } from '@/lib/validations';
@@ -168,11 +169,11 @@ export function DessertsClient({ initialDesserts, createSignal }: DessertsClient
               <tr key={dessert.id}>
                 <td>
                   <div
-                    className="w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center shrink-0"
+                    className="relative w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center shrink-0"
                     style={{ background: 'var(--surface-secondary)', border: '1px solid var(--border-default)' }}
                   >
                     {dessert.image_url ? (
-                      <img src={dessert.image_url} alt={dessert.name} className="w-full h-full object-cover" loading="lazy" />
+                      <Image src={dessert.image_url} alt={dessert.name} fill sizes="40px" className="object-cover" />
                     ) : (
                       <Cookie size={16} style={{ color: 'var(--stone)' }} />
                     )}

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useMemo, useState } from 'react';
 import { ArrowRight, ChefHat, Sparkles } from 'lucide-react';
@@ -130,9 +131,11 @@ export function PizzaBuilder({ bundle, initialPizzaSlug }: { bundle: StorefrontB
           <div className="hero-aside">
             <div className="hero-preview">
               {pizza.image_url || builderHeroImageUrl ? (
-                <img
+                <Image
                   src={(pizza.image_url || builderHeroImageUrl) as string}
                   alt={pizza.name}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 34vw"
                   className="hero-preview__image"
                 />
               ) : null}

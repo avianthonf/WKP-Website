@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useEffect, useMemo, useState, useTransition, type FormEvent } from 'react';
 import { ArrowRight, CheckCircle2, MapPin, Navigation, PhoneCall, ShoppingBag, Trash2 } from 'lucide-react';
@@ -358,7 +359,13 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
           <div className="hero-aside">
             <div className="hero-preview">
               {cartHeroImageUrl ? (
-                <img src={cartHeroImageUrl as string} alt={cartCopy.previewImageAlt} className="hero-preview__image" />
+                <Image
+                  src={cartHeroImageUrl as string}
+                  alt={cartCopy.previewImageAlt}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 34vw"
+                  className="hero-preview__image"
+                />
               ) : (
                 <div className="hero-preview__image hero-preview__image--empty">
                   <span>{getStoreName(bundle) || 'Live checkout'}</span>
@@ -691,7 +698,11 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
                     >
                       <div className="cart-line">
                         <div className="cart-line__media" aria-hidden="true">
-                          {item.imageUrl ? <img src={item.imageUrl} alt="" /> : <ShoppingBag size={14} />}
+                          {item.imageUrl ? (
+                            <Image src={item.imageUrl} alt="" fill sizes="48px" className="cart-line__image" />
+                          ) : (
+                            <ShoppingBag size={14} />
+                          )}
                         </div>
                         <div className="stack cart-line__content">
                           <span className="summary-row__label">{item.name}</span>
@@ -800,9 +811,12 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
               </div>
               <p className="hero-copy hero-copy--tight">{cartCopy.scanQrLabel}</p>
               <div className="order-handoff__qr">
-                <img
+                <Image
                   src={`https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${encodeURIComponent(handoff.whatsappUrl)}`}
                   alt={`${cartCopy.qrAltPrefix} ${handoff.orderNumber}`}
+                  width={280}
+                  height={280}
+                  unoptimized
                   className="order-handoff__qr-image"
                 />
               </div>

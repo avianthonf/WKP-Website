@@ -274,6 +274,7 @@ img {
 }
 
 .brand__mark {
+  position: relative;
   width: 2.8rem;
   height: 2.8rem;
   display: grid;
@@ -1821,6 +1822,7 @@ img {
 }
 
 .cart-line__media {
+  position: relative;
   width: 3.25rem;
   height: 3.25rem;
   border-radius: 1rem;

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight, Flame, Sparkles, ShoppingBag, Wand2 } from 'lucide-react';
 import { useMemo, useRef } from 'react';
@@ -197,9 +198,11 @@ export function ImmersiveHome({
               <div className="hero-showcase__glow" />
               <div className="hero-showcase__card hero-showcase__card--main">
                 {heroImageUrl ? (
-                  <img
+                  <Image
                     src={heroImageUrl as string}
                     alt={bundle.pizzas[0]?.name || storeName}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 36vw"
                     className="hero-showcase__image"
                   />
                 ) : (
@@ -295,7 +298,15 @@ export function ImmersiveHome({
               whileHover={prefersReducedMotion ? {} : { y: -8, scale: 1.015 }}
             >
               <div className="signature-card__media">
-                {pizza.image_url ? <img src={pizza.image_url} alt={pizza.name} /> : null}
+                {pizza.image_url ? (
+                  <Image
+                    src={pizza.image_url}
+                    alt={pizza.name}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 25vw"
+                    className="signature-card__image"
+                  />
+                ) : null}
               </div>
               <div className="signature-card__body">
                 <div className="signature-card__top">

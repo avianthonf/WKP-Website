@@ -155,7 +155,7 @@ The storefront is intentionally dynamic and should read live data instead of har
 - The top logo assumes square artwork. It should not stretch, crop, or overflow.
 - The top bar only needs the open/closed badge, not an extra duplicate status card.
 - Empty cart actions should not route directly into checkout.
-- Some screens still use raw `<img>` tags and Next warns about them during build. The build passes, but the warning is expected for now.
+- The storefront and admin image previews now use `next/image`, so the old raw image build warnings should stay gone unless a new one is introduced later.
 - The store state has more than one practical mode:
   - `open`
   - `after_hours`
@@ -261,4 +261,3 @@ Before changing shared behavior, ask:
 5. Does the layout still keep content before utility cards?
 
 If the answer to any of those is no, the change is probably incomplete.
-
