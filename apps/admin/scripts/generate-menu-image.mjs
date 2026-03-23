@@ -198,7 +198,7 @@ async function generateImage({ model, prompt }) {
     throw new Error('Set HF_TOKEN in apps/admin/.env.local before running the generator');
   }
 
-  const endpoint = `https://api-inference.huggingface.co/models/${encodeURIComponent(model)}`;
+  const endpoint = `https://router.huggingface.co/hf-inference/models/${encodeURIComponent(model)}`;
   const payload = {
     inputs: prompt,
     parameters: {
@@ -330,15 +330,26 @@ async function main() {
 
     console.log(JSON.stringify({ ...meta, prompt }, null, 2));
 
+    const buffer = await generateImage({ model: CONFIG.model, prompt });
+    await fs.promises.writeFile(path.join(outputDir, `${job.type}-${job.slug}.png`), buffer);
+
     if (dryRun) {
-      console.log('Dry run complete. Remove --dry-run or set applyByDefault=true to generate the image.');
+      console.log(
+        JSON.stringify(
+          {
+            ...meta,
+            localOnly: true,
+            outputPath: path.join(outputDir, `${job.type}-${job.slug}.png`),
+          },
+          null,
+          2
+        )
+      );
+      console.log('Dry run complete. The image was generated locally only.');
       continue;
     }
 
-    const buffer = await generateImage({ model: CONFIG.model, prompt });
     const { publicUrl } = await uploadToMenuBucket(supabase, buffer, job.folder, job.slug);
-
-    await fs.promises.writeFile(path.join(outputDir, `${job.type}-${job.slug}.png`), buffer);
     await updateItemImage(supabase, job.type, item.id, publicUrl);
 
     console.log(
@@ -346,6 +357,7 @@ async function main() {
         {
           ...meta,
           applied: true,
+          outputPath: path.join(outputDir, `${job.type}-${job.slug}.png`),
           publicUrl,
         },
         null,
