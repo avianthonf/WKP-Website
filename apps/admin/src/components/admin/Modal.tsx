@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
 interface ModalProps {
@@ -35,7 +36,7 @@ export function Modal({ open, onClose, title, children, maxWidth = 'lg' }: Modal
 
   if (!open) return null;
 
-  return (
+  const content = (
     <div
       className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto p-4 backdrop-blur-sm sm:items-center sm:p-6"
       style={{ background: 'rgba(26, 23, 18, 0.4)' }}
@@ -83,4 +84,6 @@ export function Modal({ open, onClose, title, children, maxWidth = 'lg' }: Modal
       </div>
     </div>
   );
+
+  return createPortal(content, document.body);
 }
