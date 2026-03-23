@@ -12,7 +12,7 @@ export default async function AboutPage() {
   return (
     <StorefrontShell bundle={bundle}>
       <div className="page-wrap">
-        <section className="hero-card reveal">
+        <section className="hero-card reveal" style={{ order: -1 }}>
           <div className="hero-card__grid">
             <div>
               <span className="eyebrow">
@@ -63,38 +63,8 @@ export default async function AboutPage() {
           </div>
         </section>
 
-        <section className="info-grid">
-          <div className="info-card">
-            <div className="info-card__title">
-              {getConfigValue(bundle.config, 'about_recipe_title', 'Recipe')}
-            </div>
-            <div className="info-card__body">
-              {getConfigValue(bundle.config, 'about_recipe_body', 'Built for real operations.')}
-            </div>
-            <div className="info-card__copy">
-              {getConfigValue(
-                bundle.config,
-                'about_recipe_copy',
-                'The storefront reads categories, pizzas, toppings, extras, addons, desserts, notifications, and site config live from the database.'
-              )}
-            </div>
-          </div>
-          <div className="info-card">
-            <div className="info-card__title">
-              {getConfigValue(bundle.config, 'about_workflow_title', 'Workflow')}
-            </div>
-            <div className="info-card__body">
-              {getConfigValue(bundle.config, 'about_workflow_body', 'Primary order path is a quick mobile handoff.')}
-            </div>
-            <div className="info-card__copy">
-              {getConfigValue(
-                bundle.config,
-                'about_workflow_copy',
-                'The order is stored in the database first, then the customer is given the next step to complete the send.'
-              )}
-            </div>
-          </div>
-          <div className="info-card">
+        <section className="info-grid"  style={{ display: 'flex', justifyContent: 'center' }}>
+          <div className="info-card" style={{ flex: '0 1 40%' }}>
             <div className="info-card__title">
               {getConfigValue(bundle.config, 'about_location_title', 'Location')}
             </div>

@@ -22,7 +22,7 @@ export default async function ContactPage() {
   return (
     <StorefrontShell bundle={bundle}>
       <div className="page-wrap">
-        <section className="hero-card reveal">
+        <section className="hero-card reveal" style={{ order: -1 }}>
           <div className="hero-card__grid">
             <div>
               <span className="eyebrow">
@@ -86,8 +86,8 @@ export default async function ContactPage() {
           </div>
         </section>
 
-        <section className="info-grid">
-          <div className="info-card">
+        <section className="info-grid" style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <div className="info-card" className="info-card" style={{ flex: '0 1 30%' }}>
             <div className="info-card__title">{getConfigValue(bundle.config, 'contact_map_title', 'Map')}</div>
             <div className="info-card__body">{getConfigValue(bundle.config, 'contact_map_body', 'Find us easily.')}</div>
             <div className="info-card__copy">
@@ -104,32 +104,10 @@ export default async function ContactPage() {
               )}
             </div>
           </div>
-          <div className="info-card">
+          <div className="info-card" className="info-card" style={{ flex: '0 1 30%' }}>
             <div className="info-card__title">{getConfigValue(bundle.config, 'contact_email_title', 'Email')}</div>
             <div className="info-card__body">
               <Mail size={16} /> {getSupportEmail(bundle)}
-            </div>
-            <div className="info-card__copy">
-              {getConfigValue(
-                bundle.config,
-                'contact_email_copy',
-                'This can be connected later if you want a public inbox on the site.'
-              )}
-            </div>
-          </div>
-          <div className="info-card">
-            <div className="info-card__title">
-              {getConfigValue(bundle.config, 'contact_ordering_title', 'Live ordering')}
-            </div>
-            <div className="info-card__body">
-              {getConfigValue(bundle.config, 'contact_ordering_body', 'Direct order chat.')}
-            </div>
-            <div className="info-card__copy">
-              {getConfigValue(
-                bundle.config,
-                'contact_ordering_copy',
-                'The order is stored and then handed off to the selected chat flow, which keeps the customer flow low-friction.'
-              )}
             </div>
           </div>
         </section>

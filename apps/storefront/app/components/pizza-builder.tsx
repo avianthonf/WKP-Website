@@ -128,23 +128,7 @@ export function PizzaBuilder({ bundle, initialPizzaSlug }: { bundle: StorefrontB
               </Link>
             </div>
           </div>
-          <div className="hero-aside">
-            <div className="hero-preview">
-              {pizza.image_url || builderHeroImageUrl ? (
-                <Image
-                  src={(pizza.image_url || builderHeroImageUrl) as string}
-                  alt={pizza.name}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 34vw"
-                  className="hero-preview__image"
-                />
-              ) : null}
-              <div className="hero-preview__overlay">
-                <div className="hero-preview__title">{pizza.name}</div>
-                <p className="hero-preview__meta">{pizza.description || builderCopy.previewCopy}</p>
-              </div>
-            </div>
-          </div>
+          
         </div>
       </motion.section>
 
@@ -353,27 +337,7 @@ export function PizzaBuilder({ bundle, initialPizzaSlug }: { bundle: StorefrontB
         </div>
       </motion.section>
 
-      <section className="section">
-        <div className="content-card">
-          <div className="notice">
-            <Sparkles size={16} />
-            {builderCopy.noticeCopy}
-          </div>
-          {storefrontState.mode !== 'open' ? (
-            <div className="notice" data-tone={storefrontState.tone}>
-              <Sparkles size={16} />
-              {orderingPaused ? builderCopy.pausedNoticeCopy : storefrontState.summary}
-            </div>
-          ) : null}
-          <div className="tag-list">
-            {getPizzaDisplayToppings(pizza).map((item) => (
-              <span key={item} className="tag tag--accent">
-                {item}
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
+      
     </div>
   );
 }

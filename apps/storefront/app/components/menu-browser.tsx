@@ -117,7 +117,6 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
           <div>
             <div className="section__eyebrow">{menuCopy.menuSectionEyebrow}</div>
             <h2 className="section__title">{menuSectionTitle}</h2>
-            <p className="section__copy">{menuSectionCopy}</p>
           </div>
               <div className="stack stack--end">
             <span className="badge" data-tone={storefrontState.tone}>
@@ -311,63 +310,9 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
               </Link>
             </div>
 
-            <div className="hero-grid">
-              <motion.div
-                className="stat-card"
-                initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
-                animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
-                transition={{ duration: 0.35, delay: 0.12 }}
-              >
-                <div className="stat-card__label">{menuCopy.whatsShowingLabel}</div>
-                <div className="stat-card__value">{totalVisible}</div>
-                <div className="stat-card__note">{menuCopy.whatsShowingCopy}</div>
-              </motion.div>
-              <motion.div
-                className="stat-card"
-                initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
-                animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
-                transition={{ duration: 0.35, delay: 0.18 }}
-              >
-                <div className="stat-card__label">{menuCopy.pizzaMoodsLabel}</div>
-                <div className="stat-card__value">{pizzaCategoryOptions.length}</div>
-                <div className="stat-card__note">{menuCopy.pizzaMoodsCopy}</div>
-              </motion.div>
-              <motion.div
-                className="stat-card"
-                initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
-                animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
-                transition={{ duration: 0.35, delay: 0.24 }}
-              >
-                <div className="stat-card__label">{menuCopy.freshPairingsLabel}</div>
-                <div className="stat-card__value">{bundle.toppings.length}</div>
-                <div className="stat-card__note">{menuCopy.freshPairingsCopy}</div>
-              </motion.div>
-            </div>
           </div>
 
-          <div className="hero-aside">
-            <div className="hero-preview">
-              {menuHeroImageUrl ? (
-                <Image
-                  src={menuHeroImageUrl as string}
-                  alt={bundle.pizzas[0]?.name || getStoreName(bundle) || menuCopy.heroPreviewFallbackAlt}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 34vw"
-                  className="hero-preview__image"
-                />
-              ) : (
-                <div className="hero-preview__image hero-preview__image--empty">
-                  <span>{menuCopy.heroPreviewFallbackAlt}</span>
-                </div>
-              )}
-              <div className="hero-preview__overlay">
-                <div className="hero-preview__title">{bundle.pizzas[0]?.name || menuCopy.heroPreviewFallbackTitle}</div>
-                <p className="hero-preview__meta">
-                  {bundle.pizzas[0]?.description || menuCopy.heroPreviewFallbackCopy}
-                </p>
-              </div>
-            </div>
-          </div>
+          
         </div>
       </section>
       <section className="section">

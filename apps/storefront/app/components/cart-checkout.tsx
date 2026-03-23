@@ -357,33 +357,10 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
           </div>
 
           <div className="hero-aside">
-            <div className="hero-preview">
-              {cartHeroImageUrl ? (
-                <Image
-                  src={cartHeroImageUrl as string}
-                  alt={cartCopy.previewImageAlt}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 34vw"
-                  className="hero-preview__image"
-                />
-              ) : (
-                <div className="hero-preview__image hero-preview__image--empty">
-                  <span>{getStoreName(bundle) || 'Live checkout'}</span>
-                </div>
-              )}
-              <div className="hero-preview__overlay">
-                <div className="hero-preview__title">{checkoutPreviewTitle}</div>
-                <p className="hero-preview__meta">{checkoutPreviewCopy}</p>
-              </div>
-            </div>
             <div className="content-card">
               <div className="notice">
                 <CheckCircle2 size={16} />
                 {checkoutHoursCopy} {openingWindow}
-              </div>
-              <div className="notice" data-tone={total < minimumOrder ? 'warning' : 'success'}>
-                <ShoppingBag size={16} />
-                {checkoutMinimumCopy} {minimumOrder ? money(minimumOrder) : cartCopy.minimumNotSetLabel}.
               </div>
               <div className="cart-size-summary">
                 <div className="pizza-card__section-label">{cartCopy.cartSizeSummaryLabel}</div>

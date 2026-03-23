@@ -167,25 +167,7 @@ export function ImmersiveHome({
               </Link>
             </motion.div>
 
-            <motion.div
-              className="hero-orbit"
-              initial={prefersReducedMotion ? false : { opacity: 0, y: 18 }}
-              animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
-              transition={{ duration: 0.55, delay: 0.22 }}
-            >
-              <div className="hero-orbit__item">
-                <span className="hero-orbit__label">{getConfigValue(bundle.config, 'home_orbit_state_label', 'State')}</span>
-                <strong>{storefrontState.label}</strong>
-              </div>
-              <div className="hero-orbit__item">
-                <span className="hero-orbit__label">{getConfigValue(bundle.config, 'home_orbit_tonight_label', 'Tonight')}</span>
-                <strong>{bundle.pizzas.length ? `${bundle.pizzas[0].name}` : storeName}</strong>
-              </div>
-              <div className="hero-orbit__item">
-                <span className="hero-orbit__label">{getConfigValue(bundle.config, 'home_orbit_minimum_label', 'Minimum')}</span>
-                <strong>{money(Number(getConfigValue(bundle.config, 'min_order_amount', '0')))}</strong>
-              </div>
-            </motion.div>
+            
           </div>
 
           <motion.div
@@ -234,23 +216,7 @@ export function ImmersiveHome({
                   </Link>
                 </div>
               </div>
-
-              <div className="hero-showcase__stack">
-                {bundle.addons.slice(0, 2).map((item, index) => (
-                  <motion.div
-                    key={item.id}
-                    className="hero-showcase__mini"
-                    initial={prefersReducedMotion ? false : { opacity: 0, x: 20 }}
-                    animate={prefersReducedMotion ? {} : { opacity: 1, x: 0 }}
-                    transition={{ duration: 0.45, delay: 0.18 + index * 0.08 }}
-                  >
-                    <span className="hero-showcase__mini-label">
-                      {getConfigValue(bundle.config, 'home_showcase_pair_label', 'Pair it with')}
-                    </span>
-                    <strong>{item.name}</strong>
-                  </motion.div>
-                ))}
-              </div>
+              
             </div>
           </motion.div>
 
