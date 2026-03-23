@@ -676,7 +676,7 @@ The admin app includes a one-item image generation script for menu assets:
 npm run generate:image --workspace apps/admin -- --type pizza --slug margarita --dry-run
 ```
 
-Set `HF_TOKEN` in `apps/admin/.env.local`, then remove `--dry-run` to generate and upload the asset. The script writes prompts and generated files to `apps/admin/tmp/generated-images/`, which is ignored by git.
+Paste your Hugging Face token into `HF_TOKEN` at the top of the script, then remove `--dry-run` to generate and upload the asset. The script writes prompts and generated files to `apps/admin/tmp/generated-images/`, which is ignored by git.
 
 ---
 
