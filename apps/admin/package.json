@@ -11,8 +11,7 @@
     "test:watch": "cross-env NODE_OPTIONS=--experimental-vm-modules vitest --watch",
     "test:coverage": "cross-env NODE_OPTIONS=--experimental-vm-modules vitest --coverage",
     "seed:menu": "node scripts/seed-menu.mjs",
-    "generate:image": "node scripts/generate-menu-image.mjs",
-    "show:prompts": "node scripts/show-pizza-prompts.mjs"
+    "generate:image": "node scripts/generate-menu-image.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.1.0",
