@@ -201,30 +201,30 @@ export function ImmersiveHome({
                     <span>{storeName}</span>
                   </div>
                 )}
-                <div className="hero-showcase__overlay">
-                  <div className="hero-showcase__eyebrow">
-                    <Flame size={13} />
-                    {getConfigValue(bundle.config, 'home_feature_eyebrow_label', "Chef's pick")}
-                  </div>
-                  <div className="hero-showcase__title">
-                    {heroPizza?.name || getConfigValue(bundle.config, 'home_feature_fallback_title', 'Signature pizza')}
-                  </div>
-                  <p className="hero-showcase__copy">
-                    {heroPizza?.description ||
-                      getConfigValue(
-                        bundle.config,
-                        'home_feature_copy',
-                        'Rich, hot, and ready to slide from discovery to order with almost no friction.'
-                      )}
-                  </p>
-                  <Link
-                    href={orderPrimaryHref}
-                    className="button-secondary button-secondary--hero hero-showcase__cta"
-                  >
-                    {featurePrimaryLabel}
-                    <ArrowRight size={15} />
-                  </Link>
+              </div>
+              <div className="hero-showcase__overlay">
+                <div className="hero-showcase__eyebrow">
+                  <Flame size={13} />
+                  {getConfigValue(bundle.config, 'home_feature_eyebrow_label', "Chef's pick")}
                 </div>
+                <div className="hero-showcase__title">
+                  {heroPizza?.name || getConfigValue(bundle.config, 'home_feature_fallback_title', 'Signature pizza')}
+                </div>
+                <p className="hero-showcase__copy">
+                  {heroPizza?.description ||
+                    getConfigValue(
+                      bundle.config,
+                      'home_feature_copy',
+                      'Rich, hot, and ready to slide from discovery to order with almost no friction.'
+                    )}
+                </p>
+                <Link
+                  href={orderPrimaryHref}
+                  className="button-secondary button-secondary--hero hero-showcase__cta"
+                >
+                  {featurePrimaryLabel}
+                  <ArrowRight size={15} />
+                </Link>
               </div>
               
             </div>

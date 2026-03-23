@@ -693,6 +693,8 @@ img {
 .hero-showcase {
   position: relative;
   min-height: 38rem;
+  display: flex;
+  flex-direction: column;
   border-radius: 30px;
   overflow: hidden;
   border: 1px solid var(--border-refined);
@@ -715,8 +717,9 @@ img {
 }
 
 .hero-showcase__card--main {
-  position: absolute;
-  inset: 1rem 1rem 6.5rem;
+  position: relative;
+  flex: 1;
+  margin: 1rem 1rem 0;
   border-radius: 26px;
   overflow: hidden;
 }
@@ -742,10 +745,7 @@ img {
 }
 
 .hero-showcase__overlay {
-  position: absolute;
-  inset: auto 0 0;
   padding: 1.2rem;
-  background: linear-gradient(180deg, transparent 0%, rgba(247, 241, 231, 0.96) 100%);
   color: var(--text-primary);
 }
 
