@@ -6,9 +6,7 @@ import { createClient } from '@supabase/supabase-js';
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const envPath = path.join(scriptDir, '..', '.env.local');
 const outputDir = path.join(scriptDir, '..', 'tmp', 'generated-images');
-const referenceImagePath = path.join(scriptDir, '..', 'reference-images', 'pizza-reference.jpg');
 const HF_MODEL = 'black-forest-labs/FLUX.1-schnell';
-const HF_REFERENCE_MODEL = 'black-forest-labs/FLUX.1-Kontext-dev';
 const CONFIG = {
   model: HF_MODEL,
   applyByDefault: true,
@@ -85,31 +83,6 @@ function buildPizzaPrompt(item, toppings) {
     proteinLine,
     toppingLine,
     spiceLine,
-    `Pizza name: ${item.name}.`,
-    item.description ? `Menu description: ${item.description}.` : '',
-  ]
-    .filter(Boolean)
-    .join(' ');
-}
-
-function buildReferencePrompt(item, toppings) {
-  const toppingNames = toppings.map((topping) => topping.name);
-  const toppingLine = toppingNames.length
-    ? `Target toppings: ${joinWithOxford(toppingNames)}.`
-    : 'Target toppings: keep the pizza simple and balanced.';
-
-  const proteinLine = item.is_veg ? 'Vegetarian pizza target.' : 'Non-vegetarian pizza target.';
-  const styleLine = item.is_bestseller
-    ? 'Keep the image feeling like a best-selling signature pizza.'
-    : item.is_new
-      ? 'Keep the image feeling freshly introduced and premium.'
-      : 'Keep the image feeling like a polished menu hero.';
-
-  return [
-    'Use the reference image as the visual anchor for the pizza only. Preserve the warm cream studio background, the soft lighting, the composition, the plate framing, and the overall polished menu style. Only adapt the pizza itself so it matches the target menu item. Keep the background style identical and do not introduce props, hands, text, packaging, or a different setting.',
-    styleLine,
-    proteinLine,
-    toppingLine,
     `Pizza name: ${item.name}.`,
     item.description ? `Menu description: ${item.description}.` : '',
   ]
@@ -278,74 +251,6 @@ async function generateImage({ model, prompt }) {
   throw new Error('Hugging Face image generation failed after retries');
 }
 
-async function loadReferenceImage() {
-  if (!fs.existsSync(referenceImagePath)) {
-    return null;
-  }
-
-  const buffer = await fs.promises.readFile(referenceImagePath);
-  return buffer.toString('base64');
-}
-
-async function generateImageWithReference({ model, prompt, referenceImageBase64 }) {
-  const hfToken = process.env.HF_TOKEN;
-  if (!hfToken) {
-    throw new Error('Set HF_TOKEN in apps/admin/.env.local before running the generator');
-  }
-
-  const endpoint = `https://router.huggingface.co/hf-inference/models/${encodeURIComponent(model)}`;
-  const payload = {
-    inputs: referenceImageBase64,
-    parameters: {
-      prompt,
-      guidance_scale: 2.5,
-      num_inference_steps: 28,
-      target_size: {
-        width: 1024,
-        height: 1024,
-      },
-    },
-  };
-
-  for (let attempt = 1; attempt <= 3; attempt += 1) {
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${hfToken}`,
-        'Content-Type': 'application/json',
-        Accept: 'image/png',
-      },
-      body: JSON.stringify(payload),
-    });
-
-    const contentType = response.headers.get('content-type') || '';
-    if (response.ok && contentType.includes('image/')) {
-      return Buffer.from(await response.arrayBuffer());
-    }
-
-    const rawBody = contentType.includes('application/json')
-      ? await response.json()
-      : await response.text();
-
-    if (response.status === 503 && rawBody && typeof rawBody === 'object') {
-      const estimatedSeconds = Number(rawBody.estimated_time || 0);
-      if (attempt < 3 && estimatedSeconds > 0) {
-        await new Promise((resolve) => setTimeout(resolve, Math.ceil((estimatedSeconds + 2) * 1000)));
-        continue;
-      }
-    }
-
-    const message =
-      typeof rawBody === 'string'
-        ? rawBody
-        : rawBody?.error || rawBody?.message || `HTTP ${response.status}`;
-
-    throw new Error(`Hugging Face reference image generation failed: ${message}`);
-  }
-
-  throw new Error('Hugging Face reference image generation failed after retries');
-}
-
 async function uploadToMenuBucket(supabase, buffer, folder, slug) {
   const filename = `${Date.now()}-${slug}.png`;
   const pathName = `${folder}/${filename}`;
@@ -388,8 +293,6 @@ async function ensureOutputDir() {
 async function main() {
   loadEnvFile(envPath);
   const supabase = await loadSupabase();
-  const referenceImageBase64 = await loadReferenceImage();
-  const referenceModeEnabled = Boolean(referenceImageBase64);
 
   await ensureOutputDir();
   for (const job of CONFIG.jobs) {
@@ -405,9 +308,7 @@ async function main() {
     const item = job.type === 'pizza' ? context.pizza : context[job.type];
     const prompt =
       job.type === 'pizza'
-        ? referenceModeEnabled
-          ? buildReferencePrompt(item, context.toppings)
-          : buildPizzaPrompt(item, context.toppings)
+        ? buildPizzaPrompt(item, context.toppings)
         : job.type === 'addon'
           ? buildAddonPrompt(item)
           : buildDessertPrompt(item);
@@ -429,13 +330,7 @@ async function main() {
 
     console.log(JSON.stringify({ ...meta, prompt }, null, 2));
 
-    const buffer = referenceModeEnabled && job.type === 'pizza'
-      ? await generateImageWithReference({
-          model: HF_REFERENCE_MODEL,
-          prompt,
-          referenceImageBase64,
-        })
-      : await generateImage({ model: CONFIG.model, prompt });
+    const buffer = await generateImage({ model: CONFIG.model, prompt });
     await fs.promises.writeFile(path.join(outputDir, `${job.type}-${job.slug}.png`), buffer);
 
     if (dryRun) {
