@@ -1,17 +1,16 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { InferenceClient } from '@huggingface/inference';
 import { createClient } from '@supabase/supabase-js';
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const envPath = path.join(scriptDir, '..', '.env.local');
 const outputDir = path.join(scriptDir, '..', 'tmp', 'generated-images');
 const referenceImagePath = path.join(scriptDir, '..', 'reference-images', 'pizza-reference.jpg');
-const HF_TEXT_MODEL = 'black-forest-labs/FLUX.1-schnell';
-const HF_REFERENCE_MODEL = 'stabilityai/stable-diffusion-xl-base-1.0';
+const HF_MODEL = 'black-forest-labs/FLUX.1-schnell';
+const HF_REFERENCE_MODEL = 'black-forest-labs/FLUX.1-Kontext-dev';
 const CONFIG = {
-  model: HF_TEXT_MODEL,
+  model: HF_MODEL,
   applyByDefault: true,
   jobs: [
     {
@@ -220,74 +219,131 @@ async function fetchMenuItem(supabase, type, slug) {
   return data;
 }
 
+async function generateImage({ model, prompt }) {
+  const hfToken = process.env.HF_TOKEN;
+  if (!hfToken) {
+    throw new Error('Set HF_TOKEN in apps/admin/.env.local before running the generator');
+  }
+
+  const endpoint = `https://router.huggingface.co/hf-inference/models/${encodeURIComponent(model)}`;
+  const payload = {
+    inputs: prompt,
+    parameters: {
+      width: 1024,
+      height: 1024,
+      num_inference_steps: 28,
+      guidance_scale: 3.5,
+    },
+    options: {
+      wait_for_model: true,
+    },
+  };
+
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${hfToken}`,
+        'Content-Type': 'application/json',
+        Accept: 'image/png',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const contentType = response.headers.get('content-type') || '';
+    if (response.ok && contentType.includes('image/')) {
+      return Buffer.from(await response.arrayBuffer());
+    }
+
+    const rawBody = contentType.includes('application/json')
+      ? await response.json()
+      : await response.text();
+
+    if (response.status === 503 && rawBody && typeof rawBody === 'object') {
+      const estimatedSeconds = Number(rawBody.estimated_time || 0);
+      if (attempt < 3 && estimatedSeconds > 0) {
+        await new Promise((resolve) => setTimeout(resolve, Math.ceil((estimatedSeconds + 2) * 1000)));
+        continue;
+      }
+    }
+
+    const message =
+      typeof rawBody === 'string'
+        ? rawBody
+        : rawBody?.error || rawBody?.message || `HTTP ${response.status}`;
+
+    throw new Error(`Hugging Face image generation failed: ${message}`);
+  }
+
+  throw new Error('Hugging Face image generation failed after retries');
+}
+
 async function loadReferenceImage() {
   if (!fs.existsSync(referenceImagePath)) {
     return null;
   }
 
   const buffer = await fs.promises.readFile(referenceImagePath);
-  return new Blob([buffer], { type: 'image/jpeg' });
+  return buffer.toString('base64');
 }
 
-function createHfClient() {
+async function generateImageWithReference({ model, prompt, referenceImageBase64 }) {
   const hfToken = process.env.HF_TOKEN;
   if (!hfToken) {
     throw new Error('Set HF_TOKEN in apps/admin/.env.local before running the generator');
   }
 
-  return new InferenceClient(hfToken);
-}
-
-async function generateTextImage(client, prompt) {
-  const blob = await client.textToImage({
-    provider: 'hf-inference',
-    model: CONFIG.model,
-    inputs: prompt,
-    parameters: {
-      num_inference_steps: 28,
-      guidance_scale: 3.5,
-      target_size: {
-        width: 1024,
-        height: 1024,
-      },
-    },
-  });
-
-  return Buffer.from(await blob.arrayBuffer());
-}
-
-async function generateImageWithReference(client, prompt, referenceImageBuffer) {
-  const blob = await client.imageToImage({
-    provider: 'hf-inference',
-    model: HF_REFERENCE_MODEL,
-    inputs: referenceImageBuffer,
+  const endpoint = `https://router.huggingface.co/hf-inference/models/${encodeURIComponent(model)}`;
+  const payload = {
+    inputs: referenceImageBase64,
     parameters: {
       prompt,
       guidance_scale: 2.5,
       num_inference_steps: 28,
-      strength: 0.4,
       target_size: {
         width: 1024,
         height: 1024,
       },
     },
-  });
+  };
 
-  return Buffer.from(await blob.arrayBuffer());
-}
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${hfToken}`,
+        'Content-Type': 'application/json',
+        Accept: 'image/png',
+      },
+      body: JSON.stringify(payload),
+    });
 
-async function generatePizzaImage(client, prompt, referenceImageBuffer) {
-  if (!referenceImageBuffer) {
-    return generateTextImage(client, prompt);
+    const contentType = response.headers.get('content-type') || '';
+    if (response.ok && contentType.includes('image/')) {
+      return Buffer.from(await response.arrayBuffer());
+    }
+
+    const rawBody = contentType.includes('application/json')
+      ? await response.json()
+      : await response.text();
+
+    if (response.status === 503 && rawBody && typeof rawBody === 'object') {
+      const estimatedSeconds = Number(rawBody.estimated_time || 0);
+      if (attempt < 3 && estimatedSeconds > 0) {
+        await new Promise((resolve) => setTimeout(resolve, Math.ceil((estimatedSeconds + 2) * 1000)));
+        continue;
+      }
+    }
+
+    const message =
+      typeof rawBody === 'string'
+        ? rawBody
+        : rawBody?.error || rawBody?.message || `HTTP ${response.status}`;
+
+    throw new Error(`Hugging Face reference image generation failed: ${message}`);
   }
 
-  try {
-    return await generateImageWithReference(client, prompt, referenceImageBuffer);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.warn(`Reference edit unavailable, falling back to text-to-image: ${message}`);
-    return generateTextImage(client, prompt);
-  }
+  throw new Error('Hugging Face reference image generation failed after retries');
 }
 
 async function uploadToMenuBucket(supabase, buffer, folder, slug) {
@@ -332,9 +388,8 @@ async function ensureOutputDir() {
 async function main() {
   loadEnvFile(envPath);
   const supabase = await loadSupabase();
-  const referenceImageBuffer = await loadReferenceImage();
-  const referenceModeEnabled = Boolean(referenceImageBuffer);
-  const client = createHfClient();
+  const referenceImageBase64 = await loadReferenceImage();
+  const referenceModeEnabled = Boolean(referenceImageBase64);
 
   await ensureOutputDir();
   for (const job of CONFIG.jobs) {
@@ -374,10 +429,13 @@ async function main() {
 
     console.log(JSON.stringify({ ...meta, prompt }, null, 2));
 
-    const buffer =
-      referenceModeEnabled && job.type === 'pizza'
-        ? await generatePizzaImage(client, prompt, referenceImageBuffer)
-        : await generateTextImage(client, prompt);
+    const buffer = referenceModeEnabled && job.type === 'pizza'
+      ? await generateImageWithReference({
+          model: HF_REFERENCE_MODEL,
+          prompt,
+          referenceImageBase64,
+        })
+      : await generateImage({ model: CONFIG.model, prompt });
     await fs.promises.writeFile(path.join(outputDir, `${job.type}-${job.slug}.png`), buffer);
 
     if (dryRun) {
