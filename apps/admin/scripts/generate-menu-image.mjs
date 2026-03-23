@@ -6,7 +6,6 @@ import { createClient } from '@supabase/supabase-js';
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const envPath = path.join(scriptDir, '..', '.env.local');
 const outputDir = path.join(scriptDir, '..', 'tmp', 'generated-images');
-const HF_TOKEN = 'PASTE_YOUR_HF_TOKEN_HERE';
 const HF_MODEL = 'black-forest-labs/FLUX.1-schnell';
 const CONFIG = {
   model: HF_MODEL,
@@ -194,8 +193,9 @@ async function fetchMenuItem(supabase, type, slug) {
 }
 
 async function generateImage({ model, prompt }) {
-  if (!HF_TOKEN || HF_TOKEN === 'PASTE_YOUR_HF_TOKEN_HERE') {
-    throw new Error('Paste your Hugging Face API token into HF_TOKEN at the top of the script first');
+  const hfToken = process.env.HF_TOKEN;
+  if (!hfToken) {
+    throw new Error('Set HF_TOKEN in apps/admin/.env.local before running the generator');
   }
 
   const endpoint = `https://api-inference.huggingface.co/models/${encodeURIComponent(model)}`;
@@ -216,7 +216,7 @@ async function generateImage({ model, prompt }) {
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${HF_TOKEN}`,
+        Authorization: `Bearer ${hfToken}`,
         'Content-Type': 'application/json',
         Accept: 'image/png',
       },
