@@ -668,16 +668,6 @@ It currently checks:
 - the storefront no longer falls back to stale `logo_url`
 - the image upload helper only accepts the intended buckets
 
-### Image Generation Prototype
-
-The admin app includes a one-item image generation script for menu assets:
-
-```bash
-npm run generate:image --workspace apps/admin -- --type pizza --slug margarita --dry-run
-```
-
-Paste your Hugging Face token into `HF_TOKEN` at the top of the script, then remove `--dry-run` to generate and upload the asset. The script writes prompts and generated files to `apps/admin/tmp/generated-images/`, which is ignored by git.
-
 ---
 
 ## Development Journey
