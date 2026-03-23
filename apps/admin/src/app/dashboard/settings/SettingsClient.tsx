@@ -1161,7 +1161,6 @@ function EditableConfigField({
           folder="storefront-images"
           value={draft || null}
           onChange={(next) => setDraft(next || '')}
-          previewAlt={field.label}
         />
       ) : (
         <input

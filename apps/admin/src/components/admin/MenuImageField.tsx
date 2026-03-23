@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useRef, useState } from 'react';
-import Image from 'next/image';
-import { Image as ImageIcon, Loader2, Upload, X } from 'lucide-react';
+import { Loader2, Upload, X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { uploadStorefrontAsset } from '@/app/dashboard/settings/actions';
 
@@ -15,7 +14,6 @@ interface MenuImageFieldProps {
   bucket?: 'brand-assets' | 'menu';
   value: string | null | undefined;
   onChange: (value: string | null) => void;
-  previewAlt: string;
 }
 
 export function MenuImageField({
@@ -25,7 +23,6 @@ export function MenuImageField({
   bucket = 'brand-assets',
   value,
   onChange,
-  previewAlt,
 }: MenuImageFieldProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -71,67 +68,48 @@ export function MenuImageField({
 
   return (
     <section className="rounded-2xl border border-[var(--border-default)] bg-[var(--surface-secondary)] p-4">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-        <div
-          className="relative flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-[var(--border-default)] bg-white"
-          style={{ boxShadow: 'var(--shadow-sm)' }}
-        >
-          {currentValue ? (
-            <Image
-              src={currentValue}
-              alt={previewAlt}
-              fill
-              sizes="96px"
-              className="object-cover"
-            />
-          ) : (
-            <ImageIcon size={26} className="text-[var(--stone)]" />
-          )}
+      <div className="space-y-4">
+        <div className="space-y-1.5">
+          <label className="block text-sm font-medium" style={{ color: 'var(--ink)' }}>
+            {label}
+          </label>
+          <input
+            type="url"
+            value={currentValue}
+            onChange={(event) => onChange(event.target.value.trim() || null)}
+            placeholder="Paste a public Supabase Storage URL or upload a file"
+            className="input-base"
+          />
         </div>
 
-        <div className="min-w-0 flex-1 space-y-4">
-          <div className="space-y-1.5">
-            <label className="block text-sm font-medium" style={{ color: 'var(--ink)' }}>
-              {label}
-            </label>
-            <input
-              type="url"
-              value={currentValue}
-              onChange={(event) => onChange(event.target.value.trim() || null)}
-              placeholder="Paste a public Supabase Storage URL or upload a file"
-              className="input-base"
-            />
-          </div>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={handleUploadClick}
+            disabled={isUploading}
+            className="btn-ghost inline-flex items-center gap-2"
+            style={{ borderColor: 'var(--border-default)' }}
+          >
+            {isUploading ? <Loader2 size={15} className="animate-spin" /> : <Upload size={15} />}
+            <span>{currentValue ? 'Replace image' : 'Upload image'}</span>
+          </button>
 
-          <div className="flex flex-wrap gap-2">
+          {currentValue && (
             <button
               type="button"
-              onClick={handleUploadClick}
-              disabled={isUploading}
+              onClick={handleClear}
               className="btn-ghost inline-flex items-center gap-2"
               style={{ borderColor: 'var(--border-default)' }}
             >
-              {isUploading ? <Loader2 size={15} className="animate-spin" /> : <Upload size={15} />}
-              <span>{currentValue ? 'Replace image' : 'Upload image'}</span>
+              <X size={15} />
+              <span>Remove image</span>
             </button>
-
-            {currentValue && (
-              <button
-                type="button"
-                onClick={handleClear}
-                className="btn-ghost inline-flex items-center gap-2"
-                style={{ borderColor: 'var(--border-default)' }}
-              >
-                <X size={15} />
-                <span>Remove image</span>
-              </button>
-            )}
-          </div>
-
-          <p className="text-xs leading-5" style={{ color: 'var(--stone)' }}>
-            {description}
-          </p>
+          )}
         </div>
+
+        <p className="text-xs leading-5" style={{ color: 'var(--stone)' }}>
+          {description}
+        </p>
       </div>
 
       <input

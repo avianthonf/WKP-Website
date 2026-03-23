@@ -205,7 +205,6 @@ export function PizzaForm({
           bucket="menu"
           value={imageUrl}
           onChange={(next) => setValue('image_url', next, { shouldDirty: true, shouldValidate: true })}
-          previewAlt="Pizza preview"
         />
       </fieldset>
 

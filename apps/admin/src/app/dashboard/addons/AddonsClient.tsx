@@ -291,12 +291,11 @@ export function AddonsClient({ initialAddons, createSignal }: AddonsClientProps)
           <MenuImageField
             label="Addon photo"
             description="Shown on addon cards and addon detail pages across the storefront."
-            folder="addons"
-            bucket="menu"
-            value={imageUrl}
-            onChange={(next) => setValue('image_url', next, { shouldDirty: true, shouldValidate: true })}
-            previewAlt="Addon preview"
-          />
+          folder="addons"
+          bucket="menu"
+          value={imageUrl}
+          onChange={(next) => setValue('image_url', next, { shouldDirty: true, shouldValidate: true })}
+        />
 
           <div className="flex items-center gap-2.5">
             <input type="checkbox" id="is_veg" {...register('is_veg')} className="w-5 h-5 rounded accent-ember" />

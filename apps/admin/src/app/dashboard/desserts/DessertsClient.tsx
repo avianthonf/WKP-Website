@@ -284,12 +284,11 @@ export function DessertsClient({ initialDesserts, createSignal }: DessertsClient
           <MenuImageField
             label="Dessert photo"
             description="Shown on dessert cards and dessert detail pages across the storefront."
-            folder="desserts"
-            bucket="menu"
-            value={imageUrl}
-            onChange={(next) => setValue('image_url', next, { shouldDirty: true, shouldValidate: true })}
-            previewAlt="Dessert preview"
-          />
+          folder="desserts"
+          bucket="menu"
+          value={imageUrl}
+          onChange={(next) => setValue('image_url', next, { shouldDirty: true, shouldValidate: true })}
+        />
 
           <div className="flex items-center gap-2.5">
             <input type="checkbox" id="is_veg" {...register('is_veg')} className="w-5 h-5 rounded accent-ember" />
