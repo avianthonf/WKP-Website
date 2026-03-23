@@ -347,6 +347,8 @@ export function getMenuBrowserCopy(bundle: StorefrontBundle) {
     addonsFilterLabel: getConfigValue(bundle.config, 'menu_filter_addons_label', 'Addons'),
     extrasFilterLabel: getConfigValue(bundle.config, 'menu_filter_extras_label', 'Extras'),
     dessertsFilterLabel: getConfigValue(bundle.config, 'menu_filter_desserts_label', 'Desserts'),
+    vegFilterLabel: getConfigValue(bundle.config, 'menu_filter_veg_label', 'Veg'),
+    nonVegFilterLabel: getConfigValue(bundle.config, 'menu_filter_nonveg_label', 'Non-veg'),
     menuSectionEyebrow: getConfigValue(bundle.config, 'menu_section_eyebrow', 'Browse the menu'),
     sectionTitle: getConfigValue(bundle.config, 'menu_section_title', 'Find the thing that feels right'),
     sectionCopy: getConfigValue(

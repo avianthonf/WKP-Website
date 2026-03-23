@@ -411,6 +411,8 @@ export default function SettingsClient({ initialConfigs, initialPizzas }: Settin
         { key: 'menu_filter_addons_label', label: 'Addons filter label', kind: 'text', fallback: 'Addons', description: 'Filter chip for addons.' },
         { key: 'menu_filter_extras_label', label: 'Extras filter label', kind: 'text', fallback: 'Extras', description: 'Filter chip for extras.' },
         { key: 'menu_filter_desserts_label', label: 'Desserts filter label', kind: 'text', fallback: 'Desserts', description: 'Filter chip for desserts.' },
+        { key: 'menu_filter_veg_label', label: 'Veg filter label', kind: 'text', fallback: 'Veg', description: 'Diet filter chip for vegetarian items.' },
+        { key: 'menu_filter_nonveg_label', label: 'Non-veg filter label', kind: 'text', fallback: 'Non-veg', description: 'Diet filter chip for non-vegetarian items.' },
         { key: 'menu_section_eyebrow', label: 'Section eyebrow', kind: 'text', fallback: 'Browse the menu', description: 'Label above the menu browser section.' },
         { key: 'menu_hero_title', label: 'Menu hero title', kind: 'text', fallback: 'A menu that feels like a craving, not a catalog.', description: 'Top title on the menu page.' },
         { key: 'menu_hero_copy', label: 'Menu hero copy', kind: 'textarea', fallback: 'Slide through the menu, find the thing that clicks, and move from discovery to checkout without breaking the mood.', description: 'Top subtitle on the menu page.' },

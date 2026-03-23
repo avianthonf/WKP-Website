@@ -1,9 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
-import { ChefHat, Search, Sparkles } from 'lucide-react';
+import { ChefHat, Flame, Leaf, Search, Sparkles } from 'lucide-react';
 import { useCart } from './cart-provider';
 import {
   getAddonPrice,
@@ -22,11 +22,13 @@ import type { Pizza, Size, StorefrontBundle } from '../lib/types';
 import type { CSSProperties, MouseEvent } from 'react';
 
 type FilterKey = 'all' | 'pizza' | 'addon' | 'extra' | 'dessert';
+type DietFilterKey = 'all' | 'veg' | 'nonveg';
 const pizzaSizes: Size[] = ['small', 'medium', 'large'];
 
 export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
   const { addItem, items, totalItems } = useCart();
   const [filter, setFilter] = useState<FilterKey>('all');
+  const [dietFilter, setDietFilter] = useState<DietFilterKey>('all');
   const [query, setQuery] = useState('');
   const [hasFinePointer, setHasFinePointer] = useState(false);
   const prefersReducedMotion = useReducedMotion();
@@ -58,6 +60,11 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
     { key: 'extra', label: menuCopy.extrasFilterLabel },
     { key: 'dessert', label: menuCopy.dessertsFilterLabel },
   ];
+  const dietFilters: Array<{ key: DietFilterKey; label: string; icon?: ReactNode }> = [
+    { key: 'all', label: menuCopy.allFilterLabel },
+    { key: 'veg', label: menuCopy.vegFilterLabel, icon: <Leaf size={14} /> },
+    { key: 'nonveg', label: menuCopy.nonVegFilterLabel, icon: <Flame size={14} /> },
+  ];
   const activeFilterIndex = Math.max(0, filters.findIndex((item) => item.key === filter));
 
   useEffect(() => {
@@ -84,14 +91,22 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
   const menuItems = useMemo(() => {
     const q = query.trim().toLowerCase();
     const matches = (value?: string | null) => !q || (value || '').toLowerCase().includes(q);
+    const matchesDiet = (item: { is_veg?: boolean | null }) =>
+      dietFilter === 'all' || (dietFilter === 'veg' ? item.is_veg : !item.is_veg);
 
     return {
-      pizzas: bundle.pizzas.filter((item) => (filter === 'all' || filter === 'pizza') && (matches(item.name) || matches(item.description))),
-      addons: bundle.addons.filter((item) => (filter === 'all' || filter === 'addon') && (matches(item.name) || matches(item.description))),
-      extras: bundle.extras.filter((item) => (filter === 'all' || filter === 'extra') && matches(item.name)),
-      desserts: bundle.desserts.filter((item) => (filter === 'all' || filter === 'dessert') && (matches(item.name) || matches(item.description))),
+      pizzas: bundle.pizzas.filter(
+        (item) => (filter === 'all' || filter === 'pizza') && matchesDiet(item) && (matches(item.name) || matches(item.description))
+      ),
+      addons: bundle.addons.filter(
+        (item) => (filter === 'all' || filter === 'addon') && matchesDiet(item) && (matches(item.name) || matches(item.description))
+      ),
+      extras: bundle.extras.filter((item) => (filter === 'all' || filter === 'extra') && matchesDiet(item) && matches(item.name)),
+      desserts: bundle.desserts.filter(
+        (item) => (filter === 'all' || filter === 'dessert') && matchesDiet(item) && (matches(item.name) || matches(item.description))
+      ),
     };
-  }, [bundle.addons, bundle.desserts, bundle.extras, bundle.pizzas, filter, query]);
+  }, [bundle.addons, bundle.desserts, bundle.extras, bundle.pizzas, dietFilter, filter, query]);
 
   const totalVisible = menuItems.pizzas.length + menuItems.addons.length + menuItems.extras.length + menuItems.desserts.length;
   const countsSummary = menuCopy.countsTemplate
@@ -163,6 +178,56 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
                   {item.label}
                 </motion.button>
               ))}
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-3">
+                <div className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--stone)' }}>
+                  Diet filter
+                </div>
+                <div className="text-[11px]" style={{ color: 'var(--stone)' }}>
+                  {dietFilter === 'all'
+                    ? 'Showing all items'
+                    : dietFilter === 'veg'
+                      ? 'Veg items only'
+                      : 'Non-veg items only'}
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                {dietFilters.map((item, index) => {
+                  const isActive = dietFilter === item.key;
+                  return (
+                    <motion.button
+                      key={item.key}
+                      type="button"
+                      onClick={() => setDietFilter(item.key)}
+                      className="group flex items-center justify-center gap-2 rounded-full border px-4 py-2.5 text-sm font-semibold transition-all"
+                      initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
+                      animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+                      transition={{ duration: 0.25, delay: index * 0.04 }}
+                      whileHover={canHover ? { y: -1, scale: 1.01 } : {}}
+                      whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
+                      style={
+                        isActive
+                          ? {
+                              borderColor: 'rgba(232,84,10,0.24)',
+                              background: 'linear-gradient(135deg, rgba(232,84,10,0.10), rgba(232,84,10,0.05))',
+                              color: 'var(--ember)',
+                              boxShadow: '0 10px 20px rgba(232,84,10,0.08)',
+                            }
+                          : {
+                              borderColor: 'var(--border-default)',
+                              background: 'white',
+                              color: 'var(--stone)',
+                            }
+                      }
+                    >
+                      {item.icon}
+                      <span>{item.label}</span>
+                    </motion.button>
+                  );
+                })}
+              </div>
             </div>
 
             <div className="menu-grid">
