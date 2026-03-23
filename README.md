@@ -676,7 +676,7 @@ The admin app includes a one-item image generation script for menu assets:
 npm run generate:image --workspace apps/admin -- --type pizza --slug margarita --dry-run
 ```
 
-Set `HF_TOKEN` in `apps/admin/.env.local`. Dry run now generates the image locally only, while the normal run generates, saves, and uploads the asset. The script writes prompts and generated files to `apps/admin/tmp/generated-images/`, which is ignored by git.
+Set `HF_TOKEN` in `apps/admin/.env.local`. If you want the pizza reference workflow, place one real photo at `apps/admin/reference-images/pizza-reference.jpg`. The generator uses that file to steer pizza jobs only, while keeping the studio background style driven by the prompt. Dry run now generates the image locally only, while the normal run generates, saves, and uploads the asset. The script writes prompts and generated files to `apps/admin/tmp/generated-images/`, which is ignored by git.
 
 ---
 
