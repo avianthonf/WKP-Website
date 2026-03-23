@@ -27,6 +27,10 @@ export function AddonsClient({ initialAddons, createSignal }: AddonsClientProps)
   const [addons, setAddons] = useState<Addon[]>(initialAddons);
   const createSignalRef = useRef(0);
 
+  useEffect(() => {
+    setAddons(initialAddons);
+  }, [initialAddons]);
+
   const {
     register,
     handleSubmit,
@@ -101,6 +105,7 @@ export function AddonsClient({ initialAddons, createSignal }: AddonsClientProps)
           await updateAddon(editingAddon.id, data);
           toast.success('Addon updated');
           setAddons(prev => prev.map(a => a.id === editingAddon.id ? { ...a, ...data } : a));
+          router.refresh();
         } else {
           const result = await createAddon(data);
           if (result.success) {
@@ -124,6 +129,7 @@ export function AddonsClient({ initialAddons, createSignal }: AddonsClientProps)
         await deleteAddon(addon.id);
         toast.success(`'${addon.name}' deleted`);
         setAddons(prev => prev.filter(a => a.id !== addon.id));
+        router.refresh();
       } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'Deletion failed';
         toast.error(message);

@@ -9,14 +9,11 @@ import { useCart } from './cart-provider';
 import { createWhatsAppOrder } from '../actions';
 import {
   getConfigValue,
-  getCartHeroImageUrl,
   getCartCopy,
   getLinePrice,
-  getMinimumOrder,
   getOpeningWindow,
   getSizeLabel,
   getSizeName,
-  getStoreName,
   getStoreTimeZone,
   getStorefrontState,
   money,
@@ -61,7 +58,6 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
     setDeviceMode(coarsePointer ? 'mobile' : 'desktop');
   }, []);
 
-  const minimumOrder = getMinimumOrder(bundle);
   const deliveryRequired = fulfillment === 'delivery';
   const orderingPaused = !storefrontState.orderingEnabled;
   const checkoutHeroTitle = getConfigValue(bundle.config, 'cart_hero_title', 'Send the order and keep moving.');
@@ -70,15 +66,7 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
     'cart_hero_copy',
     'This checkout stores the order for the kitchen and prepares the final handoff after checkout.'
   );
-  const checkoutPreviewTitle = getConfigValue(bundle.config, 'cart_preview_title', 'Your cart is ready');
-  const checkoutPreviewCopy = getConfigValue(
-    bundle.config,
-    'cart_preview_copy',
-    'Orders are stored in the system and prepared with the full payload intact.'
-  );
-  const cartHeroImageUrl = getCartHeroImageUrl(bundle);
   const checkoutHoursCopy = getConfigValue(bundle.config, 'cart_hours_copy', 'Store hours:');
-  const checkoutMinimumCopy = getConfigValue(bundle.config, 'cart_minimum_copy', 'Minimum order');
   const emptyCartCopy = getConfigValue(bundle.config, 'cart_empty_copy', cartCopy.emptySummaryCopy);
   const openingWindow = getOpeningWindow(bundle);
   const scheduleResolution = useMemo(() => {

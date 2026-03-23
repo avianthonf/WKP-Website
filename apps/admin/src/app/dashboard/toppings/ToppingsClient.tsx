@@ -24,6 +24,10 @@ export function ToppingsClient({ initialToppings, createSignal }: ToppingsClient
   const [toppings, setToppings] = useState<Topping[]>(initialToppings);
   const createSignalRef = useRef(0);
 
+  useEffect(() => {
+    setToppings(initialToppings);
+  }, [initialToppings]);
+
   const {
     register,
     handleSubmit,
@@ -87,6 +91,7 @@ export function ToppingsClient({ initialToppings, createSignal }: ToppingsClient
           toast.success('Topping updated');
           // Update local state
           setToppings(prev => prev.map(t => t.id === editingTopping.id ? { ...t, ...data } : t));
+          router.refresh();
         } else {
           const result = await createTopping(data);
           if (result.success) {
@@ -110,6 +115,7 @@ export function ToppingsClient({ initialToppings, createSignal }: ToppingsClient
         await deleteTopping(topping.id);
         toast.success(`'${topping.name}' deleted`);
         setToppings(prev => prev.filter(t => t.id !== topping.id));
+        router.refresh();
       } catch (error: any) {
         toast.error(error.message || 'Deletion failed');
       }

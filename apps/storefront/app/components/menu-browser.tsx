@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { ChefHat, Search, Sparkles } from 'lucide-react';
@@ -11,12 +10,10 @@ import {
   getDessertPrice,
   getExtraPrice,
   getConfigValue,
-  getMenuHeroImageUrl,
   getPizzaDisplayToppings,
   getPizzaPrice,
   getSizeLabel,
   getSizeName,
-  getStoreName,
   getStorefrontState,
   getMenuBrowserCopy,
   money,
@@ -47,8 +44,6 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
     'Slide through the menu, find the thing that clicks, and move from discovery to checkout without breaking the mood.'
   );
   const menuSectionTitle = menuCopy.sectionTitle;
-  const menuSectionCopy = menuCopy.sectionCopy;
-  const menuHeroImageUrl = getMenuHeroImageUrl(bundle);
   const hasItemsInCart = totalItems > 0;
   const heroSecondaryHref = hasItemsInCart ? '/cart' : orderingPaused ? '/status' : '/build';
   const heroSecondaryLabel = hasItemsInCart
@@ -75,11 +70,6 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
   }, []);
 
   const canHover = !prefersReducedMotion && hasFinePointer;
-
-  const pizzaCategoryOptions = useMemo(
-    () => bundle.categories.filter((category) => category.type === 'pizza'),
-    [bundle.categories]
-  );
 
   const pizzaCartCounts = useMemo(() => {
     return items.reduce((acc, item) => {

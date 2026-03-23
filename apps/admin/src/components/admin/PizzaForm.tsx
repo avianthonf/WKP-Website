@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { pizzaSchema, PizzaFormData } from '@/lib/validations';
 import { Category, Topping } from '@/types';
-import { useTransition } from 'react';
+import { useEffect, useTransition } from 'react';
 import { Loader2, Check } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
@@ -38,6 +38,7 @@ export function PizzaForm({
     register,
     handleSubmit,
     watch,
+    reset,
     setValue,
     formState: { errors }
   } = useForm<PizzaFormData>({
@@ -56,6 +57,21 @@ export function PizzaForm({
 
   const imageUrl = watch('image_url');
   const selectedToppings = watch('toppings') || [];
+
+  useEffect(() => {
+    if (!initialData) return;
+    reset({
+      is_veg: true,
+      is_active: true,
+      is_bestseller: false,
+      is_spicy: false,
+      is_new: false,
+      image_url: null,
+      sort_order: 0,
+      toppings: [],
+      ...initialData,
+    });
+  }, [initialData, reset]);
 
   const onFormSubmit = (data: PizzaFormData) => {
     startTransition(async () => {

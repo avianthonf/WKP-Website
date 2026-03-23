@@ -28,6 +28,10 @@ export default function CategoriesClient({ initialCategories, createSignal }: Ca
   const [categories, setCategories] = useState<Category[]>(initialCategories);
   const createSignalRef = useRef(0);
 
+  useEffect(() => {
+    setCategories(initialCategories);
+  }, [initialCategories]);
+
   const {
     register,
     handleSubmit,
@@ -105,6 +109,7 @@ export default function CategoriesClient({ initialCategories, createSignal }: Ca
                 : category
             )
           );
+          router.refresh();
         } else {
           const result = await createCategory(data);
           if (result.success) {
@@ -142,6 +147,7 @@ export default function CategoriesClient({ initialCategories, createSignal }: Ca
         await deleteCategory(deleteConfirmId);
         toast.success(`'${category.label}' deleted`);
         setCategories((prev) => prev.filter((item) => item.id !== deleteConfirmId));
+        router.refresh();
         setDeleteConfirmId(null);
         setDeleteConfirmText('');
       } catch (error: any) {

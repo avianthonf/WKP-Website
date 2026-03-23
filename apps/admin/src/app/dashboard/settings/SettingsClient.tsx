@@ -1,15 +1,12 @@
 ﻿'use client';
 
 import Link from 'next/link';
-import { useState, useEffect, useMemo, useTransition, type ReactNode } from 'react';
+import { useState, useEffect, useTransition, type ReactNode } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { createClient } from '@/lib/supabaseClient';
 import { MenuImageField } from '@/components/admin/MenuImageField';
 import {
-  createSiteConfig,
   updateSiteConfig,
-  deleteSiteConfig,
-  upsertDashboardLiveMode,
   upsertSiteConfig,
 } from './actions';
 import { toast } from 'react-hot-toast';
@@ -22,7 +19,6 @@ import {
   Image as ImageIcon,
   Home,
   ListChecks,
-  Menu,
   Power,
   Search,
   Settings as SettingsIcon,
@@ -59,13 +55,6 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
       }
     });
     return states;
-  });
-  const [addConfigOpen, setAddConfigOpen] = useState(false);
-  const [newConfig, setNewConfig] = useState({
-    key: '',
-    label: '',
-    type: 'text' as const,
-    value: '',
   });
 
   // Real-time subscription
@@ -111,11 +100,7 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
     const current = powerStates[key];
     startTransition(async () => {
       try {
-        if (key === 'dashboard_live_mode') {
-          await upsertDashboardLiveMode(!current);
-        } else {
-          await updateSiteConfig(key, String(!current));
-        }
+        await updateSiteConfig(key, String(!current));
         setPowerStates((prev) => ({ ...prev, [key]: !current }));
         toast.success(`${label} updated`);
       } catch (error: any) {
@@ -144,39 +129,6 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
       } catch (error: any) {
         toast.error(error.message || 'Failed to update');
         // Revert input handled by component not updating local state before save
-      }
-    });
-  };
-
-  const handleDeleteConfig = async (key: string) => {
-    if (!window.confirm(`Delete config key "${key}"? This cannot be undone.`)) return;
-
-    startTransition(async () => {
-      try {
-        await deleteSiteConfig(key);
-        toast.success('Config deleted');
-      } catch (error: any) {
-        toast.error(error.message || 'Failed to delete');
-      }
-    });
-  };
-
-  const handleAddConfig = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newConfig.key || !newConfig.label) {
-      toast.error('Key and label are required');
-      return;
-    }
-
-    startTransition(async () => {
-      try {
-        await createSiteConfig(newConfig.key, newConfig.value, newConfig.label, newConfig.type);
-        toast.success('Config created');
-        setNewConfig({ key: '', label: '', type: 'text', value: '' });
-        setAddConfigOpen(false);
-        router.refresh();
-      } catch (error: any) {
-        toast.error(error.message || 'Failed to create config');
       }
     });
   };
@@ -233,18 +185,10 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
   };
 
   const getPowerControlData = () => {
-    const dashboardLiveConfig = configs.find((c) => c.key === 'dashboard_live_mode');
     const isOpenConfig = configs.find((c) => c.key === 'is_open');
     const maintenanceConfig = configs.find((c) => c.key === 'site_maintenance_mode');
 
     return [
-      {
-        key: 'dashboard_live_mode',
-        value: powerStates.dashboard_live_mode ?? (dashboardLiveConfig?.value !== 'false'),
-        label: 'Dashboard Live Mode',
-        description: 'Keep the admin chrome synced with live operations.',
-        icon: Activity,
-      },
       {
         key: 'is_open',
         value: powerStates.is_open ?? (isOpenConfig?.value === 'true'),
@@ -313,41 +257,6 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
       ],
     },
     {
-      title: 'Storefront Shell',
-      description: 'Top bar labels, shell actions, and open/closed state wording.',
-      icon: Activity,
-      fields: [
-        { key: 'shell_primary_nav_label', label: 'Primary nav label', kind: 'text', fallback: 'Primary', description: 'Accessible label for the desktop navigation.' },
-        { key: 'shell_open_navigation_label', label: 'Open nav label', kind: 'text', fallback: 'Open navigation menu', description: 'Button label for opening the mobile navigation drawer.' },
-        { key: 'shell_close_navigation_label', label: 'Close nav label', kind: 'text', fallback: 'Close navigation menu', description: 'Button label for closing the mobile navigation drawer.' },
-        { key: 'shell_mobile_navigation_label', label: 'Mobile nav label', kind: 'text', fallback: 'Mobile navigation', description: 'Accessible label for the mobile navigation region.' },
-        { key: 'shell_order_chat_label', label: 'Order chat label', kind: 'text', fallback: 'Order chat', description: 'Drawer label for the direct order phone number.' },
-        { key: 'shell_location_label', label: 'Location label', kind: 'text', fallback: 'Location', description: 'Drawer label for the location block.' },
-        { key: 'shell_hours_label', label: 'Hours label', kind: 'text', fallback: 'Hours', description: 'Footer label for operating hours.' },
-        { key: 'shell_order_label', label: 'Order label', kind: 'text', fallback: 'Order', description: 'Footer label for the order channel.' },
-        { key: 'shell_sync_label', label: 'Sync label', kind: 'text', fallback: 'Control room sync', description: 'Footer label before the live/paused indicator.' },
-        { key: 'shell_live_label', label: 'Live label', kind: 'text', fallback: 'Live', description: 'Text used when the dashboard is live.' },
-        { key: 'shell_paused_label', label: 'Paused label', kind: 'text', fallback: 'Paused', description: 'Text used when the dashboard is not live.' },
-        { key: 'shell_cart_aria_label_template', label: 'Cart aria template', kind: 'text', fallback: 'Cart with {count} items', description: 'Accessible cart label with a count placeholder.' },
-        { key: 'storefront_open_label', label: 'Open badge label', kind: 'text', fallback: 'Open now', description: 'Badge shown when the storefront is open.' },
-        { key: 'storefront_open_summary', label: 'Open summary', kind: 'textarea', fallback: 'Orders are live now. Checkout is available and the live window is 11:00 - 23:00.', description: 'Summary shown when the storefront is open.' },
-        { key: 'storefront_open_primary_label', label: 'Open primary button', kind: 'text', fallback: 'View cart', description: 'Primary action shown when the storefront is open.' },
-        { key: 'storefront_open_secondary_label', label: 'Open secondary button', kind: 'text', fallback: 'Browse menu', description: 'Secondary action shown when the storefront is open.' },
-        { key: 'storefront_closed_label', label: 'Closed badge label', kind: 'text', fallback: 'Closed', description: 'Badge shown when the storefront is closed.' },
-        { key: 'storefront_closed_summary', label: 'Closed summary', kind: 'textarea', fallback: 'Orders are closed right now. Browse the menu and check the live status for the next open window.', description: 'Summary shown when the storefront is closed.' },
-        { key: 'storefront_closed_primary_label', label: 'Closed primary button', kind: 'text', fallback: 'View status', description: 'Primary action shown when the storefront is closed.' },
-        { key: 'storefront_closed_secondary_label', label: 'Closed secondary button', kind: 'text', fallback: 'Browse menu', description: 'Secondary action shown when the storefront is closed.' },
-        { key: 'storefront_after_hours_label', label: 'After-hours badge label', kind: 'text', fallback: 'Closed now', description: 'Badge shown when the store is outside the live window but can still accept scheduled orders.' },
-        { key: 'storefront_after_hours_summary', label: 'After-hours summary', kind: 'textarea', fallback: 'The kitchen is outside the live window right now, but you can still schedule an order within 11:00 - 23:00.', description: 'Summary shown when after-hours scheduling is available.' },
-        { key: 'storefront_after_hours_primary_label', label: 'After-hours primary button', kind: 'text', fallback: 'Schedule order', description: 'Primary action shown when after-hours scheduling is available.' },
-        { key: 'storefront_after_hours_secondary_label', label: 'After-hours secondary button', kind: 'text', fallback: 'View hours', description: 'Secondary action shown when after-hours scheduling is available.' },
-        { key: 'storefront_maintenance_label', label: 'Maintenance badge label', kind: 'text', fallback: 'Maintenance mode', description: 'Badge shown when the storefront is in maintenance.' },
-        { key: 'storefront_maintenance_summary', label: 'Maintenance summary', kind: 'textarea', fallback: 'The storefront is being updated. Browsing still works, but checkout is paused until maintenance ends.', description: 'Summary shown when the storefront is in maintenance.' },
-        { key: 'storefront_maintenance_primary_label', label: 'Maintenance primary button', kind: 'text', fallback: 'View status', description: 'Primary action shown during maintenance.' },
-        { key: 'storefront_maintenance_secondary_label', label: 'Maintenance secondary button', kind: 'text', fallback: 'Contact us', description: 'Secondary action shown during maintenance.' },
-      ],
-    },
-    {
       title: 'Size Labels',
       description: 'Small, medium, and large size names used across the storefront.',
       icon: SettingsIcon,
@@ -361,12 +270,6 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
       ],
     },
     {
-      title: 'Navigation',
-      description: 'Primary links shown in the top bar and mobile drawer.',
-      icon: Menu,
-      custom: 'nav',
-    },
-    {
       title: 'Home Page',
       description: 'Hero copy, feature copy, and the three-step intro rail.',
       icon: Home,
@@ -375,27 +278,6 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
         { key: 'home_hero_subtitle', label: 'Hero subtitle', kind: 'textarea', fallback: 'Hand-tossed pizza, warm sides, and a WhatsApp-first order flow.', description: 'Homepage hero subtitle.' },
         { key: 'home_announcement', label: 'Homepage announcement', kind: 'text', fallback: 'Freshly made daily.', description: 'Eyebrow announcement at the top of the home page.' },
         { key: 'home_feature_copy', label: 'Feature copy', kind: 'textarea', fallback: 'Rich, hot, and ready to slide from discovery to order with almost no friction.', description: 'Featured pizza callout on the homepage.' },
-        { key: 'home_steps_eyebrow', label: 'Steps eyebrow', kind: 'text', fallback: 'Start here', description: 'Label above the intro cards.' },
-        { key: 'home_steps_title', label: 'Steps title', kind: 'text', fallback: 'A three-step flow people actually enjoy using', description: 'Headline above the intro cards.' },
-        { key: 'home_steps_cta', label: 'Steps CTA', kind: 'text', fallback: 'View all items', description: 'CTA button beside the intro cards.' },
-        { key: 'home_step_1_title', label: 'Step 1 title', kind: 'text', fallback: 'Crave something now', description: 'First intro card title.' },
-        { key: 'home_step_1_copy', label: 'Step 1 copy', kind: 'textarea', fallback: 'Scroll the menu and tap into a signature pizza in seconds.', description: 'First intro card copy.' },
-        { key: 'home_step_1_href', label: 'Step 1 link', kind: 'url', fallback: '/menu', description: 'First intro card link.' },
-        { key: 'home_step_1_label', label: 'Step 1 button', kind: 'text', fallback: 'Browse menu', description: 'First intro card button label.' },
-        { key: 'home_step_2_title', label: 'Step 2 title', kind: 'text', fallback: 'Make it yours', description: 'Second intro card title.' },
-        { key: 'home_step_2_copy', label: 'Step 2 copy', kind: 'textarea', fallback: 'Start with a base, add extras, and build the exact bite you want.', description: 'Second intro card copy.' },
-        { key: 'home_step_2_href', label: 'Step 2 link', kind: 'url', fallback: '/build', description: 'Second intro card link.' },
-        { key: 'home_step_2_label', label: 'Step 2 button', kind: 'text', fallback: 'Build custom', description: 'Second intro card button label.' },
-        { key: 'home_step_3_title', label: 'Step 3 title', kind: 'text', fallback: 'Send it fast', description: 'Third intro card title.' },
-        { key: 'home_step_3_copy', label: 'Step 3 copy', kind: 'textarea', fallback: 'Checkout flows straight into WhatsApp with a clean order summary.', description: 'Third intro card copy.' },
-        { key: 'home_step_3_href', label: 'Step 3 link', kind: 'url', fallback: '/cart', description: 'Third intro card link.' },
-        { key: 'home_step_3_label', label: 'Step 3 button', kind: 'text', fallback: 'Review cart', description: 'Third intro card button label when ordering is open.' },
-        { key: 'home_step_3_after_hours_title', label: 'Step 3 after-hours title', kind: 'text', fallback: 'Schedule it for later', description: 'Third intro card title when only scheduled orders are available.' },
-        { key: 'home_step_3_after_hours_copy', label: 'Step 3 after-hours copy', kind: 'textarea', fallback: 'Pick a later time, confirm the delivery pin, and the order will be queued for the next service window.', description: 'Third intro card copy when after-hours scheduling is available.' },
-        { key: 'home_step_3_after_hours_label', label: 'Step 3 after-hours button', kind: 'text', fallback: 'Schedule order', description: 'Third intro card button label when after-hours scheduling is available.' },
-        { key: 'home_step_3_paused_title', label: 'Step 3 paused title', kind: 'text', fallback: 'Check live status', description: 'Third intro card title when ordering is paused.' },
-        { key: 'home_step_3_paused_copy', label: 'Step 3 paused copy', kind: 'textarea', fallback: 'The storefront summary explains the live state.', description: 'Third intro card copy when ordering is paused.' },
-        { key: 'home_step_3_paused_label', label: 'Step 3 paused button', kind: 'text', fallback: 'View live status', description: 'Third intro card button label when ordering is paused.' },
         { key: 'home_signature_eyebrow', label: 'Signature eyebrow', kind: 'text', fallback: 'Signature picks', description: 'Section label above the featured pizzas.' },
         { key: 'home_signature_title', label: 'Signature title', kind: 'text', fallback: 'Tap a favorite, feel the rhythm, and order', description: 'Signature section title.' },
         { key: 'home_signature_copy', label: 'Signature copy', kind: 'textarea', fallback: 'A curated line-up that feels more like browsing a chef\'s counter than a spreadsheet.', description: 'Signature section supporting copy.' },
@@ -408,23 +290,10 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
         { key: 'home_closing_title', label: 'Closing title', kind: 'text', fallback: 'Pick a craving and let the site do the rest', description: 'Closing banner title.' },
         { key: 'home_closing_primary_cta', label: 'Closing CTA 1', kind: 'text', fallback: 'Start with menu', description: 'First closing banner CTA.' },
         { key: 'home_closing_secondary_cta', label: 'Closing CTA 2', kind: 'text', fallback: 'Build custom', description: 'Second closing banner CTA.' },
-        { key: 'home_feature_primary_label', label: 'Hero primary label', kind: 'text', fallback: 'Checkout now', description: 'Primary label on the hero showcase button.' },
-        { key: 'home_feature_after_hours_label', label: 'Hero after-hours label', kind: 'text', fallback: 'Schedule order', description: 'Primary label on the hero showcase button when only scheduled orders are available.' },
-        { key: 'home_feature_paused_label', label: 'Hero paused label', kind: 'text', fallback: 'View live status', description: 'Primary label on the hero showcase button when ordering is paused.' },
-        { key: 'home_feature_fallback_title', label: 'Hero fallback title', kind: 'text', fallback: 'Signature pizza', description: 'Fallback title shown in the hero showcase.' },
-        { key: 'home_closing_primary_after_hours_label', label: 'Closing primary after-hours label', kind: 'text', fallback: 'Schedule order', description: 'Closing banner primary label when only scheduled orders are available.' },
-        { key: 'home_closing_primary_paused_label', label: 'Closing primary paused label', kind: 'text', fallback: 'View live status', description: 'Closing button label when ordering is paused.' },
-        { key: 'home_closing_secondary_after_hours_label', label: 'Closing secondary after-hours label', kind: 'text', fallback: 'Build for later', description: 'Closing banner secondary label when only scheduled orders are available.' },
-        { key: 'home_closing_secondary_paused_label', label: 'Closing secondary paused label', kind: 'text', fallback: 'Plan ahead', description: 'Closing secondary label when ordering is paused.' },
         { key: 'home_hero_menu_label', label: 'Hero menu label', kind: 'text', fallback: 'Browse the menu', description: 'Primary action label in the hero button row.' },
         { key: 'home_hero_build_label', label: 'Hero build label', kind: 'text', fallback: 'Build your pizza', description: 'Secondary action label in the hero button row.' },
         { key: 'home_hero_checkout_label', label: 'Hero checkout label', kind: 'text', fallback: 'Checkout now', description: 'Third action label in the hero button row.' },
-        { key: 'home_hero_after_hours_label', label: 'Hero after-hours checkout label', kind: 'text', fallback: 'Schedule order', description: 'Third action label in the hero button row when only scheduled orders are available.' },
         { key: 'home_feature_eyebrow_label', label: 'Feature eyebrow label', kind: 'text', fallback: "Chef's pick", description: 'Label shown above the home hero showcase.' },
-        { key: 'home_showcase_pair_label', label: 'Showcase pair label', kind: 'text', fallback: 'Pair it with', description: 'Label shown in the hero showcase stack.' },
-        { key: 'home_orbit_state_label', label: 'Orbit state label', kind: 'text', fallback: 'State', description: 'Label in the hero orbit block for state.' },
-        { key: 'home_orbit_tonight_label', label: 'Orbit tonight label', kind: 'text', fallback: 'Tonight', description: 'Label in the hero orbit block for tonight.' },
-        { key: 'home_orbit_minimum_label', label: 'Orbit minimum label', kind: 'text', fallback: 'Minimum', description: 'Label in the hero orbit block for minimum order.' },
       ],
     },
     {
@@ -558,10 +427,7 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
         { key: 'cart_eyebrow', label: 'Cart eyebrow', kind: 'text', fallback: 'WhatsApp checkout', description: 'Eyebrow on the cart page.' },
         { key: 'cart_hero_title', label: 'Cart hero title', kind: 'text', fallback: 'Send the order on WhatsApp and keep moving.', description: 'Main title on the cart page.' },
         { key: 'cart_hero_copy', label: 'Cart hero copy', kind: 'textarea', fallback: 'This checkout keeps WhatsApp as the primary customer action while storing the same order for kitchen visibility and reporting.', description: 'Hero supporting copy on the cart page.' },
-        { key: 'cart_preview_title', label: 'Cart preview title', kind: 'text', fallback: 'Your cart is ready', description: 'Preview card title.' },
-        { key: 'cart_preview_copy', label: 'Cart preview copy', kind: 'textarea', fallback: 'Orders are stored in the system and sent to WhatsApp with the full payload intact.', description: 'Preview card supporting copy.' },
         { key: 'cart_hours_copy', label: 'Hours label', kind: 'text', fallback: 'Store hours:', description: 'Prefix text before hours.' },
-        { key: 'cart_minimum_copy', label: 'Minimum label', kind: 'text', fallback: 'Minimum order', description: 'Prefix text before the minimum order amount.' },
         { key: 'cart_empty_copy', label: 'Empty cart copy', kind: 'textarea', fallback: 'Your cart is empty. Add items from Menu or Build first.', description: 'Empty cart message.' },
         { key: 'cart_view_live_status_label', label: 'View live status label', kind: 'text', fallback: 'View live status', description: 'Button label used when ordering is paused.' },
         { key: 'cart_continue_browsing_label', label: 'Continue browsing label', kind: 'text', fallback: 'Continue browsing', description: 'Button label for returning to the menu.' },
@@ -668,15 +534,9 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
         { key: 'about_eyebrow', label: 'About eyebrow', kind: 'text', fallback: 'About the kitchen', description: 'Eyebrow on the About page.' },
         { key: 'about_hero_copy', label: 'About hero copy', kind: 'textarea', fallback: 'A warm, editorial storefront for a pizzeria that wants the ordering experience to feel premium and easy.', description: 'About page hero copy.' },
         { key: 'about_notice', label: 'About notice', kind: 'textarea', fallback: 'Fresh ingredients, live data, and a WhatsApp-first ordering experience.', description: 'About page callout.' },
-        { key: 'about_recipe_title', label: 'About recipe title', kind: 'text', fallback: 'Recipe', description: 'About page card title.' },
-        { key: 'about_recipe_body', label: 'About recipe body', kind: 'text', fallback: 'Built for real operations.', description: 'About page card body.' },
-        { key: 'about_recipe_copy', label: 'About recipe copy', kind: 'textarea', fallback: 'The storefront reads categories, pizzas, toppings, extras, addons, desserts, notifications, and site config live from the database.', description: 'About page card copy.' },
         { key: 'about_hours_label', label: 'About hours label', kind: 'text', fallback: 'Hours', description: 'Label used in the About summary rail for hours.' },
         { key: 'about_min_order_label', label: 'About min order label', kind: 'text', fallback: 'Min order', description: 'Label used in the About summary rail for minimum order.' },
         { key: 'about_address_label', label: 'About address label', kind: 'text', fallback: 'Address', description: 'Label used in the About summary rail for address.' },
-        { key: 'about_workflow_title', label: 'About workflow title', kind: 'text', fallback: 'Workflow', description: 'About page workflow card title.' },
-        { key: 'about_workflow_body', label: 'About workflow body', kind: 'text', fallback: 'Primary order path is WhatsApp.', description: 'About page workflow card body.' },
-        { key: 'about_workflow_copy', label: 'About workflow copy', kind: 'textarea', fallback: 'The order is stored in the database first, then the customer is taken to WhatsApp with the message already composed.', description: 'About page workflow card copy.' },
         { key: 'about_location_title', label: 'About location title', kind: 'text', fallback: 'Location', description: 'About page location card title.' },
         { key: 'about_map_action_label', label: 'About map action', kind: 'text', fallback: 'Open map', description: 'Link label for the about page map block.' },
         { key: 'about_map_missing_copy', label: 'About map missing copy', kind: 'textarea', fallback: 'Map link is set in the store settings.', description: 'Copy shown when the map link is missing.' },
@@ -689,10 +549,6 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
         { key: 'contact_map_title', label: 'Contact map title', kind: 'text', fallback: 'Map', description: 'Contact map card title.' },
         { key: 'contact_map_body', label: 'Contact map body', kind: 'text', fallback: 'Find us easily.', description: 'Contact map card body.' },
         { key: 'contact_email_title', label: 'Contact email title', kind: 'text', fallback: 'Email', description: 'Contact email card title.' },
-        { key: 'contact_email_copy', label: 'Contact email copy', kind: 'textarea', fallback: 'This can be connected later if you want a public inbox on the site.', description: 'Contact email card copy.' },
-        { key: 'contact_ordering_title', label: 'Contact ordering title', kind: 'text', fallback: 'Live ordering', description: 'Contact ordering card title.' },
-        { key: 'contact_ordering_body', label: 'Contact ordering body', kind: 'text', fallback: 'WhatsApp-first.', description: 'Contact ordering card body.' },
-        { key: 'contact_ordering_copy', label: 'Contact ordering copy', kind: 'textarea', fallback: 'The order is stored and then handed off to WhatsApp, which keeps the customer flow low-friction.', description: 'Contact ordering card copy.' },
         { key: 'contact_message_label', label: 'Contact message label', kind: 'text', fallback: 'Message us', description: 'Button label for the contact action.' },
         { key: 'contact_order_prefill_message', label: 'Contact order prefill', kind: 'textarea', fallback: 'Hi, I would like to place an order or ask a question.', description: 'Prefilled message used when opening the contact chat action.' },
         { key: 'contact_map_action_label', label: 'Contact map action', kind: 'text', fallback: 'Open in Maps', description: 'Link label for the contact map block.' },
@@ -784,26 +640,19 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
   };
 
   const allManagedFields: CmsField[] = cmsGroups.flatMap((group) => ('fields' in group ? [...group.fields] : []));
+  const storefrontManagedFields = allManagedFields;
   const pageScopedPrefixes = ['home_', 'menu_', 'build_', 'cart_', 'about_', 'contact_', 'delivery_', 'status_', 'faq_', 'privacy_', 'terms_', 'not_found_'] as const;
   const isPageScopedKey = (key: string) => pageScopedPrefixes.some((prefix) => key.startsWith(prefix));
   const getFieldsByPrefix = (...prefixes: string[]) =>
-    allManagedFields.filter((field) => prefixes.some((prefix) => field.key.startsWith(prefix)));
-  const globalSharedFields = allManagedFields.filter((field) => !isPageScopedKey(field.key));
+    storefrontManagedFields.filter((field) => prefixes.some((prefix) => field.key.startsWith(prefix)));
+  const globalSharedFields = storefrontManagedFields.filter((field) => !isPageScopedKey(field.key));
   const pageSectionSpecs: PageSectionSpec[] = [
     {
       id: 'global-shared',
       title: 'Global / Shared',
-      description: 'Branding, imagery, hours, shell labels, and live state wording used across the storefront.',
+      description: 'Branding, imagery, hours, navigation, and other shared storefront content.',
       icon: Store,
       fields: globalSharedFields,
-    },
-    {
-      id: 'navigation',
-      title: 'Navigation',
-      description: 'Primary links shown in the top bar and mobile drawer.',
-      icon: Menu,
-      fields: [],
-      custom: 'nav',
     },
     {
       id: 'home',
@@ -906,30 +755,18 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
     },
   ];
   const managedKeys = new Set<string>([
-    'dashboard_live_mode',
     'is_open',
     'site_maintenance_mode',
     'nav_links',
     'faq_items',
     'privacy_sections',
     'terms_sections',
-    ...allManagedFields.map((field) => field.key),
+    ...storefrontManagedFields.map((field) => field.key),
   ]);
   const managedCount = configs.filter((config) => managedKeys.has(config.key)).length;
-  const advancedCount = configs.length - managedCount;
   const visibleManagedCount = configs.filter(
     (config) => managedKeys.has(config.key) && matchesSearch(config.key, config.label, config.description, config.value)
   ).length;
-  const visibleAdvancedConfigs = useMemo(
-    () =>
-      configs.filter(
-        (config) =>
-          !managedKeys.has(config.key) &&
-          matchesSearch(config.key, config.label, config.description, config.value)
-      ),
-    [configs, normalizedSearch]
-  );
-  const visibleAdvancedCount = visibleAdvancedConfigs.length;
   const sectionAnchors: Array<{
     id: string;
     title: string;
@@ -940,14 +777,8 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
       id: section.id,
       title: section.title,
       description: section.description,
-      count: section.fields.length + (section.custom === 'nav' ? 1 : 0) + (section.extra ? 1 : 0),
+      count: section.fields.length + (section.id === 'global-shared' ? 1 : 0) + (section.extra ? 1 : 0),
     })),
-    {
-      id: 'advanced-config',
-      title: 'Advanced config',
-      description: 'Manual keys and fallback entries not covered by the guided panels.',
-      count: advancedCount,
-    },
   ];
   const visibleSectionAnchors = sectionAnchors.filter((section) =>
     matchesSearch(section.title, section.description, String(section.count))
@@ -959,7 +790,7 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
       values.push(field.key, field.label, field.description, getField(field.key)?.value);
     });
 
-    if (section.custom === 'nav') {
+    if (section.id === 'global-shared') {
       values.push(getField('nav_links')?.value);
     }
 
@@ -970,97 +801,13 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
     return matchesSearch(...values);
   });
 
-  // Render value editor based on type
-  const renderValueEditor = (config: SiteConfigItem) => {
-    const currentValue = config.value;
-
-    switch (config.type) {
-      case 'text':
-      case 'url':
-      case 'image':
-      case 'number':
-        return (
-          <input
-            type={config.type === 'number' ? 'number' : 'text'}
-            defaultValue={currentValue}
-            onBlur={(e) => handleConfigValueChange(config.key, e.target.value)}
-            className="input-base w-full"
-            disabled={isPending}
-          />
-        );
-
-      case 'time':
-        return (
-          <input
-            type="time"
-            defaultValue={currentValue}
-            onBlur={(e) => handleConfigValueChange(config.key, e.target.value)}
-            className="input-base"
-            style={{ fontFamily: 'DM Mono', width: '8rem' }}
-            disabled={isPending}
-          />
-        );
-
-      case 'boolean':
-        return (
-          <button
-            type="button"
-            onClick={() => handleConfigValueChange(config.key, powerStates[config.key] ? 'false' : 'true')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              powerStates[config.key]
-                ? 'bg-[var(--ember)] text-white'
-                : 'border border-[var(--border-default)] bg-[var(--surface-secondary)] text-[var(--stone)]'
-            }`}
-            disabled={isPending}
-          >
-            {powerStates[config.key] ? 'TRUE' : 'FALSE'}
-          </button>
-        );
-
-      case 'textarea':
-        return (
-          <textarea
-            defaultValue={currentValue}
-            onBlur={(e) => handleConfigValueChange(config.key, e.target.value)}
-            className="input-base"
-            rows={2}
-            style={{ width: '100%', fontFamily: 'DM Sans' }}
-            disabled={isPending}
-          />
-        );
-
-      case 'json':
-        return (
-          <textarea
-            defaultValue={currentValue}
-            onBlur={async (e) => {
-              try {
-                JSON.parse(e.target.value); // Validate JSON
-                await handleConfigValueChange(config.key, e.target.value);
-              } catch {
-                toast.error('Invalid JSON format');
-              }
-            }}
-            className="input-base font-mono text-xs"
-            rows={3}
-            style={{ width: '100%' }}
-            placeholder='{"key": "value"}'
-            disabled={isPending}
-          />
-        );
-
-      default:
-        return <span className="text-sm" style={{ color: 'var(--stone)' }}>{currentValue}</span>;
-    }
-  };
-
   return (
     <div className="space-y-6">
       <header className="page-header">
         <div>
           <p className="mono-label">Storefront CMS</p>
           <h1 className="page-title">Live Config Editor</h1>
-          <p className="page-subtitle">Guided controls first, advanced config only when you need it.</p>
+          <p className="page-subtitle">Page-wise controls ordered to match the storefront itself.</p>
         </div>
         <div className="dashboard-settings__header-actions">
           <div className="dashboard-search">
@@ -1097,20 +844,14 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
               Everything the storefront reads lives here.
             </h2>
             <p className="mt-2 text-sm leading-6" style={{ color: 'var(--stone)' }}>
-              The guided panels below update the storefront instantly through Supabase. The advanced table is still
-              available for edge cases.
+              The guided panels below update the storefront instantly through Supabase and are arranged in the same
+              order customers see them.
             </p>
             <div className="mt-4 grid gap-2 text-sm">
               <div className="rounded-2xl bg-[var(--surface-secondary)] px-4 py-3">
                 <span className="mono-label block text-[9px]">Managed settings</span>
                 <div className="mt-1 font-semibold" style={{ color: 'var(--ink)' }}>
                   {visibleManagedCount} matching of {managedCount} managed keys
-                </div>
-              </div>
-              <div className="rounded-2xl bg-[var(--surface-secondary)] px-4 py-3">
-                <span className="mono-label block text-[9px]">Advanced config</span>
-                <div className="mt-1 font-semibold" style={{ color: 'var(--ink)' }}>
-                  {visibleAdvancedCount} matching of {advancedCount} manual entries
                 </div>
               </div>
             </div>
@@ -1130,12 +871,7 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
                       {section.title}
                     </div>
                     <span className="rounded-full border border-[var(--border-default)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em]" style={{ color: 'var(--stone)' }}>
-                      {section.count}{' '}
-                      {section.id.endsWith('-blocks')
-                        ? 'blocks'
-                        : section.id === 'navigation'
-                          ? 'panel'
-                          : 'fields'}
+                      {section.count} controls
                     </span>
                   </div>
                   <div className="mt-1 text-xs leading-5" style={{ color: 'var(--stone)' }}>
@@ -1143,17 +879,6 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
                   </div>
                 </a>
               ))}
-              <a
-                href="#advanced-config"
-                className="block rounded-2xl border border-dashed border-[var(--border-default)] px-4 py-3 transition-all hover:border-[var(--stone)] hover:bg-[var(--surface-secondary)]"
-              >
-                <div className="text-sm font-semibold" style={{ color: 'var(--ink)' }}>
-                  Advanced config
-                </div>
-                <div className="mt-1 text-xs leading-5" style={{ color: 'var(--stone)' }}>
-                  Use this only for keys not covered by the guided panels.
-                </div>
-              </a>
             </nav>
           </section>
         </aside>
@@ -1166,19 +891,15 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
                   Storefront control room
                 </p>
                 <h2 className="mt-2 text-2xl font-semibold" style={{ color: 'var(--ink)' }}>
-                  Use the guided controls first.
+                  Edit the storefront page by page.
                 </h2>
                 <p className="mt-2 max-w-3xl text-sm" style={{ color: 'var(--stone)' }}>
-                  Brand, navigation, page copy, legal content, and live toggles are grouped below so the storefront
-                  stays easy to manage.
+                  Brand, shared assets, page copy, and live toggles are grouped below in storefront order.
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
                 <span className="rounded-full border border-[var(--border-default)] px-3 py-1 text-xs font-medium" style={{ color: 'var(--stone)' }}>
                   {visibleManagedCount} visible managed
-                </span>
-                <span className="rounded-full border border-[var(--border-default)] px-3 py-1 text-xs font-medium" style={{ color: 'var(--stone)' }}>
-                  {visibleAdvancedCount} visible advanced
                 </span>
                 <span className="rounded-full border border-[var(--border-default)] px-3 py-1 text-xs font-medium" style={{ color: 'var(--stone)' }}>
                   Live sync
@@ -1220,18 +941,9 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
           </div>
 
           <div className="space-y-6">
-            {visiblePageSections.length ? (
-              visiblePageSections.map((section) => (
-                <div key={section.id} className="space-y-6">
-                  {section.custom === 'nav' ? (
-                    <NavLinksEditor
-                      config={getField('nav_links')}
-                      pending={isPending}
-                      onSave={(value) =>
-                        saveCmsSetting('nav_links', 'Navigation links', 'json', value, 'Primary site navigation', true)
-                      }
-                    />
-                  ) : (
+              {visiblePageSections.length ? (
+                visiblePageSections.map((section) => (
+                  <div key={section.id} className="space-y-6">
                     <SettingsPanel
                       id={section.id}
                       title={section.title}
@@ -1250,8 +962,18 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
                           />
                         ))}
                       </div>
+                      {section.id === 'global-shared' ? (
+                        <div className="mt-6">
+                          <NavLinksEditor
+                            config={getField('nav_links')}
+                            pending={isPending}
+                            onSave={(value) =>
+                              saveCmsSetting('nav_links', 'Navigation links', 'json', value, 'Primary site navigation', true)
+                            }
+                          />
+                        </div>
+                      ) : null}
                     </SettingsPanel>
-                  )}
 
                   {section.extra ? (
                     <ContentBlocksEditor
@@ -1287,186 +1009,6 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
               </section>
             )}
           </div>
-
-          <details
-            id="advanced-config"
-            className="rounded-3xl border border-[var(--border-default)] bg-white/90 p-6 shadow-sm"
-          >
-            <summary className="cursor-pointer list-none">
-              <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                <div>
-                  <p className="mono-label">Advanced config</p>
-                  <h3 className="mt-2 text-2xl font-semibold" style={{ color: 'var(--ink)' }}>
-                    Manual keys and fallback entries
-                  </h3>
-                  <p className="mt-2 text-sm" style={{ color: 'var(--stone)' }}>
-                    Only use this when a key is not covered by the curated panels above.
-                  </p>
-                </div>
-                <span className="rounded-full border border-[var(--border-default)] px-3 py-1 text-xs font-medium" style={{ color: 'var(--stone)' }}>
-                  {visibleAdvancedCount} entries
-                </span>
-              </div>
-            </summary>
-
-            <div className="mt-6 space-y-4">
-              <div className="bg-white border border-[#E5E5E0] rounded-xl overflow-hidden">
-                <div className="table-wrap">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="bg-gray-50 border-b border-[#E5E5E0]">
-                        <th className="p-4 text-xs font-mono uppercase tracking-wider" style={{ color: 'var(--stone)' }}>
-                          Key
-                        </th>
-                        <th className="p-4 text-xs font-mono uppercase tracking-wider" style={{ color: 'var(--stone)' }}>
-                          Label
-                        </th>
-                        <th className="p-4 text-xs font-mono uppercase tracking-wider" style={{ color: 'var(--stone)' }}>
-                          Type
-                        </th>
-                        <th className="p-4 text-xs font-mono uppercase tracking-wider" style={{ color: 'var(--stone)' }}>
-                          Value
-                        </th>
-                        <th className="p-4 text-xs font-mono uppercase tracking-wider text-right" style={{ color: 'var(--stone)' }}>
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[#E5E5E0]">
-                      {visibleAdvancedConfigs
-                        .map((config) => (
-                          <tr key={config.key} className="hover:bg-gray-50 transition-colors">
-                            <td className="p-4" data-label="Key">
-                              <code className="text-xs font-mono" style={{ color: 'var(--stone)' }}>
-                                {config.key}
-                              </code>
-                            </td>
-                            <td className="p-4 text-sm" data-label="Label" style={{ color: 'var(--ink)' }}>
-                              {config.label}
-                            </td>
-                            <td className="p-4" data-label="Type">
-                              <span
-                                className="px-2 py-1 rounded text-xs font-medium"
-                                style={{ background: 'var(--surface-secondary)', color: 'var(--stone)' }}
-                              >
-                                {config.type}
-                              </span>
-                            </td>
-                            <td className="p-4" data-label="Value">
-                              {renderValueEditor(config)}
-                            </td>
-                            <td className="p-4 text-right" data-label="Actions">
-                              <button
-                                onClick={() => handleDeleteConfig(config.key)}
-                                className="icon-btn text-red-500"
-                                disabled={isPending}
-                                title="Delete config"
-                              >
-                                <Trash2 size={16} />
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-              {normalizedSearch && !visibleAdvancedConfigs.length ? (
-                <div className="rounded-2xl border border-dashed border-[var(--border-default)] bg-[var(--surface-secondary)] px-4 py-3 text-sm text-[var(--stone)]">
-                  No advanced config entries match your search.
-                </div>
-              ) : null}
-
-              <div className="bg-white border border-dashed border-[#E5E5E0] rounded-xl p-4">
-                {!addConfigOpen ? (
-                  <button
-                    onClick={() => setAddConfigOpen(true)}
-                    className="w-full py-4 flex items-center justify-center gap-2 text-sm"
-                    style={{ color: 'var(--stone)' }}
-                  >
-                    <Plus size={16} />
-                    Add Config Key
-                  </button>
-                ) : (
-                  <form
-                    onSubmit={handleAddConfig}
-                    className="grid grid-cols-1 gap-4 items-end sm:grid-cols-2 xl:grid-cols-12"
-                  >
-                    <div className="xl:col-span-2">
-                      <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--stone)' }}>
-                        Key
-                      </label>
-                      <input
-                        type="text"
-                        value={newConfig.key}
-                        onChange={(e) => setNewConfig((prev) => ({ ...prev, key: e.target.value }))}
-                        placeholder="config_key"
-                        className="input-base"
-                        required
-                      />
-                    </div>
-                    <div className="xl:col-span-3">
-                      <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--stone)' }}>
-                        Label
-                      </label>
-                      <input
-                        type="text"
-                        value={newConfig.label}
-                        onChange={(e) => setNewConfig((prev) => ({ ...prev, label: e.target.value }))}
-                        placeholder="Display label"
-                        className="input-base"
-                        required
-                      />
-                    </div>
-                    <div className="xl:col-span-2">
-                      <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--stone)' }}>
-                        Type
-                      </label>
-                      <select
-                        value={newConfig.type}
-                        onChange={(e) => setNewConfig((prev) => ({ ...prev, type: e.target.value as any }))}
-                        className="input-base"
-                      >
-                        <option value="text">Text</option>
-                        <option value="textarea">Textarea</option>
-                        <option value="url">URL</option>
-                        <option value="image">Image</option>
-                        <option value="time">Time</option>
-                        <option value="number">Number</option>
-                        <option value="boolean">Boolean</option>
-                        <option value="json">JSON</option>
-                      </select>
-                    </div>
-                    <div className="xl:col-span-4">
-                      <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--stone)' }}>
-                        Value
-                      </label>
-                      <input
-                        type="text"
-                        value={newConfig.value}
-                        onChange={(e) => setNewConfig((prev) => ({ ...prev, value: e.target.value }))}
-                        placeholder="Default value"
-                        className="input-base"
-                      />
-                    </div>
-                    <div className="flex gap-2 sm:col-span-2 xl:col-span-1">
-                      <button type="submit" disabled={isPending} className="btn-primary flex-1">
-                        Save
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setAddConfigOpen(false)}
-                        className="btn-ghost"
-                        disabled={isPending}
-                      >
-                        <X size={16} />
-                      </button>
-                    </div>
-                  </form>
-                )}
-              </div>
-            </div>
-          </details>
         </div>
       </section>
     </div>
@@ -1694,18 +1236,20 @@ function NavLinksEditor({
   const save = () => onSave(JSON.stringify(rows));
 
   return (
-    <SettingsPanel
-      id={slugify('Navigation')}
-      title="Navigation"
-      description="Primary links shown in the top bar and mobile drawer."
-      icon={Menu}
-      prefersReducedMotion={prefersReducedMotion}
-    >
+    <div className="space-y-4 rounded-2xl border border-[var(--border-default)] bg-[var(--surface-secondary)] p-4">
+      <div>
+        <div className="text-sm font-semibold" style={{ color: 'var(--ink)' }}>
+          Navigation
+        </div>
+        <p className="mt-1 text-xs leading-relaxed" style={{ color: 'var(--stone)' }}>
+          Primary links shown in the top bar and mobile drawer.
+        </p>
+      </div>
       <div className="space-y-3">
         {rows.map((row, index) => (
           <motion.div
             key={`${row.label}-${index}`}
-            className="grid gap-3 rounded-2xl border border-[var(--border-default)] p-4 md:grid-cols-[1fr_1fr_auto]"
+            className="grid gap-3 rounded-2xl border border-[var(--border-default)] bg-white p-4 md:grid-cols-[1fr_1fr_auto]"
             initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
             whileInView={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
@@ -1741,7 +1285,7 @@ function NavLinksEditor({
           </motion.div>
         ))}
       </div>
-      <div className="mt-4 flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2">
         <button type="button" className="btn-ghost" onClick={addRow} disabled={pending}>
           <Plus size={16} />
           Add link
@@ -1750,7 +1294,7 @@ function NavLinksEditor({
           Save navigation
         </button>
       </div>
-    </SettingsPanel>
+    </div>
   );
 }
 
@@ -1911,12 +1455,3 @@ function ContentBlocksEditor({
     </SettingsPanel>
   );
 }
-
-function slugify(value: string) {
-  return value
-    .toLowerCase()
-    .replace(/&/g, 'and')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-}
-

@@ -26,6 +26,10 @@ export function ExtrasClient({ initialExtras, createSignal }: ExtrasClientProps)
   const [extras, setExtras] = useState<Extra[]>(initialExtras);
   const createSignalRef = useRef(0);
 
+  useEffect(() => {
+    setExtras(initialExtras);
+  }, [initialExtras]);
+
   const {
     register,
     handleSubmit,
@@ -94,6 +98,7 @@ export function ExtrasClient({ initialExtras, createSignal }: ExtrasClientProps)
           await updateExtra(editingExtra.id, data);
           toast.success('Extra updated');
           setExtras(prev => prev.map(e => e.id === editingExtra.id ? { ...e, ...data } : e));
+          router.refresh();
         } else {
           const result = await createExtra(data);
           if (result.success) {
@@ -116,6 +121,7 @@ export function ExtrasClient({ initialExtras, createSignal }: ExtrasClientProps)
         await deleteExtra(extra.id);
         toast.success(`'${extra.name}' deleted`);
         setExtras(prev => prev.filter(e => e.id !== extra.id));
+        router.refresh();
       } catch (error: any) {
         toast.error(error.message || 'Deletion failed');
       }

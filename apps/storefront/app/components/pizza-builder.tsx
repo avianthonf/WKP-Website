@@ -1,17 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useMemo, useState } from 'react';
-import { ArrowRight, ChefHat, Sparkles } from 'lucide-react';
+import { ArrowRight, ChefHat } from 'lucide-react';
 import { useCart } from './cart-provider';
 import {
   getConfigValue,
   getExtraPrice,
-  getBuilderHeroImageUrl,
   getBuilderCopy,
-  getPizzaDisplayToppings,
   getPizzaPrice,
   getSizeName,
   getStorefrontState,
@@ -38,7 +35,6 @@ export function PizzaBuilder({ bundle, initialPizzaSlug }: { bundle: StorefrontB
     'build_hero_title',
     'Build a custom pizza without leaving the menu.'
   );
-  const builderHeroImageUrl = getBuilderHeroImageUrl(bundle);
   const builderHeroCopy = getConfigValue(
     bundle.config,
     'build_hero_copy',

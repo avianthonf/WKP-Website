@@ -87,11 +87,11 @@ export default async function ContactPage() {
         </section>
 
         <section className="info-grid" style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-          <div className="info-card" className="info-card" style={{ flex: '0 1 30%' }}>
+          <div className="info-card" style={{ flex: '0 1 30%' }}>
             <div className="info-card__title">{getConfigValue(bundle.config, 'contact_map_title', 'Map')}</div>
             <div className="info-card__body">{getConfigValue(bundle.config, 'contact_map_body', 'Find us easily.')}</div>
             <div className="info-card__copy">
-                {getConfigValue(bundle.config, 'google_maps_link', '') ? (
+              {getConfigValue(bundle.config, 'google_maps_link', '') ? (
                 <Link href={getConfigValue(bundle.config, 'google_maps_link', '')} target="_blank" className="footer__link">
                   {getConfigValue(bundle.config, 'contact_map_action_label', 'Open in Maps')}
                 </Link>
@@ -104,7 +104,7 @@ export default async function ContactPage() {
               )}
             </div>
           </div>
-          <div className="info-card" className="info-card" style={{ flex: '0 1 30%' }}>
+          <div className="info-card" style={{ flex: '0 1 30%' }}>
             <div className="info-card__title">{getConfigValue(bundle.config, 'contact_email_title', 'Email')}</div>
             <div className="info-card__body">
               <Mail size={16} /> {getSupportEmail(bundle)}

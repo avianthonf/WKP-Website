@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useTransition } from 'react';
+import React, { useEffect, useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
 import { updateExtraPrice } from '@/app/dashboard/extras/actions';
 import { Size } from '@/types';
 import { toast } from 'react-hot-toast';
@@ -15,6 +16,11 @@ export function InlineExtraPrice({ extraId, size, initialPrice }: InlineExtraPri
   const [price, setPrice] = useState(initialPrice);
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
+
+  useEffect(() => {
+    setPrice(initialPrice);
+  }, [initialPrice]);
 
   const handleBlur = async () => {
     if (price === initialPrice) return;
@@ -30,6 +36,7 @@ export function InlineExtraPrice({ extraId, size, initialPrice }: InlineExtraPri
         await updateExtraPrice(extraId, size, price);
         setStatus('saved');
         toast.success(`${size.charAt(0).toUpperCase() + size.slice(1)} price updated`);
+        router.refresh();
         setTimeout(() => setStatus('idle'), 3000);
       } catch (error) {
         setStatus('error');

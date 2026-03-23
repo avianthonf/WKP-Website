@@ -27,6 +27,10 @@ export function DessertsClient({ initialDesserts, createSignal }: DessertsClient
   const [desserts, setDesserts] = useState<Dessert[]>(initialDesserts);
   const createSignalRef = useRef(0);
 
+  useEffect(() => {
+    setDesserts(initialDesserts);
+  }, [initialDesserts]);
+
   const {
     register,
     handleSubmit,
@@ -98,6 +102,7 @@ export function DessertsClient({ initialDesserts, createSignal }: DessertsClient
           await updateDessert(editingDessert.id, data);
           toast.success('Dessert updated');
           setDesserts(prev => prev.map(d => d.id === editingDessert.id ? { ...d, ...data } : d));
+          router.refresh();
         } else {
           const result = await createDessert(data);
           if (result.success) {
@@ -121,6 +126,7 @@ export function DessertsClient({ initialDesserts, createSignal }: DessertsClient
         await deleteDessert(dessert.id);
         toast.success(`'${dessert.name}' deleted`);
         setDesserts(prev => prev.filter(d => d.id !== dessert.id));
+        router.refresh();
       } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'Deletion failed';
         toast.error(message);
