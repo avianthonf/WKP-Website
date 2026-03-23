@@ -189,12 +189,66 @@ export function getFeaturedImageUrl(bundle: StorefrontBundle) {
   );
 }
 
+function getPizzaById(bundle: StorefrontBundle, pizzaId: string | null | undefined) {
+  const id = (pizzaId || '').trim();
+  if (!id) return null;
+  return bundle.pizzas.find((item) => item.id === id) || null;
+}
+
+function resolvePizzaSelection(
+  bundle: StorefrontBundle,
+  selectionIds: Array<string | null | undefined>,
+  excludedIds: Array<string | null | undefined> = []
+) {
+  const excluded = new Set(excludedIds.map((id) => (id || '').trim()).filter(Boolean));
+  const selected: Pizza[] = [];
+  const selectedIds = new Set<string>();
+
+  selectionIds.forEach((selectionId) => {
+    const pizza = getPizzaById(bundle, selectionId);
+    if (!pizza || excluded.has(pizza.id) || selectedIds.has(pizza.id)) return;
+    selected.push(pizza);
+    selectedIds.add(pizza.id);
+  });
+
+  const fallback = bundle.pizzas.filter((pizza) => !excluded.has(pizza.id) && !selectedIds.has(pizza.id));
+  return [...selected, ...fallback];
+}
+
+export function getHomeHeroPizza(bundle: StorefrontBundle) {
+  return (
+    getPizzaById(bundle, getConfigValue(bundle.config, 'home_hero_pizza_id', '')) ||
+    bundle.pizzas[0] ||
+    null
+  );
+}
+
+export function getHomeFeaturedPizzas(bundle: StorefrontBundle) {
+  const heroPizza = getHomeHeroPizza(bundle);
+  const featured = resolvePizzaSelection(
+    bundle,
+    [
+      getConfigValue(bundle.config, 'home_featured_pizza_1_id', ''),
+      getConfigValue(bundle.config, 'home_featured_pizza_2_id', ''),
+      getConfigValue(bundle.config, 'home_featured_pizza_3_id', ''),
+      getConfigValue(bundle.config, 'home_featured_pizza_4_id', ''),
+    ],
+    heroPizza ? [heroPizza.id] : []
+  );
+
+  return featured.slice(0, 4);
+}
+
 export function getHomeFeaturedImageUrl(bundle: StorefrontBundle) {
   return (
     getConfigImageValue(bundle.config, 'home_feature_image_url') ||
     getConfigImageValue(bundle.config, 'hero_bg_url') ||
     getFeaturedImageUrl(bundle)
   );
+}
+
+export function getHomeHeroImageUrl(bundle: StorefrontBundle) {
+  return getHomeHeroPizza(bundle)?.image_url || getHomeFeaturedImageUrl(bundle);
 }
 
 export function getHeroBackgroundImageUrl(bundle: StorefrontBundle) {

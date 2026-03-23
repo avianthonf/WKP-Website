@@ -29,10 +29,11 @@ import {
   X,
   Plus,
 } from 'lucide-react';
-import { SiteConfigItem } from '@/types';
+import { Pizza, SiteConfigItem } from '@/types';
 
 interface SettingsClientProps {
   initialConfigs: SiteConfigItem[];
+  initialPizzas: Pizza[];
 }
 
 type RealtimeSiteConfigPayload = {
@@ -41,11 +42,12 @@ type RealtimeSiteConfigPayload = {
   old: SiteConfigItem;
 };
 
-export default function SettingsClient({ initialConfigs }: SettingsClientProps) {
+export default function SettingsClient({ initialConfigs, initialPizzas }: SettingsClientProps) {
   const router = useRouter();
   const prefersReducedMotion = useReducedMotion() ?? false;
   const [isPending, startTransition] = useTransition();
   const [configs, setConfigs] = useState<SiteConfigItem[]>(initialConfigs);
+  const [pizzas] = useState<Pizza[]>(initialPizzas);
   const [search, setSearch] = useState('');
   const [powerStates, setPowerStates] = useState<Record<string, boolean>>(() => {
     const states: Record<string, boolean> = {};
@@ -180,6 +182,98 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
         toast.success(`${label} saved`);
       } catch (error: any) {
         toast.error(error.message || 'Failed to save setting');
+      }
+    });
+  };
+
+  const upsertConfigInState = (
+    prev: SiteConfigItem[],
+    key: string,
+    label: string,
+    type: string,
+    value: string,
+    description: string
+  ) => {
+    const current = prev.find((item) => item.key === key);
+    const updated: SiteConfigItem = current
+      ? {
+          ...current,
+          label,
+          type,
+          value,
+          description,
+          updated_at: new Date().toISOString(),
+        }
+      : {
+          id: key,
+          key,
+          label,
+          value,
+          type,
+          description,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+
+    const next = prev.filter((item) => item.key !== key);
+    next.push(updated);
+    return next.sort((a, b) => a.key.localeCompare(b.key));
+  };
+
+  const saveHomepagePizzaSelections = (
+    heroPizzaId: string,
+    featuredPizzaIds: [string, string, string, string]
+  ) => {
+    const updates = [
+      {
+        key: 'home_hero_pizza_id',
+        label: 'Homepage hero pizza',
+        value: heroPizzaId,
+        description: 'Pizza shown in the homepage hero showcase.',
+      },
+      {
+        key: 'home_featured_pizza_1_id',
+        label: 'Homepage featured pizza 1',
+        value: featuredPizzaIds[0],
+        description: 'First curated pizza shown on the homepage.',
+      },
+      {
+        key: 'home_featured_pizza_2_id',
+        label: 'Homepage featured pizza 2',
+        value: featuredPizzaIds[1],
+        description: 'Second curated pizza shown on the homepage.',
+      },
+      {
+        key: 'home_featured_pizza_3_id',
+        label: 'Homepage featured pizza 3',
+        value: featuredPizzaIds[2],
+        description: 'Third curated pizza shown on the homepage.',
+      },
+      {
+        key: 'home_featured_pizza_4_id',
+        label: 'Homepage featured pizza 4',
+        value: featuredPizzaIds[3],
+        description: 'Fourth curated pizza shown on the homepage.',
+      },
+    ] as const;
+
+    startTransition(async () => {
+      try {
+        for (const update of updates) {
+          await upsertSiteConfig(update.key, update.value, update.label, 'text', update.description, true);
+        }
+
+        setConfigs((prev) => {
+          let next = prev;
+          for (const update of updates) {
+            next = upsertConfigInState(next, update.key, update.label, 'text', update.value, update.description);
+          }
+          return next;
+        });
+
+        toast.success('Homepage pizzas saved');
+      } catch (error: any) {
+        toast.error(error.message || 'Failed to save homepage pizzas');
       }
     });
   };
@@ -645,6 +739,13 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
   const isPageScopedKey = (key: string) => pageScopedPrefixes.some((prefix) => key.startsWith(prefix));
   const getFieldsByPrefix = (...prefixes: string[]) =>
     storefrontManagedFields.filter((field) => prefixes.some((prefix) => field.key.startsWith(prefix)));
+  const homepagePizzaKeys = [
+    'home_hero_pizza_id',
+    'home_featured_pizza_1_id',
+    'home_featured_pizza_2_id',
+    'home_featured_pizza_3_id',
+    'home_featured_pizza_4_id',
+  ];
   const globalSharedFields = storefrontManagedFields.filter((field) => !isPageScopedKey(field.key));
   const pageSectionSpecs: PageSectionSpec[] = [
     {
@@ -657,7 +758,7 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
     {
       id: 'home',
       title: 'Home',
-      description: 'Homepage hero, feature copy, intro rail, and closing banner.',
+      description: 'Homepage hero, feature copy, curated pizza picks, intro rail, and closing banner.',
       icon: Home,
       fields: getFieldsByPrefix('home_'),
     },
@@ -761,6 +862,7 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
     'faq_items',
     'privacy_sections',
     'terms_sections',
+    ...homepagePizzaKeys,
     ...storefrontManagedFields.map((field) => field.key),
   ]);
   const managedCount = configs.filter((config) => managedKeys.has(config.key)).length;
@@ -777,7 +879,11 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
       id: section.id,
       title: section.title,
       description: section.description,
-      count: section.fields.length + (section.id === 'global-shared' ? 1 : 0) + (section.extra ? 1 : 0),
+      count:
+        section.fields.length +
+        (section.id === 'global-shared' ? 1 : 0) +
+        (section.id === 'home' ? homepagePizzaKeys.length : 0) +
+        (section.extra ? 1 : 0),
     })),
   ];
   const visibleSectionAnchors = sectionAnchors.filter((section) =>
@@ -975,6 +1081,21 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
                       ) : null}
                     </SettingsPanel>
 
+                    {section.id === 'home' ? (
+                      <HomepagePizzaPicker
+                        pizzas={pizzas}
+                        heroPizzaId={getField('home_hero_pizza_id')?.value || ''}
+                        featuredPizzaIds={[
+                          getField('home_featured_pizza_1_id')?.value || '',
+                          getField('home_featured_pizza_2_id')?.value || '',
+                          getField('home_featured_pizza_3_id')?.value || '',
+                          getField('home_featured_pizza_4_id')?.value || '',
+                        ]}
+                        pending={isPending}
+                        onSave={saveHomepagePizzaSelections}
+                      />
+                    ) : null}
+
                   {section.extra ? (
                     <ContentBlocksEditor
                       id={`${section.id}-blocks`}
@@ -1055,6 +1176,171 @@ function SettingsPanel({
       </div>
       {children}
     </motion.section>
+  );
+}
+
+function HomepagePizzaPicker({
+  pizzas,
+  heroPizzaId,
+  featuredPizzaIds,
+  pending,
+  onSave,
+}: {
+  pizzas: Pizza[];
+  heroPizzaId: string;
+  featuredPizzaIds: [string, string, string, string];
+  pending: boolean;
+  onSave: (heroPizzaId: string, featuredPizzaIds: [string, string, string, string]) => void;
+}) {
+  const [draftHeroPizzaId, setDraftHeroPizzaId] = useState(heroPizzaId);
+  const [draftFeaturedPizzaIds, setDraftFeaturedPizzaIds] = useState<[string, string, string, string]>(featuredPizzaIds);
+  const featuredPizzaIdsKey = featuredPizzaIds.join('|');
+
+  useEffect(() => {
+    setDraftHeroPizzaId(heroPizzaId);
+  }, [heroPizzaId]);
+
+  useEffect(() => {
+    setDraftFeaturedPizzaIds(featuredPizzaIds);
+  }, [featuredPizzaIdsKey]);
+
+  const selectedIds = [draftHeroPizzaId, ...draftFeaturedPizzaIds].map((value) => value.trim()).filter(Boolean);
+
+  const buildOptions = (currentValue: string, excludedIds: string[]) => {
+    const normalizedCurrent = currentValue.trim();
+    const excluded = new Set(excludedIds.map((value) => value.trim()).filter(Boolean));
+    if (normalizedCurrent) excluded.delete(normalizedCurrent);
+
+    return pizzas.filter((pizza) => !excluded.has(pizza.id) || pizza.id === normalizedCurrent);
+  };
+
+  const selectedPizzaById = (id: string) => pizzas.find((pizza) => pizza.id === id) || null;
+
+  const normalizeFeatured = (values: string[], heroId: string) => {
+    const seen = new Set<string>(heroId ? [heroId] : []);
+    return values.map((value) => {
+      const trimmed = value.trim();
+      if (!trimmed || seen.has(trimmed)) return '';
+      seen.add(trimmed);
+      return trimmed;
+    }) as [string, string, string, string];
+  };
+
+  const handleSave = () => {
+    const hero = draftHeroPizzaId.trim();
+    const featured = normalizeFeatured(draftFeaturedPizzaIds, hero);
+    onSave(hero, featured);
+  };
+
+  if (!pizzas.length) {
+    return (
+      <section className="mt-6 rounded-3xl border border-dashed border-[var(--border-default)] bg-[var(--surface-secondary)] p-5">
+        <p className="mono-label text-[10px]">Homepage pizza picks</p>
+        <p className="mt-2 text-sm leading-6" style={{ color: 'var(--stone)' }}>
+          Add pizzas first, then return here to choose the homepage hero and the four curated cards.
+        </p>
+      </section>
+    );
+  }
+
+  return (
+    <section className="mt-6 rounded-3xl border border-[var(--border-default)] bg-[var(--surface-secondary)] p-5 shadow-sm">
+      <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p className="mono-label text-[10px]">Homepage pizza picks</p>
+          <h3 className="mt-1 text-xl font-semibold" style={{ color: 'var(--ink)' }}>
+            Pick the hero pizza and four featured cards
+          </h3>
+          <p className="mt-1 text-sm leading-6" style={{ color: 'var(--stone)' }}>
+            Leave a slot blank to fall back to the live menu order. Selections stay unique so the homepage feels curated.
+          </p>
+        </div>
+        <div className="rounded-full border border-[var(--border-default)] bg-white px-3 py-1 text-xs font-medium" style={{ color: 'var(--stone)' }}>
+          {selectedIds.length} selected of 5 slots
+        </div>
+      </div>
+
+      <div className="mt-5 grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,1.85fr)]">
+        <div className="space-y-3 rounded-3xl border border-[var(--border-default)] bg-white p-4">
+          <div>
+            <label className="block text-sm font-semibold" style={{ color: 'var(--ink)' }}>
+              Homepage hero pizza
+            </label>
+            <p className="mt-1 text-xs leading-5" style={{ color: 'var(--stone)' }}>
+              This pizza powers the main hero showcase at the top of the homepage.
+            </p>
+          </div>
+          <select
+            className="input-base w-full"
+            value={draftHeroPizzaId}
+            onChange={(event) => setDraftHeroPizzaId(event.target.value)}
+            disabled={pending}
+          >
+            <option value="">Automatic: first pizza</option>
+            {buildOptions(draftHeroPizzaId, draftFeaturedPizzaIds).map((pizza) => (
+              <option key={pizza.id} value={pizza.id}>
+                {pizza.name}
+                {pizza.is_sold_out ? ' (sold out)' : ''}
+                {pizza.is_active ? '' : ' (hidden)'}
+              </option>
+            ))}
+          </select>
+          {selectedPizzaById(draftHeroPizzaId) ? (
+            <p className="text-xs leading-5" style={{ color: 'var(--stone)' }}>
+              Currently selected: <span className="font-semibold text-[var(--ink)]">{selectedPizzaById(draftHeroPizzaId)?.name}</span>
+            </p>
+          ) : null}
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          {draftFeaturedPizzaIds.map((slotValue, index) => (
+            <div key={index} className="space-y-3 rounded-3xl border border-[var(--border-default)] bg-white p-4">
+              <div>
+                <label className="block text-sm font-semibold" style={{ color: 'var(--ink)' }}>
+                  Featured pizza {index + 1}
+                </label>
+                <p className="mt-1 text-xs leading-5" style={{ color: 'var(--stone)' }}>
+                  One of the four curated pizzas shown below the hero.
+                </p>
+              </div>
+              <select
+                className="input-base w-full"
+                value={slotValue}
+                onChange={(event) => {
+                  const next = [...draftFeaturedPizzaIds] as [string, string, string, string];
+                  next[index] = event.target.value;
+                  setDraftFeaturedPizzaIds(next);
+                }}
+                disabled={pending}
+              >
+                <option value="">Automatic: fill from live menu</option>
+                {buildOptions(slotValue, [draftHeroPizzaId, ...draftFeaturedPizzaIds.filter((_, currentIndex) => currentIndex !== index)]).map((pizza) => (
+                  <option key={pizza.id} value={pizza.id}>
+                    {pizza.name}
+                    {pizza.is_sold_out ? ' (sold out)' : ''}
+                    {pizza.is_active ? '' : ' (hidden)'}
+                  </option>
+                ))}
+              </select>
+              {selectedPizzaById(slotValue) ? (
+                <p className="text-xs leading-5" style={{ color: 'var(--stone)' }}>
+                  Currently selected: <span className="font-semibold text-[var(--ink)]">{selectedPizzaById(slotValue)?.name}</span>
+                </p>
+              ) : null}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+        <p className="text-xs leading-5" style={{ color: 'var(--stone)' }}>
+          The storefront will use your selected hero pizza and curated cards first, then fill any blank slots from the live menu.
+        </p>
+        <button type="button" className="btn-primary" onClick={handleSave} disabled={pending}>
+          Save homepage pizzas
+        </button>
+      </div>
+    </section>
   );
 }
 

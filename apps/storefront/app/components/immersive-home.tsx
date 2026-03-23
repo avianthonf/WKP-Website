@@ -6,7 +6,15 @@ import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion
 import { ArrowRight, Flame, Sparkles, ShoppingBag, Wand2 } from 'lucide-react';
 import { useMemo, useRef } from 'react';
 import { useCart } from './cart-provider';
-import { getConfigValue, getHeroBackgroundImageUrl, getHomeFeaturedImageUrl, getStorefrontState, money } from '../lib/catalog';
+import {
+  getConfigValue,
+  getHeroBackgroundImageUrl,
+  getHomeFeaturedPizzas,
+  getHomeHeroImageUrl,
+  getHomeHeroPizza,
+  getStorefrontState,
+  money,
+} from '../lib/catalog';
 import type { StorefrontBundle } from '../lib/types';
 
 export function ImmersiveHome({
@@ -24,7 +32,8 @@ export function ImmersiveHome({
 }) {
   const prefersReducedMotion = useReducedMotion();
   const { totalItems } = useCart();
-  const featuredPizzas = bundle.pizzas.slice(0, 4);
+  const heroPizza = getHomeHeroPizza(bundle);
+  const featuredPizzas = getHomeFeaturedPizzas(bundle);
   const storefrontState = getStorefrontState(bundle);
   const orderingAvailable = storefrontState.orderingEnabled;
   const isOpenNow = storefrontState.mode === 'open';
@@ -63,7 +72,7 @@ export function ImmersiveHome({
     []
   );
 
-  const heroImageUrl = getHomeFeaturedImageUrl(bundle);
+  const heroImageUrl = getHomeHeroImageUrl(bundle);
   const heroBackgroundImageUrl = getHeroBackgroundImageUrl(bundle);
   const featurePrimaryLabel = orderPrimaryLabel;
   const signatureEyebrow = getConfigValue(bundle.config, 'home_signature_eyebrow', 'Signature picks');
@@ -182,7 +191,7 @@ export function ImmersiveHome({
                 {heroImageUrl ? (
                   <Image
                     src={heroImageUrl as string}
-                    alt={bundle.pizzas[0]?.name || storeName}
+                    alt={heroPizza?.name || storeName}
                     fill
                     sizes="(max-width: 768px) 100vw, 36vw"
                     className="hero-showcase__image"
@@ -198,14 +207,15 @@ export function ImmersiveHome({
                     {getConfigValue(bundle.config, 'home_feature_eyebrow_label', "Chef's pick")}
                   </div>
                   <div className="hero-showcase__title">
-                    {bundle.pizzas[0]?.name || getConfigValue(bundle.config, 'home_feature_fallback_title', 'Signature pizza')}
+                    {heroPizza?.name || getConfigValue(bundle.config, 'home_feature_fallback_title', 'Signature pizza')}
                   </div>
                   <p className="hero-showcase__copy">
-                    {getConfigValue(
-                      bundle.config,
-                      'home_feature_copy',
-                      'Rich, hot, and ready to slide from discovery to order with almost no friction.'
-                    )}
+                    {heroPizza?.description ||
+                      getConfigValue(
+                        bundle.config,
+                        'home_feature_copy',
+                        'Rich, hot, and ready to slide from discovery to order with almost no friction.'
+                      )}
                   </p>
                   <Link
                     href={orderPrimaryHref}
