@@ -3654,6 +3654,55 @@ body.admin-app [class*="rounded-[1.4rem]"] {
   border-radius: 1.4rem !important;
 }
 
+body.admin-app :is(.btn-primary, .btn-ghost, .btn-outline) {
+  min-height: 3rem;
+  padding-inline: 1.15rem;
+}
+
+body.admin-app .dashboard-topbar__left,
+body.admin-app .dashboard-topbar__right {
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+body.admin-app .dashboard-settings__header-actions,
+body.admin-app .dashboard-hero__actions--center,
+body.admin-app .overview-hero__actions,
+body.admin-app .dashboard-snapshot__footer,
+body.admin-app .dashboard-drawer__footer {
+  gap: 1rem;
+}
+
+body.admin-app .dashboard-settings__header-actions {
+  flex-wrap: wrap;
+}
+
+body.admin-app .dashboard-settings__header-actions .flex {
+  gap: 0.85rem;
+}
+
+body.admin-app .dashboard-hero__actions--center,
+body.admin-app .overview-hero__actions {
+  row-gap: 0.9rem;
+}
+
+body.admin-app .field-grid {
+  gap: 1.1rem;
+}
+
+body.admin-app .split {
+  gap: 1rem;
+}
+
+body.admin-app .menu-tabs {
+  gap: 0.65rem;
+}
+
+body.admin-app .dashboard-quicklink {
+  padding-top: 1.05rem;
+  padding-bottom: 1.05rem;
+}
+
 body.admin-app .dashboard-shell__ambient {
   opacity: 0.18;
   background:
