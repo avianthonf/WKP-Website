@@ -168,7 +168,7 @@ export default function MenuStudio({
                   Live menu
                 </div>
               </div>
-              <div className="mt-4 grid gap-2">
+              <div className="mt-4 grid gap-3">
                 <MenuActionButton
                   title="Add pizza"
                   description="Recipe, pricing, toppings"
@@ -176,7 +176,7 @@ export default function MenuStudio({
                   onClick={() => requestCreate('pizzas')}
                   primary
                 />
-                <div className="grid gap-2 sm:grid-cols-2">
+                <div className="grid gap-3 sm:grid-cols-2">
                   <MenuActionButton title="Addon" description="Flat-price side item" icon={UtensilsCrossed} onClick={() => requestCreate('addons')} />
                   <MenuActionButton title="Topping" description="Ingredient or sauce" icon={Leaf} onClick={() => requestCreate('toppings')} />
                   <MenuActionButton title="Extra" description="Sized add-on pricing" icon={Tag} onClick={() => requestCreate('extras')} />
@@ -216,15 +216,17 @@ export default function MenuStudio({
                     key={tab.key}
                     type="button"
                     onClick={() => setActiveTab(tab.key)}
-                    className={`inline-flex items-center gap-2 rounded-[1.1rem] px-4 py-2.5 text-sm font-semibold transition-all ${
+                    className={`inline-flex min-w-[9rem] items-center justify-between gap-4 rounded-[1.1rem] px-4 py-2.5 text-sm font-semibold transition-all ${
                       isActive
                         ? 'bg-white text-[var(--ink)] shadow-[0_8px_20px_rgba(26,23,18,0.08)]'
                         : 'text-[var(--stone)] hover:bg-white/70 hover:text-[var(--ink)]'
                     }`}
                   >
-                    <Icon size={16} />
-                    <span>{tab.label}</span>
-                    <span className="rounded-full bg-[rgba(232,84,10,0.08)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--ember)]">
+                    <span className="flex min-w-0 items-center gap-2 text-left">
+                      <Icon size={16} />
+                      <span className="truncate">{tab.label}</span>
+                    </span>
+                    <span className="shrink-0 rounded-full bg-[rgba(232,84,10,0.08)] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--ember)]">
                       {counts[tab.key]}
                     </span>
                   </button>
@@ -422,17 +424,17 @@ function MenuActionButton({
     <button
       type="button"
       onClick={onClick}
-      className={`group flex w-full items-center gap-3 rounded-[1rem] border px-4 py-3 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(232,84,10,0.25)] ${
+      className={`group flex w-full items-start gap-4 rounded-[1rem] border px-5 py-4 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(232,84,10,0.25)] ${
         primary
           ? 'border-[rgba(232,84,10,0.18)] bg-white shadow-[0_12px_24px_rgba(26,23,18,0.05)] hover:-translate-y-0.5 hover:border-[rgba(232,84,10,0.32)]'
           : 'border-[var(--border-default)] bg-white hover:-translate-y-0.5 hover:border-[rgba(232,84,10,0.3)] hover:shadow-[0_10px_20px_rgba(26,23,18,0.06)]'
       }`}
     >
-      <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${primary ? 'bg-[rgba(232,84,10,0.10)] text-[var(--ember)]' : 'bg-[var(--surface-secondary)] text-[var(--ink)]'}`}>
+      <span className={`mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${primary ? 'bg-[rgba(232,84,10,0.10)] text-[var(--ember)]' : 'bg-[var(--surface-secondary)] text-[var(--ink)]'}`}>
         <Icon size={18} />
       </span>
-      <span className="min-w-0 flex-1">
-        <span className="block text-sm font-semibold text-[var(--ink)]">{title}</span>
+      <span className="min-w-0 flex-1 space-y-1">
+        <span className="block text-sm font-semibold leading-5 text-[var(--ink)]">{title}</span>
         <span className="block text-xs leading-5 text-[var(--stone)]">{description}</span>
       </span>
       <ArrowRight size={14} className="text-[var(--stone)] transition-transform group-hover:translate-x-0.5 group-hover:text-[var(--ember)]" />

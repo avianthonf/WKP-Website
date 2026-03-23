@@ -345,7 +345,6 @@ export function getMenuBrowserCopy(bundle: StorefrontBundle) {
     allFilterLabel: getConfigValue(bundle.config, 'menu_filter_all_label', 'All'),
     pizzasFilterLabel: getConfigValue(bundle.config, 'menu_filter_pizzas_label', 'Pizzas'),
     addonsFilterLabel: getConfigValue(bundle.config, 'menu_filter_addons_label', 'Addons'),
-    extrasFilterLabel: getConfigValue(bundle.config, 'menu_filter_extras_label', 'Extras'),
     dessertsFilterLabel: getConfigValue(bundle.config, 'menu_filter_desserts_label', 'Desserts'),
     vegFilterLabel: getConfigValue(bundle.config, 'menu_filter_veg_label', 'Veg'),
     nonVegFilterLabel: getConfigValue(bundle.config, 'menu_filter_nonveg_label', 'Non-veg'),
@@ -359,7 +358,7 @@ export function getMenuBrowserCopy(bundle: StorefrontBundle) {
     countsTemplate: getConfigValue(
       bundle.config,
       'menu_counts_template',
-      '{pizzas} pizzas, {addons} addons, {extras} extras, {desserts} desserts'
+      '{pizzas} pizzas, {addons} addons, {desserts} desserts'
     ),
     emptyMatchesTitle: getConfigValue(bundle.config, 'menu_empty_matches_title', 'No matches found'),
     emptyMatchesBody: getConfigValue(bundle.config, 'menu_empty_matches_body', 'Try a different search term or clear the filters.'),
@@ -417,10 +416,8 @@ export function getMenuBrowserCopy(bundle: StorefrontBundle) {
     cardAddToCartLabel: getConfigValue(bundle.config, 'menu_card_add_to_cart_label', 'Add to cart'),
     cardHouseRecipeCopy: getConfigValue(bundle.config, 'menu_card_house_recipe_copy', 'House recipe from the live menu.'),
     cardAddonCopy: getConfigValue(bundle.config, 'menu_card_addon_copy', 'Flat-price side item'),
-    cardExtraCopy: getConfigValue(bundle.config, 'menu_card_extra_copy', 'Sized topping add-on'),
     cardDessertCopy: getConfigValue(bundle.config, 'menu_card_dessert_copy', 'Sweet finish to the meal'),
     cardAddonKindLabel: getConfigValue(bundle.config, 'menu_card_addon_kind_label', 'Addon'),
-    cardExtraKindLabel: getConfigValue(bundle.config, 'menu_card_extra_kind_label', 'Extra'),
     cardDessertKindLabel: getConfigValue(bundle.config, 'menu_card_dessert_kind_label', 'Dessert'),
     cardOrderingPausedLabel: getConfigValue(bundle.config, 'menu_card_ordering_paused_label', 'Ordering paused'),
     cardCartAriaLabel: getConfigValue(bundle.config, 'menu_card_cart_aria_label', 'Pizza sizes already in cart'),

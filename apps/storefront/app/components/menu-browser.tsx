@@ -8,7 +8,6 @@ import { useCart } from './cart-provider';
 import {
   getAddonPrice,
   getDessertPrice,
-  getExtraPrice,
   getConfigValue,
   getPizzaDisplayToppings,
   getPizzaPrice,
@@ -21,7 +20,7 @@ import {
 import type { Pizza, Size, StorefrontBundle } from '../lib/types';
 import type { CSSProperties, MouseEvent } from 'react';
 
-type FilterKey = 'all' | 'pizza' | 'addon' | 'extra' | 'dessert';
+type FilterKey = 'all' | 'pizza' | 'addon' | 'dessert';
 type DietFilterKey = 'all' | 'veg' | 'nonveg';
 const pizzaSizes: Size[] = ['small', 'medium', 'large'];
 
@@ -57,7 +56,6 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
     { key: 'all', label: menuCopy.allFilterLabel },
     { key: 'pizza', label: menuCopy.pizzasFilterLabel },
     { key: 'addon', label: menuCopy.addonsFilterLabel },
-    { key: 'extra', label: menuCopy.extrasFilterLabel },
     { key: 'dessert', label: menuCopy.dessertsFilterLabel },
   ];
   const dietFilters: Array<{ key: DietFilterKey; label: string; icon?: ReactNode }> = [
@@ -101,19 +99,18 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
       addons: bundle.addons.filter(
         (item) => (filter === 'all' || filter === 'addon') && matchesDiet(item) && (matches(item.name) || matches(item.description))
       ),
-      extras: bundle.extras.filter((item) => (filter === 'all' || filter === 'extra') && matchesDiet(item) && matches(item.name)),
       desserts: bundle.desserts.filter(
         (item) => (filter === 'all' || filter === 'dessert') && matchesDiet(item) && (matches(item.name) || matches(item.description))
       ),
     };
-  }, [bundle.addons, bundle.desserts, bundle.extras, bundle.pizzas, dietFilter, filter, query]);
+  }, [bundle.addons, bundle.desserts, bundle.pizzas, dietFilter, filter, query]);
 
-  const totalVisible = menuItems.pizzas.length + menuItems.addons.length + menuItems.extras.length + menuItems.desserts.length;
+  const totalVisible = menuItems.pizzas.length + menuItems.addons.length + menuItems.desserts.length;
   const countsSummary = menuCopy.countsTemplate
     .replace('{pizzas}', String(bundle.pizzas.length))
     .replace('{addons}', String(bundle.addons.length))
-    .replace('{extras}', String(bundle.extras.length))
-    .replace('{desserts}', String(bundle.desserts.length));
+    .replace('{desserts}', String(bundle.desserts.length))
+    .replace(/\s*,?\s*\{extras\}\s*extras?/i, '');
 
   return (
     <div className="page-wrap">
@@ -273,30 +270,6 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
                       name: addon.name,
                       imageUrl: addon.image_url,
                       unitPrice: getAddonPrice(addon),
-                    })
-                  }
-                />
-              ))}
-
-              {menuItems.extras.map((extra, index) => (
-                <SimpleCard
-                  key={extra.id}
-                  index={index}
-                  copy={menuCopy}
-                  title={extra.name}
-                  description={menuCopy.cardExtraCopy}
-                  price={getExtraPrice(extra, 'medium')}
-                  kindLabel={menuCopy.cardExtraKindLabel}
-                  tone="success"
-                  href={`/menu/${extra.slug}`}
-                  disabled={orderingPaused || extra.is_sold_out}
-                  onAdd={() =>
-                    addItem({
-                      kind: 'extra',
-                      sourceId: extra.id,
-                      name: extra.name,
-                      unitPrice: getExtraPrice(extra, 'medium'),
-                      customization: { size: 'medium' },
                     })
                   }
                 />
