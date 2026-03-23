@@ -38,7 +38,7 @@ export function Modal({ open, onClose, title, children, maxWidth = 'lg' }: Modal
 
   const content = (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto p-4 backdrop-blur-sm sm:items-center sm:p-6"
+      className="fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto p-4 backdrop-blur-sm sm:items-center sm:p-6"
       style={{ background: 'rgba(26, 23, 18, 0.4)' }}
       onClick={onClose}
     >

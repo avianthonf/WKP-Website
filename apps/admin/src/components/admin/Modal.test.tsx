@@ -31,7 +31,7 @@ describe('Modal', () => {
     const user = userEvent.setup();
     render(<Modal {...defaultProps} />);
 
-    const backdrop = document.querySelector('.fixed.inset-0.z-50');
+    const backdrop = document.querySelector('.fixed.inset-0.z-\\[100\\]');
     expect(backdrop).toBeInTheDocument();
 
     await user.click(backdrop!);
