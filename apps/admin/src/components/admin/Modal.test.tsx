@@ -69,22 +69,24 @@ describe('Modal', () => {
   it('renders title in Cormorant Garamond with ember color', () => {
     render(<Modal {...defaultProps} />);
     const title = screen.getByText('Test Modal');
-    expect(title).toHaveStyle({ fontFamily: "'Cormorant Garamond', serif", color: '#E8540A' });
+    expect(title).toHaveStyle({ fontFamily: "'Cormorant Garamond', serif", color: 'var(--ember)' });
   });
 
   it('has correct max width and scroll', () => {
     render(<Modal {...defaultProps} />);
-    const panel = document.querySelector('.max-w-md');
-    expect(panel).toHaveClass('max-h-[85vh]', 'overflow-y-auto');
+    const panel = screen.getByTestId('modal-panel');
+    expect(panel).toHaveClass('max-h-[calc(100dvh-2rem)]', 'overflow-hidden', 'flex', 'flex-col');
+
+    const content = screen.getByTestId('modal-content');
+    expect(content).toHaveClass('flex-1', 'overflow-y-auto', 'overscroll-contain');
   });
 
-  it('closes on unmount cleanup', () => {
+  it('locks and unlocks body scroll around modal lifecycle', () => {
     const { unmount } = render(<Modal {...defaultProps} />);
-    expect(document.body.style.overflow).toBe(''); // Should be set on open
+    expect(document.body.style.overflow).toBe('hidden');
 
     unmount();
 
-    // After unmount, body overflow should be reset
     expect(document.body.style.overflow).toBe('');
   });
 });
