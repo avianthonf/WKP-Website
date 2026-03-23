@@ -10,7 +10,8 @@
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules vitest",
     "test:watch": "cross-env NODE_OPTIONS=--experimental-vm-modules vitest --watch",
     "test:coverage": "cross-env NODE_OPTIONS=--experimental-vm-modules vitest --coverage",
-    "seed:menu": "node scripts/seed-menu.mjs"
+    "seed:menu": "node scripts/seed-menu.mjs",
+    "generate:image": "node scripts/generate-menu-image.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.1.0",
