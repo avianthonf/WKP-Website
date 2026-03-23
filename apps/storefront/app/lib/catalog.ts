@@ -134,7 +134,7 @@ export function getFooterCopy(bundle: StorefrontBundle) {
 }
 
 export function getBrandLogoUrl(bundle: StorefrontBundle) {
-  return getConfigImageValue(bundle.config, 'brand_logo_image_url') || getConfigImageValue(bundle.config, 'logo_url');
+  return getConfigImageValue(bundle.config, 'brand_logo_image_url');
 }
 
 export function getSupportEmail(bundle: StorefrontBundle) {

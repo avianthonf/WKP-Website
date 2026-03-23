@@ -233,7 +233,7 @@ export default function SettingsClient({ initialConfigs }: SettingsClientProps) 
       icon: ImageIcon,
       fields: [
         { key: 'brand_logo_image_url', label: 'Brand logo image', kind: 'image', fallback: '', description: 'Shown in the top-left brand area and mobile drawer when set. Leave blank to use the text mark.' },
-        { key: 'hero_bg_url', label: 'Home hero background image', kind: 'image', fallback: '', description: 'Legacy-compatible background image for the immersive home hero. Falls back behind the home showcase.' },
+        { key: 'hero_bg_url', label: 'Home hero background image', kind: 'image', fallback: '', description: 'Background image for the immersive home hero. Falls back behind the home showcase.' },
         { key: 'home_feature_image_url', label: 'Home feature image', kind: 'image', fallback: '', description: 'Shown in the homepage hero showcase and featured media panel.' },
         { key: 'menu_hero_image_url', label: 'Menu hero image', kind: 'image', fallback: '', description: 'Shown beside the menu intro and browsing summary.' },
         { key: 'cart_hero_image_url', label: 'Cart hero image', kind: 'image', fallback: '', description: 'Shown beside the checkout summary before the WhatsApp handoff.' },

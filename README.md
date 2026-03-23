@@ -247,6 +247,8 @@ Supabase PostgreSQL is the single source of truth for both apps.
 | `menu` | Public read, authenticated write | Menu item images |
 | `brand-assets` | Via server action | Storefront branding images (logo, hero, feature) |
 
+Both buckets are backed by idempotent migrations in `apps/admin/supabase/migrations/` and are validated by `npm run verify:invariants`.
+
 ### Source of Truth Rules
 
 - Text and image content for the storefront comes from Supabase `site_config` whenever a curated key exists.
@@ -646,8 +648,25 @@ Before changing shared behavior, verify:
 5. Does the layout still keep content before utility cards?
 6. Are all migrations idempotent (using `ON CONFLICT` or `IF NOT EXISTS`)?
 7. Have you run lint and build for both workspaces?
+8. Have you run `npm run verify:invariants` to catch stale aliases and bucket drift?
 
 If the answer to any of those is no, the change is probably incomplete.
+
+### Invariant Checks
+
+Run this before merging changes that touch settings, uploads, or storefront copy:
+
+```bash
+npm run verify:invariants
+```
+
+It currently checks:
+
+- `brand-assets` and `menu` remain the only supported upload buckets
+- branding uploads stay on `brand-assets`
+- menu item image uploads stay on `menu`
+- the storefront no longer falls back to stale `logo_url`
+- the image upload helper only accepts the intended buckets
 
 ---
 

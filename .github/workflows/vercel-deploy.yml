@@ -38,6 +38,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Verify invariants
+        run: npm run verify:invariants
+
       - name: Build admin
         run: npm run build --workspace apps/admin
 

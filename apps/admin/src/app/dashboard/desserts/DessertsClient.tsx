@@ -285,6 +285,7 @@ export function DessertsClient({ initialDesserts, createSignal }: DessertsClient
             label="Dessert photo"
             description="Shown on dessert cards and dessert detail pages across the storefront."
             folder="desserts"
+            bucket="menu"
             value={imageUrl}
             onChange={(next) => setValue('image_url', next, { shouldDirty: true, shouldValidate: true })}
             previewAlt="Dessert preview"

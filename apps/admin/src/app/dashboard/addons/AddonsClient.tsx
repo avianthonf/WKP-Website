@@ -292,6 +292,7 @@ export function AddonsClient({ initialAddons, createSignal }: AddonsClientProps)
             label="Addon photo"
             description="Shown on addon cards and addon detail pages across the storefront."
             folder="addons"
+            bucket="menu"
             value={imageUrl}
             onChange={(next) => setValue('image_url', next, { shouldDirty: true, shouldValidate: true })}
             previewAlt="Addon preview"

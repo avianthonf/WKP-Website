@@ -9,6 +9,7 @@
     "dev": "npm run dev --workspaces",
     "build": "npm run build --workspaces",
     "test": "npm run test --workspaces",
-    "lint": "npm run lint --workspaces"
+    "lint": "npm run lint --workspaces",
+    "verify:invariants": "node scripts/verify-invariants.mjs"
   }
 }

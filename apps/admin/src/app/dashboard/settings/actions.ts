@@ -90,6 +90,7 @@ export async function uploadStorefrontAsset(formData: FormData) {
   try {
     const file = formData.get('file');
     const folder = String(formData.get('folder') || 'storefront-images').trim() || 'storefront-images';
+    const bucket = String(formData.get('bucket') || 'brand-assets').trim() || 'brand-assets';
 
     if (!(file instanceof File)) {
       throw new Error('No image file was provided');
@@ -115,14 +116,18 @@ export async function uploadStorefrontAsset(formData: FormData) {
     const path = `${folder}/${Date.now()}-${uniqueId}-${safeName}${extension}`;
     const fileBytes = Buffer.from(await file.arrayBuffer());
 
-    const { error } = await supabaseAdmin.storage.from('brand-assets').upload(path, fileBytes, {
+    if (!['brand-assets', 'menu'].includes(bucket)) {
+      throw new Error('Unsupported upload bucket');
+    }
+
+    const { error } = await supabaseAdmin.storage.from(bucket).upload(path, fileBytes, {
       contentType: file.type,
       upsert: false,
     });
 
     if (error) throw error;
 
-    const { data } = supabaseAdmin.storage.from('brand-assets').getPublicUrl(path);
+    const { data } = supabaseAdmin.storage.from(bucket).getPublicUrl(path);
     if (!data.publicUrl) {
       throw new Error('The image uploaded, but a public URL could not be generated');
     }

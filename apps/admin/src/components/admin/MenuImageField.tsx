@@ -12,6 +12,7 @@ interface MenuImageFieldProps {
   label: string;
   description: string;
   folder: string;
+  bucket?: 'brand-assets' | 'menu';
   value: string | null | undefined;
   onChange: (value: string | null) => void;
   previewAlt: string;
@@ -21,6 +22,7 @@ export function MenuImageField({
   label,
   description,
   folder,
+  bucket = 'brand-assets',
   value,
   onChange,
   previewAlt,
@@ -49,6 +51,7 @@ export function MenuImageField({
       const formData = new FormData();
       formData.append('file', file);
       formData.append('folder', folder);
+      formData.append('bucket', bucket);
 
       const { publicUrl } = await uploadStorefrontAsset(formData);
       onChange(publicUrl);

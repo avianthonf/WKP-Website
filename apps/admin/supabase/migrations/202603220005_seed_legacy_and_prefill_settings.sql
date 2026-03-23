@@ -1,6 +1,6 @@
 insert into public.site_config (key, value, label, type, description, is_public)
 values
-  ('hero_bg_url', '', 'Home hero background image', 'image', 'Legacy-compatible background image for the immersive home hero. Falls back behind the home showcase.', true),
+  ('hero_bg_url', '', 'Home hero background image', 'image', 'Background image for the immersive home hero. Falls back behind the home showcase.', true),
   ('delivery_radius_km', '0', 'Delivery radius (km)', 'number', 'Optional delivery radius shown on the delivery information page.', true),
   ('contact_order_prefill_message', 'Hi, I would like to place an order or ask a question.', 'Contact order prefill', 'textarea', 'Prefilled message used when opening the contact chat action.', true),
   ('delivery_radius_title', 'Radius', 'Delivery radius title', 'text', 'Delivery radius card title.', true),

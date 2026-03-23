@@ -202,6 +202,7 @@ export function PizzaForm({
           label="Pizza photo"
           description="Shown on the storefront menu cards, item detail page, builder preview, and any featured pizza panels."
           folder="pizzas"
+          bucket="menu"
           value={imageUrl}
           onChange={(next) => setValue('image_url', next, { shouldDirty: true, shouldValidate: true })}
           previewAlt="Pizza preview"
