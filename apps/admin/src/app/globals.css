@@ -3653,3 +3653,177 @@ body.admin-app [class*="rounded-[1.35rem]"],
 body.admin-app [class*="rounded-[1.4rem]"] {
   border-radius: 1.4rem !important;
 }
+
+body.admin-app .dashboard-shell__ambient {
+  opacity: 0.18;
+  background:
+    radial-gradient(circle at 12% 12%, rgba(232, 84, 10, 0.08), transparent 20%),
+    radial-gradient(circle at 88% 8%, rgba(22, 163, 74, 0.05), transparent 16%),
+    radial-gradient(circle at 60% 92%, rgba(255, 255, 255, 0.22), transparent 20%);
+}
+
+body.admin-app .dashboard-shell__orb {
+  display: none;
+}
+
+body.admin-app .dashboard-shell__content {
+  gap: 1.75rem;
+}
+
+body.admin-app .dashboard-topbar {
+  top: 0.85rem;
+  left: calc(var(--drawer-width) + 0.85rem);
+  right: 0.85rem;
+  min-height: 4.2rem;
+  padding: 0.9rem 1.15rem;
+  border-radius: 1.5rem;
+  border: 1px solid rgba(229, 229, 224, 0.84);
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 18px 36px rgba(26, 23, 18, 0.07);
+}
+
+body.admin-app .dashboard-topbar__left,
+body.admin-app .dashboard-topbar__right {
+  gap: 0.85rem;
+}
+
+body.admin-app .dashboard-topbar__crumb--current {
+  letter-spacing: -0.02em;
+}
+
+body.admin-app .dashboard-topbar__page-subtitle {
+  max-width: 30rem;
+}
+
+body.admin-app .dashboard-drawer {
+  top: 0.85rem;
+  left: 0.85rem;
+  bottom: 0.85rem;
+  border-radius: 1.7rem;
+  background:
+    radial-gradient(circle at top right, rgba(232, 84, 10, 0.08), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(251, 248, 243, 0.98));
+  color: var(--ink);
+  border: 1px solid rgba(229, 229, 224, 0.82);
+  box-shadow: 0 26px 60px rgba(26, 23, 18, 0.08);
+}
+
+body.admin-app .dashboard-drawer__rail {
+  padding: 1rem 0.85rem 0.9rem;
+}
+
+body.admin-app .dashboard-drawer__brand {
+  background: rgba(245, 240, 232, 0.78);
+  color: var(--ink);
+  border: 1px solid rgba(229, 229, 224, 0.72);
+}
+
+body.admin-app .dashboard-drawer__brand-name {
+  color: var(--ink);
+}
+
+body.admin-app .dashboard-drawer__brand-sub,
+body.admin-app .dashboard-drawer__section-label {
+  color: var(--stone);
+}
+
+body.admin-app .dashboard-drawer__brand-toggle {
+  color: var(--stone);
+  background: rgba(255, 255, 255, 0.82);
+}
+
+body.admin-app .dashboard-drawer__item {
+  color: var(--stone);
+  border: 1px solid transparent;
+}
+
+body.admin-app .dashboard-drawer__item:hover {
+  background: rgba(232, 84, 10, 0.06);
+  color: var(--ink);
+}
+
+body.admin-app .dashboard-drawer__item.is-active {
+  background: rgba(232, 84, 10, 0.08);
+  color: var(--ink);
+  box-shadow: inset 3px 0 0 var(--ember);
+}
+
+body.admin-app .dashboard-drawer__icon {
+  background: rgba(232, 84, 10, 0.08);
+  color: var(--ember);
+}
+
+body.admin-app .dashboard-drawer__status,
+body.admin-app .dashboard-drawer__profile {
+  background: rgba(245, 240, 232, 0.82);
+  color: var(--ink);
+  border: 1px solid rgba(229, 229, 224, 0.72);
+}
+
+body.admin-app .dashboard-drawer__status-label-top,
+body.admin-app .dashboard-drawer__status-label-bottom,
+body.admin-app .dashboard-drawer__profile-role {
+  color: var(--stone);
+}
+
+body.admin-app .dashboard-drawer__status-pill {
+  background: rgba(255, 255, 255, 0.95);
+}
+
+body.admin-app .dashboard-drawer__signout {
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--stone);
+}
+
+body.admin-app .dashboard-shell__main {
+  padding-top: 5.8rem;
+  padding-bottom: 2.5rem;
+}
+
+@media (max-width: 1024px) {
+  body.admin-app .dashboard-drawer {
+    width: min(88vw, 20rem);
+    transform: translateX(calc(-100% - 1rem));
+  }
+
+  body.admin-app .dashboard-drawer.is-expanded {
+    transform: translateX(0);
+  }
+
+  body.admin-app .dashboard-topbar {
+    left: 0.75rem;
+    right: 0.75rem;
+  }
+
+  body.admin-app .dashboard-shell__main {
+    padding-top: 5.4rem;
+  }
+}
+
+@media (max-width: 640px) {
+  body.admin-app .dashboard-topbar {
+    top: 0.6rem;
+    left: 0.6rem;
+    right: 0.6rem;
+    padding: 0.75rem 0.9rem;
+  }
+
+  body.admin-app .dashboard-drawer {
+    top: 0.6rem;
+    left: 0.6rem;
+    bottom: 0.6rem;
+  }
+
+  body.admin-app .dashboard-shell__main {
+    padding-top: 5rem;
+    padding-inline: 0.6rem;
+  }
+
+  body.admin-app .dashboard-topbar__crumbs {
+    display: none;
+  }
+
+  body.admin-app .dashboard-live-toggle span {
+    display: none;
+  }
+}
