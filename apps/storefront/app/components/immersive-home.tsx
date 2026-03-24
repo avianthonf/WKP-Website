@@ -384,65 +384,30 @@ function HeroLoopingVideo({
     const video = videoRef.current;
     if (!video) return;
 
-    let raf = 0;
-    let direction = 1;
-    let active = true;
-    let lastFrame = performance.now();
+    video.loop = true;
+    video.playbackRate = 1;
+    video.defaultPlaybackRate = 1;
+    video.muted = true;
+    video.playsInline = true;
 
-    const startLoop = () => {
-      const duration = video.duration;
-      if (!Number.isFinite(duration) || duration <= 0) return;
-
-      const edge = Math.min(0.16, Math.max(0.04, duration * 0.01));
-      video.currentTime = edge;
-      video.pause();
-
-      const tick = (now: number) => {
-        if (!active) return;
-
-        const elapsed = Math.min(0.05, (now - lastFrame) / 1000);
-        lastFrame = now;
-
-        const currentDuration = video.duration;
-        if (Number.isFinite(currentDuration) && currentDuration > 0 && video.readyState >= 2) {
-          const safeEdge = Math.min(0.16, Math.max(0.04, currentDuration * 0.01));
-          let nextTime = video.currentTime + elapsed * 0.72 * direction;
-
-          if (nextTime >= currentDuration - safeEdge) {
-            nextTime = currentDuration - safeEdge;
-            direction = -1;
-          } else if (nextTime <= safeEdge) {
-            nextTime = safeEdge;
-            direction = 1;
-          }
-
-          if (Math.abs(nextTime - video.currentTime) > 0.0001) {
-            video.currentTime = nextTime;
-          }
-        }
-
-        raf = window.requestAnimationFrame(tick);
-      };
-
-      raf = window.requestAnimationFrame(tick);
-    };
-
-    const handleLoadedMetadata = () => {
-      startLoop();
+    const startPlayback = () => {
+      const playPromise = video.play();
+      if (playPromise && typeof playPromise.catch === 'function') {
+        playPromise.catch(() => {
+          // Autoplay can be blocked on a few devices until the browser is ready.
+        });
+      }
     };
 
     if (video.readyState >= 1) {
-      startLoop();
+      startPlayback();
     } else {
-      video.addEventListener('loadedmetadata', handleLoadedMetadata, { once: true });
+      video.addEventListener('loadedmetadata', startPlayback, { once: true });
     }
 
     return () => {
-      active = false;
-      if (raf) {
-        window.cancelAnimationFrame(raf);
-      }
-      video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      video.pause();
+      video.removeEventListener('loadedmetadata', startPlayback);
     };
   }, [src]);
 
@@ -454,7 +419,12 @@ function HeroLoopingVideo({
       poster={poster}
       muted
       playsInline
+      autoPlay
+      loop
       preload="auto"
+      disablePictureInPicture
+      controls={false}
+      controlsList="nodownload noplaybackrate noremoteplayback"
       aria-hidden="true"
     />
   );
