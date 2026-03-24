@@ -598,6 +598,11 @@ img {
   position: relative;
 }
 
+.hero-card--video {
+  isolation: isolate;
+  contain: paint;
+}
+
 .hero-card__media-video,
 .hero-card__media-overlay {
   position: absolute;
@@ -612,6 +617,9 @@ img {
   object-fit: cover;
   object-position: center;
   z-index: 0;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform;
 }
 
 .hero-card__media-overlay {
@@ -619,8 +627,16 @@ img {
   background:
     linear-gradient(135deg, rgba(247, 241, 231, 0.9), rgba(247, 241, 231, 0.7)),
     radial-gradient(circle at top right, rgba(201, 139, 47, 0.18), transparent 38%),
-    radial-gradient(circle at bottom left, rgba(197, 104, 47, 0.12), transparent 34%);
+  radial-gradient(circle at bottom left, rgba(197, 104, 47, 0.12), transparent 34%);
   backdrop-filter: blur(2px);
+}
+
+.hero-card--video .hero-card__media-overlay {
+  backdrop-filter: none;
+  background:
+    linear-gradient(135deg, rgba(247, 241, 231, 0.86), rgba(247, 241, 231, 0.66)),
+    radial-gradient(circle at top right, rgba(201, 139, 47, 0.14), transparent 38%),
+    radial-gradient(circle at bottom left, rgba(197, 104, 47, 0.1), transparent 34%);
 }
 
 .hero-card--immersive::after {
@@ -635,6 +651,11 @@ img {
   filter: blur(16px);
   pointer-events: none;
   animation: drift 10s var(--ease-organic) infinite alternate, morph 20s var(--ease-smooth) infinite;
+}
+
+.hero-card--video::after {
+  animation: none;
+  opacity: 0.55;
 }
 
 .hero-card__immersive-grid {
@@ -741,6 +762,12 @@ img {
   animation: drift 8s var(--ease-premium) infinite alternate;
 }
 
+.hero-card--video .hero-showcase__glow {
+  opacity: 0.35;
+  animation: none;
+  filter: blur(12px);
+}
+
 .hero-showcase__card--main {
   position: relative;
   flex: 1;
@@ -821,6 +848,10 @@ img {
   pointer-events: none;
   z-index: 2;
   filter: blur(1px);
+}
+
+.hero-card--video .hero-particles {
+  display: none;
 }
 
 .hero-particle {

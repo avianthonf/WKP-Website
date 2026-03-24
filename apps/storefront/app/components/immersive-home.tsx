@@ -79,6 +79,7 @@ export function ImmersiveHome({
   const heroBackgroundMediaType = getHomeHeroBackgroundMediaType(bundle);
   const heroBackgroundVideoUrl = getHomeHeroBackgroundVideoUrl(bundle);
   const showHeroBackgroundImage = prefersReducedMotion || heroBackgroundMediaType !== 'video' || !heroBackgroundVideoUrl;
+  const isHeroVideoMode = !showHeroBackgroundImage && heroBackgroundMediaType === 'video' && !!heroBackgroundVideoUrl;
   const featurePrimaryLabel = orderPrimaryLabel;
   const signatureEyebrow = getConfigValue(bundle.config, 'home_signature_eyebrow', 'Signature picks');
   const signatureTitle = getConfigValue(
@@ -104,12 +105,12 @@ export function ImmersiveHome({
     <div className="immersive-home">
       <motion.section
         ref={heroRef}
-        className="hero-card hero-card--immersive reveal"
+        className={`hero-card hero-card--immersive reveal${isHeroVideoMode ? ' hero-card--video' : ''}`}
         initial={prefersReducedMotion ? false : { opacity: 0, y: 18, scale: 0.992 }}
         animate={prefersReducedMotion ? {} : { opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
         style={
-          prefersReducedMotion
+          prefersReducedMotion || isHeroVideoMode
             ? showHeroBackgroundImage
               ? {
                   backgroundImage: `linear-gradient(135deg, rgba(247, 241, 231, 0.92), rgba(247, 241, 231, 0.76)), url(${heroBackgroundImageUrl})`,
@@ -133,7 +134,10 @@ export function ImmersiveHome({
       >
         {!showHeroBackgroundImage && heroBackgroundMediaType === 'video' && heroBackgroundVideoUrl ? (
           <>
-            <HeroLoopingVideo src={heroBackgroundVideoUrl} poster={heroBackgroundImageUrl || undefined} />
+            <HeroLoopingVideo
+              src={heroBackgroundVideoUrl}
+              poster={heroBackgroundImageUrl || undefined}
+            />
             <div
               className="hero-card__media-overlay"
               aria-hidden="true"
