@@ -393,6 +393,7 @@ function HeroLoopingVideo({
     let shouldPlayWhenReady = false;
     let introScrollCount = 0;
     let wheelCooldownTimer: number | undefined;
+    let continuousPlaybackEnabled = false;
     let touchGestureActive = false;
     let touchLockCounted = false;
     let touchStartY = 0;
@@ -423,8 +424,21 @@ function HeroLoopingVideo({
       introScrollCount += 1;
       shouldPlayWhenReady = true;
       playVideo();
+      if (idlePauseTimer) {
+        window.clearTimeout(idlePauseTimer);
+      }
       queueIdlePause();
       return true;
+    };
+
+    const unlockContinuousPlayback = () => {
+      continuousPlaybackEnabled = true;
+      shouldPlayWhenReady = true;
+      if (idlePauseTimer) {
+        window.clearTimeout(idlePauseTimer);
+        idlePauseTimer = undefined;
+      }
+      playVideo();
     };
 
     const queueIdlePause = () => {
@@ -440,7 +454,10 @@ function HeroLoopingVideo({
       if (!isVisible || document.visibilityState !== 'visible') return;
       shouldPlayWhenReady = true;
       playVideo();
-      queueIdlePause();
+
+      if (!continuousPlaybackEnabled) {
+        queueIdlePause();
+      }
     };
 
     const handleWheel = (event: WheelEvent) => {
@@ -449,6 +466,10 @@ function HeroLoopingVideo({
         event.preventDefault();
         registerIntroScroll();
         return;
+      }
+
+      if (!continuousPlaybackEnabled) {
+        unlockContinuousPlayback();
       }
 
       handleScrollActivity();
@@ -488,9 +509,15 @@ function HeroLoopingVideo({
         return;
       }
 
+      if (!continuousPlaybackEnabled) {
+        unlockContinuousPlayback();
+      }
+
       shouldPlayWhenReady = true;
       playVideo();
-      queueIdlePause();
+      if (!continuousPlaybackEnabled) {
+        queueIdlePause();
+      }
     };
 
     const handleTouchEnd = () => {
@@ -505,7 +532,11 @@ function HeroLoopingVideo({
         return;
       }
 
-      queueIdlePause();
+      if (continuousPlaybackEnabled) {
+        playVideo();
+      } else {
+        queueIdlePause();
+      }
     };
 
     const observer = new IntersectionObserver(
@@ -513,12 +544,18 @@ function HeroLoopingVideo({
         isVisible = Boolean(entry?.isIntersecting);
         if (!isVisible) {
           shouldPlayWhenReady = false;
-          pauseVideo();
+          if (!continuousPlaybackEnabled) {
+            pauseVideo();
+          }
           return;
         }
 
         if (video.readyState >= 2) {
-          queueIdlePause();
+          if (continuousPlaybackEnabled) {
+            playVideo();
+          } else {
+            queueIdlePause();
+          }
         }
       },
       { threshold: 0.2 }
@@ -533,15 +570,21 @@ function HeroLoopingVideo({
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
     if (video.readyState >= 2) {
-      queueIdlePause();
+      if (continuousPlaybackEnabled) {
+        playVideo();
+      } else {
+        queueIdlePause();
+      }
     } else {
       video.addEventListener(
         'canplay',
         () => {
-          if (shouldPlayWhenReady && isVisible && document.visibilityState === 'visible') {
+          if (continuousPlaybackEnabled && isVisible && document.visibilityState === 'visible') {
+            playVideo();
+          } else if (shouldPlayWhenReady && isVisible && document.visibilityState === 'visible') {
             playVideo();
             queueIdlePause();
-          } else {
+          } else if (!continuousPlaybackEnabled) {
             queueIdlePause();
           }
         },
