@@ -371,6 +371,7 @@ The `StorefrontBundle` type contains: categories, pizzas, toppings, extras, addo
 - Floating cart FAB (visible when cart has items)
 - Footer with store info, nav links, social
 - Brand logo from config or text fallback
+- Browser tab icon follows the storefront branding image when available
 
 **MenuBrowser** (`menu-browser.tsx`, ~705 lines)
 - Hero section with stats (pizza count, topping count, category count)
@@ -420,7 +421,7 @@ The `StorefrontBundle` type contains: categories, pizzas, toppings, extras, addo
 - **Config readers**: `getConfigValue`, `getConfigBoolean`, `getConfigImageValue`, `getStructuredContent`
 - **Store identity**: `getStoreName`, `getSiteMetaTitle`, `getSiteMetaDescription`, `getThemeColor`
 - **Navigation**: `getNavLinks` (JSON-parsed), `getShellCopy`
-- **Images**: `getHomeFeaturedImageUrl`, `getMenuHeroImageUrl`, `getCartHeroImageUrl`, `getBuilderHeroImageUrl`
+- **Images and media**: `getHomeHeroBackgroundMediaType`, `getHomeHeroBackgroundImageUrl`, `getHomeHeroBackgroundVideoUrl`, `getHomeHeroBackgroundMediaUrl`, `getHomeFeaturedImageUrl`, `getMenuHeroImageUrl`, `getCartHeroImageUrl`, `getBuilderHeroImageUrl`
 - **Store state**: `getStorefrontState` (returns mode, tone, labels, actions), `isOrderingPaused`
 - **Pricing**: `getPizzaPrice`, `getExtraPrice`, `getAddonPrice`, `getDessertPrice`, `getLinePrice`
 - **Page copy**: `getMenuBrowserCopy`, `getPizzaBuilderCopy`, `getCartCheckoutCopy`, `getMenuItemDetailCopy`
@@ -586,6 +587,19 @@ npm run test:watch --workspace apps/admin
 npm run test:coverage --workspace apps/admin
 ```
 
+### Storefront Unit Tests
+
+The storefront app now includes a lightweight Vitest harness for pure helper regressions.
+
+Test files found:
+- `app/lib/catalog.test.ts`
+
+Run tests:
+
+```bash
+npm run test --workspace apps/storefront
+```
+
 ### Build Verification
 
 ```bash
@@ -630,6 +644,7 @@ npx tsc --noEmit -p apps/storefront/tsconfig.json
 - Geolocation may fail on devices that deny permission. The cart keeps a manual address fallback.
 - The top logo assumes square artwork. It should not stretch, crop, or overflow.
 - The top bar only needs the open/closed badge, not a duplicate status card.
+- The homepage hero can switch between image and video backgrounds; video mode uses a seamless forward/reverse loop and falls back to the image when no video is configured.
 - Cross-midnight opening windows (e.g., 18:00-02:00) are handled by `store-hours.ts`.
 - JSON config values (nav_links, faq_items, privacy/terms sections) must be valid JSON arrays of `{title, body}` objects.
 - System categories (`veg-pizzas`, `non-veg-pizzas`, `addons`, `desserts`) are protected from deletion.
