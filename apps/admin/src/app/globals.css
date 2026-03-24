@@ -2617,7 +2617,7 @@ body > div {
 }
 
 .dashboard-shell.is-expanded {
-  --drawer-width: 16.25rem;
+  --drawer-width: 32rem;
 }
 
 .dashboard-shell__ambient {
@@ -2828,11 +2828,11 @@ body > div {
 }
 
 .dashboard-drawer:hover {
-  width: 16.25rem;
+  width: 32rem;
 }
 
 .dashboard-drawer.is-expanded {
-  width: 16.25rem;
+  width: 32rem;
 }
 
 .dashboard-drawer__brand {

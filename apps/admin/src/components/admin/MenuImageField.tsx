@@ -73,13 +73,20 @@ export function MenuImageField({
           <label className="block text-sm font-medium" style={{ color: 'var(--ink)' }}>
             {label}
           </label>
-          <input
-            type="url"
-            value={currentValue}
-            onChange={(event) => onChange(event.target.value.trim() || null)}
-            placeholder="Paste a public Supabase Storage URL or upload a file"
-            className="input-base"
-          />
+          {currentValue ? (
+            <a
+              href={currentValue}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex max-w-full items-center gap-2 rounded-full border border-[var(--border-default)] bg-white px-3 py-2 text-sm font-medium text-[var(--ink)] transition hover:border-[var(--ember)] hover:text-[var(--ember)]"
+            >
+              <span className="truncate">Open uploaded image</span>
+            </a>
+          ) : (
+            <p className="text-sm" style={{ color: 'var(--stone)' }}>
+              Upload an image to generate a link.
+            </p>
+          )}
         </div>
 
         <div className="flex flex-wrap gap-2">
