@@ -108,6 +108,19 @@ export async function fetchStorefrontBundle(): Promise<StorefrontBundle> {
   };
 }
 
+export async function fetchStorefrontConfig(): Promise<Record<string, string>> {
+  noStore();
+
+  if (!env.NEXT_PUBLIC_SUPABASE_URL || !env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    return fallbackBundle.config;
+  }
+
+  const supabase = env.SUPABASE_SERVICE_ROLE_KEY ? createSupabaseService() : await createSupabaseServer();
+  const { data } = await supabase.from('site_config').select('*').order('key', { ascending: true });
+
+  return toConfigMap((data || []) as SiteConfigItem[]);
+}
+
 export function getConfigValue(config: Record<string, string>, key: string, fallback = '') {
   return config[key] || fallback;
 }
