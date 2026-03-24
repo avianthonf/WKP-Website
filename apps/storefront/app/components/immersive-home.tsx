@@ -555,7 +555,7 @@ function HeroLoopingVideo({
   return (
     <>
       {showFrozenFrame && frozenFrameSrc ? (
-        <div className="hero-card__media-frozen" aria-hidden="true">
+        <div className="hero-card__media-frozen hero-card__media-frozen--active" aria-hidden="true">
           <div className="hero-card__media-frozen-frame">
             <Image
               src={frozenFrameSrc}

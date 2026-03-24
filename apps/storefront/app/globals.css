@@ -631,6 +631,10 @@ img {
   backface-visibility: hidden;
 }
 
+.hero-card__media-frozen--active {
+  animation: frozenFrameReveal 1100ms var(--ease-premium) both;
+}
+
 .hero-card__media-frozen-frame {
   position: absolute;
   inset: 0;
@@ -662,9 +666,11 @@ img {
 .hero-card__media-frozen-fade::before {
   background:
     radial-gradient(circle at 50% 24%, rgba(255, 248, 235, 0.18), transparent 38%),
-    radial-gradient(circle at 50% 120%, rgba(0, 0, 0, 0.28), transparent 40%);
+    radial-gradient(circle at 50% 120%, rgba(0, 0, 0, 0.34), transparent 42%);
   mix-blend-mode: screen;
-  opacity: 0.6;
+  opacity: 0;
+  transform: scale(1.02);
+  animation: frozenFrameGlow 1800ms var(--ease-premium) 90ms both;
 }
 
 .hero-card__media-frozen-fade::after {
@@ -673,11 +679,25 @@ img {
     linear-gradient(135deg, rgba(17, 12, 8, 0.04) 0%, rgba(17, 12, 8, 0.22) 52%, rgba(17, 12, 8, 0.5) 100%),
     radial-gradient(circle at 20% 18%, rgba(226, 186, 121, 0.08), transparent 26%),
     radial-gradient(circle at 82% 14%, rgba(255, 255, 255, 0.06), transparent 22%);
-  opacity: 0.94;
+  background-size: 100% 100%, 100% 100%, 200% 200%, 200% 200%;
+  opacity: 0;
+  transform: translateX(-10%) scale(1.03);
+  filter: blur(0.15px);
   transition:
     opacity 420ms var(--ease-smooth),
     background 420ms var(--ease-smooth),
     transform 420ms var(--ease-smooth);
+  animation:
+    frozenFrameSweep 2200ms var(--ease-premium) 40ms both,
+    frozenFrameDeepen 2400ms var(--ease-smooth) 160ms both;
+}
+
+.hero-card__media-frozen--active .hero-card__media-frozen-fade::before {
+  opacity: 1;
+}
+
+.hero-card__media-frozen--active .hero-card__media-frozen-fade::after {
+  opacity: 1;
 }
 
 .hero-card__media-overlay {
@@ -2499,6 +2519,65 @@ img {
   }
   50% {
     transform: translateY(-12px) scale(1.02);
+  }
+}
+
+@keyframes frozenFrameReveal {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes frozenFrameGlow {
+  0% {
+    opacity: 0;
+    transform: scale(1.015);
+  }
+  45% {
+    opacity: 0.58;
+    transform: scale(1.03);
+  }
+  100% {
+    opacity: 0.72;
+    transform: scale(1.045);
+  }
+}
+
+@keyframes frozenFrameSweep {
+  0% {
+    opacity: 0;
+    transform: translateX(-16%) scale(1.03);
+    background-position: 0% 0%, 0% 0%, 0% 0%, 100% 0%;
+  }
+  35% {
+    opacity: 0.62;
+    transform: translateX(-4%) scale(1.04);
+    background-position: 0% 0%, 0% 0%, 20% 20%, 80% 20%;
+  }
+  70% {
+    opacity: 0.88;
+    transform: translateX(3%) scale(1.05);
+    background-position: 0% 0%, 0% 0%, 38% 28%, 70% 20%;
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0%) scale(1.055);
+    background-position: 0% 0%, 0% 0%, 52% 34%, 62% 24%;
+  }
+}
+
+@keyframes frozenFrameDeepen {
+  0% {
+    opacity: 0.12;
+  }
+  40% {
+    opacity: 0.52;
+  }
+  100% {
+    opacity: 0.94;
   }
 }
 
