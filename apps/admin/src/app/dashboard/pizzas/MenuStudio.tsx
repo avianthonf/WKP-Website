@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { useMemo, useState, type ComponentType } from 'react';
 import {
   ArrowRight,
@@ -529,13 +528,14 @@ function PizzaSection({
                       style={{ boxShadow: 'var(--shadow-sm)' }}
                     >
                       {pizza.image_url ? (
-                        <Image
-                          src={pizza.image_url}
-                          alt={pizza.name}
-                          fill
-                          sizes="48px"
-                          className="object-cover"
-                        />
+                        <a
+                          href={pizza.image_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-1 text-center text-[9px] font-semibold uppercase tracking-[0.12em] text-[var(--ember)] underline underline-offset-2"
+                        >
+                          Open
+                        </a>
                       ) : (
                         <PizzaIcon size={20} className="text-[var(--stone)]" />
                       )}
@@ -609,21 +609,22 @@ function PizzaSection({
 function PizzaCard({ pizza }: { pizza: Pizza & { categories?: { label: string } } }) {
   return (
     <article className="group flex h-full flex-col rounded-[1.4rem] border border-[var(--border-default)] bg-white p-5 shadow-sm transition-all hover:-translate-y-1 hover:shadow-[0_12px_28px_rgba(26,23,18,0.08)]">
-      <div className="flex items-start gap-4">
-        <div className="relative aspect-square w-24 shrink-0 overflow-hidden rounded-[1.1rem] border border-[var(--border-default)] bg-[var(--surface-secondary)]">
-          {pizza.image_url ? (
-            <Image
-              src={pizza.image_url}
-              alt={pizza.name}
-              fill
-              sizes="96px"
-              className="object-cover"
-            />
-          ) : (
-            <div className="grid h-full w-full place-items-center text-[var(--stone)]">
-              <PizzaIcon size={24} />
-            </div>
-          )}
+        <div className="flex items-start gap-4">
+          <div className="relative aspect-square w-24 shrink-0 overflow-hidden rounded-[1.1rem] border border-[var(--border-default)] bg-[var(--surface-secondary)]">
+            {pizza.image_url ? (
+              <a
+                href={pizza.image_url}
+                target="_blank"
+                rel="noreferrer"
+                className="flex h-full w-full items-center justify-center px-2 text-center text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--ember)] underline underline-offset-2"
+              >
+                Open image
+              </a>
+            ) : (
+              <div className="grid h-full w-full place-items-center text-[var(--stone)]">
+                <PizzaIcon size={24} />
+              </div>
+            )}
           <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-black/35 to-transparent" />
         </div>
 
