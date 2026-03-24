@@ -1,7 +1,7 @@
 'use server';
 
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, unstable_noStore as noStore } from 'next/cache';
 
 export async function updateSiteConfig(key: string, value: string) {
   try {
@@ -88,6 +88,8 @@ export async function upsertDashboardLiveMode(value: boolean) {
 
 export async function uploadStorefrontAsset(formData: FormData) {
   try {
+    noStore();
+
     const file = formData.get('file');
     const folder = String(formData.get('folder') || 'storefront-images').trim() || 'storefront-images';
     const bucket = String(formData.get('bucket') || 'brand-assets').trim() || 'brand-assets';
