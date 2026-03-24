@@ -391,6 +391,13 @@ function HeroLoopingVideo({
     let idlePauseTimer: number | undefined;
     let isVisible = false;
     let shouldPlayWhenReady = false;
+    let introScrollCount = 0;
+    let wheelCooldownTimer: number | undefined;
+    let touchGestureActive = false;
+    let touchLockCounted = false;
+    let touchStartY = 0;
+    let touchStartX = 0;
+    let touchIntentLocked = false;
 
     const playVideo = () => {
       if (video.readyState < 2) return;
@@ -411,6 +418,15 @@ function HeroLoopingVideo({
       }
     };
 
+    const registerIntroScroll = () => {
+      if (introScrollCount >= 3) return false;
+      introScrollCount += 1;
+      shouldPlayWhenReady = true;
+      playVideo();
+      queueIdlePause();
+      return true;
+    };
+
     const queueIdlePause = () => {
       if (idlePauseTimer) {
         window.clearTimeout(idlePauseTimer);
@@ -425,6 +441,62 @@ function HeroLoopingVideo({
       shouldPlayWhenReady = true;
       playVideo();
       queueIdlePause();
+    };
+
+    const handleWheel = (event: WheelEvent) => {
+      if (!isVisible || document.visibilityState !== 'visible') return;
+      if (introScrollCount < 3) {
+        event.preventDefault();
+        registerIntroScroll();
+        return;
+      }
+
+      handleScrollActivity();
+    };
+
+    const handleTouchStart = (event: TouchEvent) => {
+      if (!isVisible || document.visibilityState !== 'visible') return;
+      const touch = event.touches[0];
+      if (!touch) return;
+
+      touchGestureActive = true;
+      touchLockCounted = false;
+      touchStartY = touch.clientY;
+      touchStartX = touch.clientX;
+      touchIntentLocked = false;
+    };
+
+    const handleTouchMove = (event: TouchEvent) => {
+      if (!isVisible || document.visibilityState !== 'visible') return;
+      if (!touchGestureActive) return;
+
+      const touch = event.touches[0];
+      if (!touch) return;
+
+      const deltaY = Math.abs(touch.clientY - touchStartY);
+      const deltaX = Math.abs(touch.clientX - touchStartX);
+      if (!touchIntentLocked && deltaY < 6 && deltaX < 6) {
+        return;
+      }
+
+      touchIntentLocked = true;
+      if (introScrollCount < 3) {
+        event.preventDefault();
+        if (!touchLockCounted) {
+          touchLockCounted = registerIntroScroll();
+        }
+        return;
+      }
+
+      shouldPlayWhenReady = true;
+      playVideo();
+      queueIdlePause();
+    };
+
+    const handleTouchEnd = () => {
+      touchGestureActive = false;
+      touchLockCounted = false;
+      touchIntentLocked = false;
     };
 
     const handleVisibilityChange = () => {
@@ -454,8 +526,10 @@ function HeroLoopingVideo({
 
     observer.observe(video);
     window.addEventListener('scroll', handleScrollActivity, { passive: true });
-    window.addEventListener('wheel', handleScrollActivity, { passive: true });
-    window.addEventListener('touchmove', handleScrollActivity, { passive: true });
+    window.addEventListener('wheel', handleWheel, { passive: false, capture: true });
+    window.addEventListener('touchstart', handleTouchStart, { passive: true, capture: true });
+    window.addEventListener('touchmove', handleTouchMove, { passive: false, capture: true });
+    window.addEventListener('touchend', handleTouchEnd, { passive: true, capture: true });
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
     if (video.readyState >= 2) {
@@ -479,10 +553,15 @@ function HeroLoopingVideo({
       if (idlePauseTimer) {
         window.clearTimeout(idlePauseTimer);
       }
+      if (wheelCooldownTimer) {
+        window.clearTimeout(wheelCooldownTimer);
+      }
       observer.disconnect();
       window.removeEventListener('scroll', handleScrollActivity);
-      window.removeEventListener('wheel', handleScrollActivity);
-      window.removeEventListener('touchmove', handleScrollActivity);
+      window.removeEventListener('wheel', handleWheel, true);
+      window.removeEventListener('touchstart', handleTouchStart, true);
+      window.removeEventListener('touchmove', handleTouchMove, true);
+      window.removeEventListener('touchend', handleTouchEnd, true);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       pauseVideo();
     };
