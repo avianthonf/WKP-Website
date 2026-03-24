@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useMemo, useState, type ComponentType } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   ArrowRight,
   ChefHat,
@@ -68,6 +69,7 @@ export default function MenuStudio({
   const [showActiveOnly, setShowActiveOnly] = useState(false);
   const [showBestsellersOnly, setShowBestsellersOnly] = useState(false);
   const [pizzaCreateOpen, setPizzaCreateOpen] = useState(false);
+  const router = useRouter();
   const [createSignals, setCreateSignals] = useState<Record<Exclude<TabKey, 'pizzas'>, number>>({
     categories: 0,
     toppings: 0,
@@ -123,6 +125,10 @@ export default function MenuStudio({
     setActiveTab(tab);
     if (tab === 'pizzas') {
       setPizzaCreateOpen(true);
+      return;
+    }
+    if (tab === 'extras') {
+      router.push('/dashboard/extras/new');
       return;
     }
 
@@ -348,7 +354,7 @@ export default function MenuStudio({
       </section>
 
       <section hidden={activeTab !== 'extras'} className="card card-premium p-0 overflow-hidden">
-        <ExtrasClient initialExtras={extras} createSignal={createSignals.extras} />
+        <ExtrasClient initialExtras={extras} />
       </section>
 
       <section hidden={activeTab !== 'addons'} className="card card-premium p-0 overflow-hidden">
