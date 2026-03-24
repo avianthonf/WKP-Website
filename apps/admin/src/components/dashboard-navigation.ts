@@ -1,12 +1,9 @@
 import {
-  BarChart3,
   ChefHat,
   Grid2X2,
   LayoutDashboard,
   Receipt,
   Settings,
-  ShoppingBag,
-  Users,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -35,15 +32,12 @@ export const dashboardSections: DashboardNavSection[] = [
       { href: '/dashboard/orders', label: 'Live Orders', icon: ChefHat },
       { href: '/dashboard/orders/history', label: 'Order History', icon: Receipt },
       { href: '/dashboard/pizzas', label: 'Menu Studio', icon: Grid2X2 },
-      { href: '/dashboard/analytics', label: 'Analytics', icon: BarChart3 },
     ],
   },
   {
     label: 'Management',
     items: [
       { href: '/dashboard/settings', label: 'Store Settings', icon: Settings },
-      { href: '/dashboard/staff', label: 'Team', icon: Users },
-      { href: '/dashboard/prices', label: 'Pricing', icon: ShoppingBag },
     ],
   },
 ];
@@ -85,14 +79,6 @@ export const dashboardRouteMeta: Record<string, DashboardRouteMeta> = {
     label: 'Desserts',
     subtitle: 'Keep sweet finishers available and priced correctly.',
   },
-  '/dashboard/prices': {
-    label: 'Pricing',
-    subtitle: 'Review price bands and menu economics.',
-  },
-  '/dashboard/analytics': {
-    label: 'Analytics',
-    subtitle: 'Understand revenue, throughput, and order patterns.',
-  },
   '/dashboard/notifications': {
     label: 'Notifications',
     subtitle: 'Review active alerts and important store updates.',
@@ -100,10 +86,6 @@ export const dashboardRouteMeta: Record<string, DashboardRouteMeta> = {
   '/dashboard/settings': {
     label: 'Store Settings',
     subtitle: 'Control storefront content, hours, navigation, and live flags.',
-  },
-  '/dashboard/staff': {
-    label: 'Team',
-    subtitle: 'Track the roster, contacts, and shift visibility.',
   },
 };
 
