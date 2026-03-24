@@ -648,17 +648,36 @@ img {
   position: absolute;
   inset: 0;
   display: block;
+  overflow: hidden;
 }
 
+.hero-card__media-frozen-fade::before,
 .hero-card__media-frozen-fade::after {
   content: "";
   position: absolute;
   inset: 0;
+  pointer-events: none;
+}
+
+.hero-card__media-frozen-fade::before {
   background:
-    linear-gradient(180deg, rgba(16, 12, 8, 0.02) 0%, rgba(16, 12, 8, 0.18) 100%),
-    linear-gradient(135deg, rgba(16, 12, 8, 0.06), rgba(16, 12, 8, 0.26));
-  opacity: 0.85;
-  transition: opacity 420ms var(--ease-smooth), background 420ms var(--ease-smooth);
+    radial-gradient(circle at 50% 24%, rgba(255, 248, 235, 0.18), transparent 38%),
+    radial-gradient(circle at 50% 120%, rgba(0, 0, 0, 0.28), transparent 40%);
+  mix-blend-mode: screen;
+  opacity: 0.6;
+}
+
+.hero-card__media-frozen-fade::after {
+  background:
+    linear-gradient(180deg, rgba(15, 10, 8, 0.02) 0%, rgba(15, 10, 8, 0.24) 100%),
+    linear-gradient(135deg, rgba(17, 12, 8, 0.04) 0%, rgba(17, 12, 8, 0.22) 52%, rgba(17, 12, 8, 0.5) 100%),
+    radial-gradient(circle at 20% 18%, rgba(226, 186, 121, 0.08), transparent 26%),
+    radial-gradient(circle at 82% 14%, rgba(255, 255, 255, 0.06), transparent 22%);
+  opacity: 0.94;
+  transition:
+    opacity 420ms var(--ease-smooth),
+    background 420ms var(--ease-smooth),
+    transform 420ms var(--ease-smooth);
 }
 
 .hero-card__media-overlay {
