@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight, Flame, Sparkles, ShoppingBag, Wand2 } from 'lucide-react';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useCart } from './cart-provider';
 import {
   getConfigValue,
@@ -380,14 +380,20 @@ function HeroLoopingVideo({
   src: string;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [frozenFrameSrc, setFrozenFrameSrc] = useState<string | null>(null);
+  const [showFrozenFrame, setShowFrozenFrame] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    let shouldStartWhenReady = false;
+    setFrozenFrameSrc(null);
+    setShowFrozenFrame(false);
+
+    let disposed = false;
     let hasPlayedOnce = false;
-    let frozenFrameTime = 0;
+    let shouldStartWhenReady = false;
+    let firstFrameInitDone = false;
 
     const playVideo = () => {
       if (video.readyState < 2) return;
@@ -408,20 +414,10 @@ function HeroLoopingVideo({
       }
     };
 
-    const snapToFirstFrame = () => {
-      if (!Number.isFinite(video.duration) || video.duration <= 0) return;
-      const safeStart = Math.min(0.04, Math.max(0.01, video.duration * 0.002));
-      if (video.currentTime > safeStart) {
-        video.currentTime = safeStart;
-      } else {
-        video.currentTime = 0;
-      }
-      pauseVideo();
-    };
-
-    const snapToFrozenFrame = () => {
-      if (!Number.isFinite(video.duration) || video.duration <= 0) return;
-      video.currentTime = frozenFrameTime || Math.max(video.duration - 0.08, 0);
+    const setInitialFrame = () => {
+      if (firstFrameInitDone || !Number.isFinite(video.duration) || video.duration <= 0) return;
+      firstFrameInitDone = true;
+      video.currentTime = Math.min(0.03, Math.max(0, video.duration * 0.001));
       pauseVideo();
     };
 
@@ -439,9 +435,8 @@ function HeroLoopingVideo({
       const endThreshold = Math.max(0.08, video.duration * 0.01);
       if (video.currentTime >= video.duration - endThreshold) {
         hasPlayedOnce = true;
-        frozenFrameTime = Math.max(video.duration - endThreshold, 0);
         video.pause();
-        video.currentTime = frozenFrameTime;
+        setShowFrozenFrame(true);
       }
     };
 
@@ -452,15 +447,14 @@ function HeroLoopingVideo({
       }
 
       if (hasPlayedOnce) {
-        snapToFrozenFrame();
+        setShowFrozenFrame(true);
       } else if (shouldStartWhenReady) {
         playVideo();
       }
     };
 
     const observer = new IntersectionObserver(() => {
-      // Intentionally no-op: the video now plays once after the first scroll and
-      // then freezes on the last frame, even if the hero leaves the viewport.
+      // Intentionally no-op: playback is controlled by scroll and the frozen frame.
     }, { threshold: 0.2 });
 
     observer.observe(video);
@@ -472,12 +466,12 @@ function HeroLoopingVideo({
     video.addEventListener('timeupdate', handlePlaybackProgress);
 
     if (video.readyState >= 2) {
-      snapToFirstFrame();
+      setInitialFrame();
     } else {
       video.addEventListener(
         'loadeddata',
         () => {
-          snapToFirstFrame();
+          setInitialFrame();
           if (shouldStartWhenReady && document.visibilityState === 'visible') {
             playVideo();
           }
@@ -486,7 +480,67 @@ function HeroLoopingVideo({
       );
     }
 
+    const captureFrozenFrame = async () => {
+      const snapshotVideo = document.createElement('video');
+      snapshotVideo.crossOrigin = 'anonymous';
+      snapshotVideo.muted = true;
+      snapshotVideo.playsInline = true;
+      snapshotVideo.preload = 'auto';
+      snapshotVideo.loop = false;
+      snapshotVideo.src = src;
+
+      const waitForEvent = (target: HTMLMediaElement, eventName: string) =>
+        new Promise<void>((resolve, reject) => {
+          const onSuccess = () => {
+            cleanup();
+            resolve();
+          };
+          const onError = () => {
+            cleanup();
+            reject(new Error(`Failed to load ${eventName}`));
+          };
+          const cleanup = () => {
+            target.removeEventListener(eventName, onSuccess);
+            target.removeEventListener('error', onError);
+          };
+          target.addEventListener(eventName, onSuccess, { once: true });
+          target.addEventListener('error', onError, { once: true });
+        });
+
+      try {
+        await waitForEvent(snapshotVideo, 'loadedmetadata');
+        if (disposed) return;
+
+        const duration = snapshotVideo.duration;
+        if (!Number.isFinite(duration) || duration <= 0) return;
+
+        snapshotVideo.currentTime = Math.max(duration - 0.03, 0);
+        await waitForEvent(snapshotVideo, 'seeked');
+        if (disposed) return;
+
+        const canvas = document.createElement('canvas');
+        canvas.width = snapshotVideo.videoWidth || 1;
+        canvas.height = snapshotVideo.videoHeight || 1;
+        const context = canvas.getContext('2d');
+        if (!context) return;
+
+        context.drawImage(snapshotVideo, 0, 0, canvas.width, canvas.height);
+        if (!disposed) {
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+          setFrozenFrameSrc(dataUrl);
+        }
+      } catch {
+        // If canvas export or cross-origin access fails, we still keep the live video paused.
+      } finally {
+        snapshotVideo.src = '';
+        snapshotVideo.load();
+      }
+    };
+
+    captureFrozenFrame();
+
     return () => {
+      disposed = true;
       observer.disconnect();
       window.removeEventListener('scroll', handleFirstScroll);
       window.removeEventListener('wheel', handleFirstScroll);
@@ -499,18 +553,25 @@ function HeroLoopingVideo({
   }, [src]);
 
   return (
-    <video
-      ref={videoRef}
-      className="hero-card__media-video"
-      src={src}
-      muted
-      playsInline
-      loop={false}
-      preload="auto"
-      disablePictureInPicture
-      controls={false}
-      controlsList="nodownload noplaybackrate noremoteplayback"
-      aria-hidden="true"
-    />
+    <>
+      {showFrozenFrame && frozenFrameSrc ? (
+        <img className="hero-card__media-frozen" src={frozenFrameSrc} alt="" aria-hidden="true" />
+      ) : null}
+      <video
+        ref={videoRef}
+        className="hero-card__media-video"
+        src={src}
+        muted
+        playsInline
+        loop={false}
+        preload="auto"
+        crossOrigin="anonymous"
+        style={{ opacity: showFrozenFrame ? 0 : 1 }}
+        disablePictureInPicture
+        controls={false}
+        controlsList="nodownload noplaybackrate noremoteplayback"
+        aria-hidden="true"
+      />
+    </>
   );
 }

@@ -622,6 +622,19 @@ img {
   will-change: transform;
 }
 
+.hero-card__media-frozen {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: 1;
+  pointer-events: none;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
 .hero-card__media-overlay {
   z-index: 0;
   background:
