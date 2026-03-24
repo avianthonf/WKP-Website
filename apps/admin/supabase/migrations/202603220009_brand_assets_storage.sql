@@ -1,5 +1,11 @@
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-values ('brand-assets', 'brand-assets', true, 10485760, array['image/png', 'image/jpeg', 'image/webp'])
+values (
+  'brand-assets',
+  'brand-assets',
+  true,
+  134217728,
+  array['image/png', 'image/jpeg', 'image/webp', 'video/mp4', 'video/webm', 'video/quicktime']
+)
 on conflict (id) do update
 set
   name = excluded.name,
