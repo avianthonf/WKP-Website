@@ -9,16 +9,16 @@ export const dynamic = 'force-dynamic';
 const reviewSourceUrl = 'https://maps.app.goo.gl/7LdezW6stsNshqVg7';
 const reviewHighlights = [
   {
-    title: 'Generous toppings',
-    body: 'Reviewers keep coming back to the same point: the pizzas feel loaded, balanced, and made with genuine care.',
+    title: 'Alyque Pinto',
+    body: 'Yummy is what I would say. Much better than Dominos and Pizza Hut. ',
   },
   {
-    title: 'Warm, prompt service',
-    body: 'The ordering experience is praised for being smooth, friendly, and reassuringly well handled from start to finish.',
+    title: 'Luv Jasuja',
+    body: 'Excellent pizza and loaded with toppings.We ordered two vegetarian pizzas and both were great.',
   },
   {
-    title: 'Desserts worth saving room for',
-    body: 'Desserts and brownies show up again and again in public praise, giving the menu a strong finish people remember.',
+    title: 'Meghna Unhawane',
+    body: ' If you’re a pizza lover, you need to check this place out. I’ll definitely be back for more!',
   },
 ] as const;
 
@@ -84,12 +84,11 @@ export default async function AboutPage() {
             <div className="review-hero__copy">
               <span className="eyebrow eyebrow--hero">
                 <Star size={12} />
-                Public praise
+                What Our Customers Say
               </span>
-              <h2 className="hero-title hero-title--review">A local favorite people recommend without hesitation</h2>
+              <h2 className="hero-title hero-title--review">A local favorite people recommend</h2>
               <p className="hero-copy hero-copy--review">
-                Public review listings keep pointing to the same strengths: generous toppings, thoughtful service, and a menu that feels worth the extra
-                stop.
+                We are thrilled to recieve so much much love from our customers!
               </p>
 
               <div className="review-rating">
@@ -111,9 +110,6 @@ export default async function AboutPage() {
               </div>
 
               <div className="review-hero__actions">
-                <Link href={reviewSourceUrl} target="_blank" rel="noreferrer" className="button--hero">
-                  Read on Maps
-                </Link>
                 <div className="review-hero__microcopy">
                   <Quote size={14} />
                   Curated from public review listings on Google Maps
@@ -128,7 +124,7 @@ export default async function AboutPage() {
                   What people keep saying
                 </div>
                 <p className="review-spotlight__quote">
-                  “A menu that feels generous, welcoming, and worth telling people about.”
+                  "The best homemade pizza with the freshest of ingredients one could ask for!"
                 </p>
               </article>
 
@@ -151,7 +147,7 @@ export default async function AboutPage() {
           </div>
         </section>
 
-        <section className="info-grid"  style={{ display: 'flex', justifyContent: 'center' }}>
+        <section className="info-grid"  style={{ display: 'flex', justifyContent: 'center', order: 100 }}>
           <div className="info-card" style={{ flex: '0 1 40%' }}>
             <div className="info-card__title">
               {getConfigValue(bundle.config, 'about_location_title', 'Location')}
@@ -162,7 +158,7 @@ export default async function AboutPage() {
               <div className="info-card__copy">
                 {getConfigValue(bundle.config, 'google_maps_link', '') ? (
                   <Link href={getConfigValue(bundle.config, 'google_maps_link', '')} className="footer__link" target="_blank">
-                  {getConfigValue(bundle.config, 'about_map_action_label', 'Open map')}
+                  {'Open Google Maps and Reviews'}
                   </Link>
                 ) : (
                   getConfigValue(
