@@ -10,15 +10,15 @@ const reviewSourceUrl = 'https://maps.app.goo.gl/7LdezW6stsNshqVg7';
 const reviewHighlights = [
   {
     title: 'Generous toppings',
-    body: 'Guests consistently mention the toppings, freshness, and the feeling that every pizza arrives properly loaded.',
+    body: 'Reviewers keep coming back to the same point: the pizzas feel loaded, balanced, and made with genuine care.',
   },
   {
-    title: 'Prompt service',
-    body: 'Public review summaries call out polite staff and quick delivery, which keeps the whole ordering experience easy.',
+    title: 'Warm, prompt service',
+    body: 'The ordering experience is praised for being smooth, friendly, and reassuringly well handled from start to finish.',
   },
   {
-    title: 'Worth the sweet finish',
-    body: 'Desserts and brownies get special praise too, so the menu lands as more than just a pizza stop.',
+    title: 'Desserts worth saving room for',
+    body: 'Desserts and brownies show up again and again in public praise, giving the menu a strong finish people remember.',
   },
 ] as const;
 
@@ -86,10 +86,10 @@ export default async function AboutPage() {
                 <Star size={12} />
                 Public praise
               </span>
-              <h2 className="hero-title hero-title--review">Trusted by hungry locals</h2>
+              <h2 className="hero-title hero-title--review">A local favorite people recommend without hesitation</h2>
               <p className="hero-copy hero-copy--review">
-                Public review listings consistently highlight the generous toppings, the friendly delivery experience, and the fact that the menu feels
-                generous instead of sparse.
+                Public review listings keep pointing to the same strengths: generous toppings, thoughtful service, and a menu that feels worth the extra
+                stop.
               </p>
 
               <div className="review-rating">
@@ -105,9 +105,9 @@ export default async function AboutPage() {
               </div>
 
               <div className="review-hero__tags">
-                <span className="badge">197+ public ratings</span>
-                <span className="badge">Fast delivery praise</span>
-                <span className="badge">Brownie favorite</span>
+                <span className="badge">Frequently recommended</span>
+                <span className="badge">Friendly, fast handoff</span>
+                <span className="badge">Desserts get love too</span>
               </div>
 
               <div className="review-hero__actions">
@@ -116,7 +116,7 @@ export default async function AboutPage() {
                 </Link>
                 <div className="review-hero__microcopy">
                   <Quote size={14} />
-                  Handpicked from public review listings on Google Maps
+                  Curated from public review listings on Google Maps
                 </div>
               </div>
             </div>
@@ -128,7 +128,7 @@ export default async function AboutPage() {
                   What people keep saying
                 </div>
                 <p className="review-spotlight__quote">
-                  “Generous toppings, prompt service, and a menu that actually feels like a treat.”
+                  “A menu that feels generous, welcoming, and worth telling people about.”
                 </p>
               </article>
 
