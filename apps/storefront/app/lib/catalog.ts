@@ -242,7 +242,6 @@ export function getHomeFeaturedPizzas(bundle: StorefrontBundle) {
 export function getHomeFeaturedImageUrl(bundle: StorefrontBundle) {
   return (
     getConfigImageValue(bundle.config, 'home_feature_image_url') ||
-    getConfigImageValue(bundle.config, 'home_hero_background_image_url') ||
     getConfigImageValue(bundle.config, 'hero_bg_url') ||
     getFeaturedImageUrl(bundle)
   );
@@ -252,12 +251,37 @@ export function getHomeHeroImageUrl(bundle: StorefrontBundle) {
   return getHomeHeroPizza(bundle)?.image_url || getHomeFeaturedImageUrl(bundle);
 }
 
-export function getHeroBackgroundImageUrl(bundle: StorefrontBundle) {
+export function getHomeHeroBackgroundMediaType(bundle: StorefrontBundle) {
+  const mediaType = getConfigValue(bundle.config, 'home_hero_background_media_type', '').trim().toLowerCase();
+  if (mediaType === 'image' || mediaType === 'video') return mediaType;
+
+  if (getConfigImageValue(bundle.config, 'home_hero_background_video_url')) {
+    return 'video';
+  }
+
+  return 'image';
+}
+
+export function getHomeHeroBackgroundImageUrl(bundle: StorefrontBundle) {
   return (
     getConfigImageValue(bundle.config, 'home_hero_background_image_url') ||
     getConfigImageValue(bundle.config, 'hero_bg_url') ||
-    getHomeFeaturedImageUrl(bundle)
+    getFeaturedImageUrl(bundle)
   );
+}
+
+export function getHomeHeroBackgroundVideoUrl(bundle: StorefrontBundle) {
+  return getConfigImageValue(bundle.config, 'home_hero_background_video_url');
+}
+
+export function getHomeHeroBackgroundMediaUrl(bundle: StorefrontBundle) {
+  return getHomeHeroBackgroundMediaType(bundle) === 'video'
+    ? getHomeHeroBackgroundVideoUrl(bundle) || getHomeHeroBackgroundImageUrl(bundle)
+    : getHomeHeroBackgroundImageUrl(bundle);
+}
+
+export function getHeroBackgroundImageUrl(bundle: StorefrontBundle) {
+  return getHomeHeroBackgroundMediaUrl(bundle);
 }
 
 export function getMenuHeroImageUrl(bundle: StorefrontBundle) {

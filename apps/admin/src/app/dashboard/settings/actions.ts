@@ -91,17 +91,30 @@ export async function uploadStorefrontAsset(formData: FormData) {
     const file = formData.get('file');
     const folder = String(formData.get('folder') || 'storefront-images').trim() || 'storefront-images';
     const bucket = String(formData.get('bucket') || 'brand-assets').trim() || 'brand-assets';
+    const kind = String(formData.get('kind') || 'image').trim() || 'image';
 
     if (!(file instanceof File)) {
-      throw new Error('No image file was provided');
+      throw new Error('No file was provided');
     }
 
-    if (!file.type.startsWith('image/')) {
+    const isImage = kind === 'image';
+    const isVideo = kind === 'video';
+
+    if (!isImage && !isVideo) {
+      throw new Error('Unsupported media type');
+    }
+
+    if (isImage && !file.type.startsWith('image/')) {
       throw new Error('Only image files are supported');
     }
 
-    if (file.size > 16 * 1024 * 1024) {
-      throw new Error('Please choose an image smaller than 16 MB');
+    if (isVideo && !file.type.startsWith('video/')) {
+      throw new Error('Only video files are supported');
+    }
+
+    const maxBytes = isVideo ? 128 * 1024 * 1024 : 16 * 1024 * 1024;
+    if (file.size > maxBytes) {
+      throw new Error(`Please choose a ${kind} smaller than ${isVideo ? '128 MB' : '16 MB'}`);
     }
 
     const safeName = file.name

@@ -4,11 +4,13 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight, Flame, Sparkles, ShoppingBag, Wand2 } from 'lucide-react';
-import { useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useCart } from './cart-provider';
 import {
   getConfigValue,
-  getHeroBackgroundImageUrl,
+  getHomeHeroBackgroundImageUrl,
+  getHomeHeroBackgroundMediaType,
+  getHomeHeroBackgroundVideoUrl,
   getHomeFeaturedPizzas,
   getHomeHeroImageUrl,
   getHomeHeroPizza,
@@ -73,7 +75,10 @@ export function ImmersiveHome({
   );
 
   const heroImageUrl = getHomeHeroImageUrl(bundle);
-  const heroBackgroundImageUrl = getHeroBackgroundImageUrl(bundle);
+  const heroBackgroundImageUrl = getHomeHeroBackgroundImageUrl(bundle);
+  const heroBackgroundMediaType = getHomeHeroBackgroundMediaType(bundle);
+  const heroBackgroundVideoUrl = getHomeHeroBackgroundVideoUrl(bundle);
+  const showHeroBackgroundImage = prefersReducedMotion || heroBackgroundMediaType !== 'video' || !heroBackgroundVideoUrl;
   const featurePrimaryLabel = orderPrimaryLabel;
   const signatureEyebrow = getConfigValue(bundle.config, 'home_signature_eyebrow', 'Signature picks');
   const signatureTitle = getConfigValue(
@@ -105,7 +110,7 @@ export function ImmersiveHome({
         transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
         style={
           prefersReducedMotion
-            ? heroBackgroundImageUrl
+            ? showHeroBackgroundImage
               ? {
                   backgroundImage: `linear-gradient(135deg, rgba(247, 241, 231, 0.92), rgba(247, 241, 231, 0.76)), url(${heroBackgroundImageUrl})`,
                   backgroundSize: 'cover',
@@ -116,7 +121,7 @@ export function ImmersiveHome({
                 y: heroTranslateY,
                 scale: heroScale,
                 willChange: 'transform',
-                ...(heroBackgroundImageUrl
+                ...(showHeroBackgroundImage
                   ? {
                       backgroundImage: `linear-gradient(135deg, rgba(247, 241, 231, 0.92), rgba(247, 241, 231, 0.76)), url(${heroBackgroundImageUrl})`,
                       backgroundSize: 'cover',
@@ -126,6 +131,16 @@ export function ImmersiveHome({
               }
         }
       >
+        {!showHeroBackgroundImage && heroBackgroundMediaType === 'video' && heroBackgroundVideoUrl ? (
+          <>
+            <HeroLoopingVideo src={heroBackgroundVideoUrl} poster={heroBackgroundImageUrl || undefined} />
+            <div
+              className="hero-card__media-overlay"
+              aria-hidden="true"
+            />
+          </>
+        ) : null}
+
         <div className="hero-card__immersive-grid">
           <div className="hero-card__copy">
             <motion.span
@@ -353,5 +368,94 @@ export function ImmersiveHome({
         </motion.div>
       </section>
     </div>
+  );
+}
+
+function HeroLoopingVideo({
+  src,
+  poster,
+}: {
+  src: string;
+  poster?: string;
+}) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    let raf = 0;
+    let direction = 1;
+    let active = true;
+    let lastFrame = performance.now();
+
+    const startLoop = () => {
+      const duration = video.duration;
+      if (!Number.isFinite(duration) || duration <= 0) return;
+
+      const edge = Math.min(0.16, Math.max(0.04, duration * 0.01));
+      video.currentTime = edge;
+      video.pause();
+
+      const tick = (now: number) => {
+        if (!active) return;
+
+        const elapsed = Math.min(0.05, (now - lastFrame) / 1000);
+        lastFrame = now;
+
+        const currentDuration = video.duration;
+        if (Number.isFinite(currentDuration) && currentDuration > 0 && video.readyState >= 2) {
+          const safeEdge = Math.min(0.16, Math.max(0.04, currentDuration * 0.01));
+          let nextTime = video.currentTime + elapsed * 0.72 * direction;
+
+          if (nextTime >= currentDuration - safeEdge) {
+            nextTime = currentDuration - safeEdge;
+            direction = -1;
+          } else if (nextTime <= safeEdge) {
+            nextTime = safeEdge;
+            direction = 1;
+          }
+
+          if (Math.abs(nextTime - video.currentTime) > 0.0001) {
+            video.currentTime = nextTime;
+          }
+        }
+
+        raf = window.requestAnimationFrame(tick);
+      };
+
+      raf = window.requestAnimationFrame(tick);
+    };
+
+    const handleLoadedMetadata = () => {
+      startLoop();
+    };
+
+    if (video.readyState >= 1) {
+      startLoop();
+    } else {
+      video.addEventListener('loadedmetadata', handleLoadedMetadata, { once: true });
+    }
+
+    return () => {
+      active = false;
+      if (raf) {
+        window.cancelAnimationFrame(raf);
+      }
+      video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+    };
+  }, [src]);
+
+  return (
+    <video
+      ref={videoRef}
+      className="hero-card__media-video"
+      src={src}
+      poster={poster}
+      muted
+      playsInline
+      preload="auto"
+      aria-hidden="true"
+    />
   );
 }

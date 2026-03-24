@@ -5,6 +5,7 @@ import { useState, useEffect, useTransition, type ReactNode } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { createClient } from '@/lib/supabaseClient';
 import { MenuImageField } from '@/components/admin/MenuImageField';
+import { MenuVideoField } from '@/components/admin/MenuVideoField';
 import {
   updateSiteConfig,
   upsertSiteConfig,
@@ -25,6 +26,7 @@ import {
   Shield,
   ShoppingCart,
   Store,
+  Video,
   Trash2,
   X,
   Plus,
@@ -387,7 +389,6 @@ export default function SettingsClient({ initialConfigs, initialPizzas }: Settin
         { key: 'home_hero_title', label: 'Hero title', kind: 'text', fallback: 'We Knead Pizza', description: 'Main title on the homepage.' },
         { key: 'home_hero_subtitle', label: 'Hero subtitle', kind: 'textarea', fallback: 'Hand-tossed pizza, warm sides, and a WhatsApp-first order flow.', description: 'Homepage hero subtitle.' },
         { key: 'home_announcement', label: 'Homepage announcement', kind: 'text', fallback: 'Freshly made daily.', description: 'Eyebrow announcement at the top of the home page.' },
-        { key: 'home_hero_background_image_url', label: 'Homepage hero background image', kind: 'image', fallback: '', description: 'Background image behind the immersive homepage hero card. Falls back to the live menu if blank.' },
         { key: 'home_feature_copy', label: 'Feature copy', kind: 'textarea', fallback: 'Rich, hot, and ready to slide from discovery to order with almost no friction.', description: 'Featured pizza callout on the homepage.' },
         { key: 'home_signature_eyebrow', label: 'Signature eyebrow', kind: 'text', fallback: 'Signature picks', description: 'Section label above the featured pizzas.' },
         { key: 'home_signature_title', label: 'Signature title', kind: 'text', fallback: 'Tap a favorite, feel the rhythm, and order', description: 'Signature section title.' },
@@ -1077,11 +1078,7 @@ export default function SettingsClient({ initialConfigs, initialPizzas }: Settin
                         {section.fields.map((field) => (
                           <EditableConfigField
                             key={field.key}
-                            config={
-                              field.key === 'home_hero_background_image_url'
-                                ? getResolvedField(field.key, 'hero_bg_url')
-                                : getField(field.key)
-                            }
+                            config={getField(field.key)}
                             field={field}
                             pending={isPending}
                             onSave={saveCmsSetting}
@@ -1100,6 +1097,16 @@ export default function SettingsClient({ initialConfigs, initialPizzas }: Settin
                         </div>
                       ) : null}
                     </SettingsPanel>
+
+                    {section.id === 'home' ? (
+                      <HomepageHeroMediaEditor
+                        imageConfig={getResolvedField('home_hero_background_image_url', 'hero_bg_url')}
+                        videoConfig={getField('home_hero_background_video_url')}
+                        mediaTypeConfig={getField('home_hero_background_media_type')}
+                        pending={isPending}
+                        onSave={saveCmsSetting}
+                      />
+                    ) : null}
 
                     {section.id === 'home' ? (
                       <HomepagePizzaPicker
@@ -1195,6 +1202,123 @@ function SettingsPanel({
         </div>
       </div>
       {children}
+    </motion.section>
+  );
+}
+
+function HomepageHeroMediaEditor({
+  imageConfig,
+  videoConfig,
+  mediaTypeConfig,
+  pending,
+  onSave,
+}: {
+  imageConfig?: SiteConfigItem;
+  videoConfig?: SiteConfigItem;
+  mediaTypeConfig?: SiteConfigItem;
+  pending: boolean;
+  onSave: (
+    key: string,
+    label: string,
+    type: string,
+    value: string,
+    description?: string,
+    isPublic?: boolean
+  ) => void;
+}) {
+  const prefersReducedMotion = useReducedMotion() ?? false;
+  const imageValue = imageConfig?.value || '';
+  const videoValue = videoConfig?.value || '';
+  const initialMediaType =
+    mediaTypeConfig?.value === 'video' || (!mediaTypeConfig?.value && videoValue && !imageValue) ? 'video' : 'image';
+  const [mediaType, setMediaType] = useState<'image' | 'video'>(initialMediaType);
+
+  useEffect(() => {
+    setMediaType(initialMediaType);
+  }, [initialMediaType]);
+
+  const saveMediaType = (nextType: 'image' | 'video') => {
+    setMediaType(nextType);
+    onSave(
+      'home_hero_background_media_type',
+      'Homepage hero background type',
+      'text',
+      nextType,
+      'Controls whether the homepage hero uses an image or looping video background.',
+      true
+    );
+  };
+
+  return (
+    <motion.section
+      className="mt-6 rounded-3xl border border-[var(--border-default)] bg-[var(--surface-secondary)] p-5 shadow-sm"
+      initial={prefersReducedMotion ? false : { opacity: 0, y: 10 }}
+      whileInView={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.35 }}
+    >
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+        <div className="space-y-1">
+          <p className="mono-label text-[10px]">Homepage hero background</p>
+          <h3 className="text-xl font-semibold" style={{ color: 'var(--ink)' }}>
+            Choose an image or a looping video
+          </h3>
+          <p className="max-w-3xl text-sm leading-6" style={{ color: 'var(--stone)' }}>
+            The selected media fills the homepage hero card behind the copy. Images use the clean background treatment,
+            while videos play in a seamless forward-and-reverse loop.
+          </p>
+        </div>
+        <div className="inline-flex overflow-hidden rounded-full border border-[var(--border-default)] bg-white p-1">
+          <button
+            type="button"
+            onClick={() => saveMediaType('image')}
+            className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition ${
+              mediaType === 'image'
+                ? 'bg-[var(--ember)] text-white shadow-sm'
+                : 'text-[var(--ink)] hover:bg-[var(--surface-secondary)]'
+            }`}
+            disabled={pending}
+          >
+            <ImageIcon size={15} />
+            Image
+          </button>
+          <button
+            type="button"
+            onClick={() => saveMediaType('video')}
+            className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition ${
+              mediaType === 'video'
+                ? 'bg-[var(--ember)] text-white shadow-sm'
+                : 'text-[var(--ink)] hover:bg-[var(--surface-secondary)]'
+            }`}
+            disabled={pending}
+          >
+            <Video size={15} />
+            Video
+          </button>
+        </div>
+      </div>
+
+      <div className="mt-5">
+        {mediaType === 'image' ? (
+          <MenuImageField
+            label="Homepage hero image"
+            description="Used when the hero background is set to image mode. Leave blank to fall back to the live menu."
+            folder="storefront-images"
+            bucket="brand-assets"
+            value={imageValue}
+            onChange={(next) => onSave('home_hero_background_image_url', 'Homepage hero image', 'image', next || '', 'Background image behind the immersive homepage hero card. Falls back to the live menu if blank.', true)}
+          />
+        ) : (
+          <MenuVideoField
+            label="Homepage hero video"
+            description="Used when the hero background is set to video mode. Upload a square or near-square clip for the smoothest result."
+            folder="storefront-images"
+            bucket="brand-assets"
+            value={videoValue}
+            onChange={(next) => onSave('home_hero_background_video_url', 'Homepage hero video', 'url', next || '', 'Looping video background behind the immersive homepage hero card.', true)}
+          />
+        )}
+      </div>
     </motion.section>
   );
 }
