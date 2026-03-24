@@ -388,30 +388,103 @@ function HeroLoopingVideo({
     const video = videoRef.current;
     if (!video) return;
 
-    video.loop = true;
-    video.playbackRate = 1;
-    video.defaultPlaybackRate = 1;
-    video.muted = true;
-    video.playsInline = true;
+    let idlePauseTimer: number | undefined;
+    let isVisible = false;
+    let shouldPlayWhenReady = false;
 
-    const startPlayback = () => {
+    const playVideo = () => {
+      if (video.readyState < 2) return;
+      if (!video.paused) return;
+
+      shouldPlayWhenReady = false;
       const playPromise = video.play();
       if (playPromise && typeof playPromise.catch === 'function') {
         playPromise.catch(() => {
-          // Autoplay can be blocked on a few devices until the browser is ready.
+          // If the browser delays playback, the next scroll event will retry.
         });
       }
     };
 
-    if (video.readyState >= 1) {
-      startPlayback();
+    const pauseVideo = () => {
+      if (!video.paused) {
+        video.pause();
+      }
+    };
+
+    const queueIdlePause = () => {
+      if (idlePauseTimer) {
+        window.clearTimeout(idlePauseTimer);
+      }
+      idlePauseTimer = window.setTimeout(() => {
+        pauseVideo();
+      }, 140);
+    };
+
+    const handleScrollActivity = () => {
+      if (!isVisible || document.visibilityState !== 'visible') return;
+      shouldPlayWhenReady = true;
+      playVideo();
+      queueIdlePause();
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState !== 'visible') {
+        pauseVideo();
+        return;
+      }
+
+      queueIdlePause();
+    };
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isVisible = Boolean(entry?.isIntersecting);
+        if (!isVisible) {
+          shouldPlayWhenReady = false;
+          pauseVideo();
+          return;
+        }
+
+        if (video.readyState >= 2) {
+          queueIdlePause();
+        }
+      },
+      { threshold: 0.2 }
+    );
+
+    observer.observe(video);
+    window.addEventListener('scroll', handleScrollActivity, { passive: true });
+    window.addEventListener('wheel', handleScrollActivity, { passive: true });
+    window.addEventListener('touchmove', handleScrollActivity, { passive: true });
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    if (video.readyState >= 2) {
+      queueIdlePause();
     } else {
-      video.addEventListener('loadedmetadata', startPlayback, { once: true });
+      video.addEventListener(
+        'canplay',
+        () => {
+          if (shouldPlayWhenReady && isVisible && document.visibilityState === 'visible') {
+            playVideo();
+            queueIdlePause();
+          } else {
+            queueIdlePause();
+          }
+        },
+        { once: true }
+      );
     }
 
     return () => {
-      video.pause();
-      video.removeEventListener('loadedmetadata', startPlayback);
+      if (idlePauseTimer) {
+        window.clearTimeout(idlePauseTimer);
+      }
+      observer.disconnect();
+      window.removeEventListener('scroll', handleScrollActivity);
+      window.removeEventListener('wheel', handleScrollActivity);
+      window.removeEventListener('touchmove', handleScrollActivity);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      pauseVideo();
     };
   }, [src]);
 
@@ -423,7 +496,6 @@ function HeroLoopingVideo({
       poster={poster}
       muted
       playsInline
-      autoPlay
       loop
       preload="auto"
       disablePictureInPicture
