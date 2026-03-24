@@ -566,7 +566,6 @@ function HeroLoopingVideo({
               className="hero-card__media-frozen-image"
             />
           </div>
-          <span className="hero-card__media-frozen-fade" />
         </div>
       ) : null}
       <video

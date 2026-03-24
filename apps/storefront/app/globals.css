@@ -632,7 +632,7 @@ img {
 }
 
 .hero-card__media-frozen--active {
-  animation: frozenFrameReveal 1100ms var(--ease-premium) both;
+  animation: none;
 }
 
 .hero-card__media-frozen-frame {
