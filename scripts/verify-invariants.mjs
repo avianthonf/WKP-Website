@@ -14,10 +14,30 @@ function assert(condition, message) {
 }
 
 function hasBucketMigration(contents, bucketName, policyPrefix) {
+  const bucketInsertPattern = new RegExp(
+    String.raw`insert\s+into\s+storage\.buckets[\s\S]*?values\s*\([\s\S]*?['"]${bucketName}['"][\s\S]*?on conflict`,
+    'i'
+  );
+  const publicReadPattern = new RegExp(String.raw`create\s+policy\s+${policyPrefix}_public_read`, 'i');
+  const insertPolicyPattern = new RegExp(
+    String.raw`create\s+policy\s+${policyPrefix}_authenticated_insert[\s\S]*?bucket_id\s*=\s*['"]${bucketName}['"]`,
+    'i'
+  );
+  const updatePolicyPattern = new RegExp(
+    String.raw`create\s+policy\s+${policyPrefix}_authenticated_update[\s\S]*?bucket_id\s*=\s*['"]${bucketName}['"]`,
+    'i'
+  );
+  const deletePolicyPattern = new RegExp(
+    String.raw`create\s+policy\s+${policyPrefix}_authenticated_delete[\s\S]*?bucket_id\s*=\s*['"]${bucketName}['"]`,
+    'i'
+  );
+
   return (
-    contents.includes(`values ('${bucketName}'`) &&
-    contents.includes(`create policy ${policyPrefix}_public_read`) &&
-    contents.includes(`bucket_id = '${bucketName}'`)
+    bucketInsertPattern.test(contents) &&
+    publicReadPattern.test(contents) &&
+    insertPolicyPattern.test(contents) &&
+    updatePolicyPattern.test(contents) &&
+    deletePolicyPattern.test(contents)
   );
 }
 
