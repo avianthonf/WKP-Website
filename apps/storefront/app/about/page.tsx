@@ -6,24 +6,24 @@ import { getAddressLine, getConfigValue, getOpeningWindow, getStoreName } from '
 
 export const dynamic = 'force-dynamic';
 
-const reviewSourceUrl = 'https://maps.app.goo.gl/7LdezW6stsNshqVg7';
 const reviewHighlights = [
   {
     title: 'Alyque Pinto',
-    body: 'Yummy is what I would say. Much better than Dominos and Pizza Hut. ',
+    body: 'Yummy is what I would say. Much better than Dominos and Pizza Hut.',
   },
   {
     title: 'Luv Jasuja',
-    body: 'Excellent pizza and loaded with toppings.We ordered two vegetarian pizzas and both were great.',
+    body: 'Excellent pizza and loaded with toppings. We ordered two vegetarian pizzas and both were great.',
   },
   {
     title: 'Meghna Unhawane',
-    body: ' If you’re a pizza lover, you need to check this place out. I’ll definitely be back for more!',
+    body: 'If you’re a pizza lover, you need to check this place out. I’ll definitely be back for more!',
   },
 ] as const;
 
 export default async function AboutPage() {
   const bundle = await fetchStorefrontBundle();
+  const googleMapsLink = getConfigValue(bundle.config, 'google_maps_link', '');
 
   return (
     <StorefrontShell bundle={bundle}>
@@ -88,7 +88,7 @@ export default async function AboutPage() {
               </span>
               <h2 className="hero-title hero-title--review">A local favorite people recommend</h2>
               <p className="hero-copy hero-copy--review">
-                We are thrilled to recieve so much much love from our customers!
+                We are thrilled to receive so much love from our customers.
               </p>
 
               <div className="review-rating">
@@ -124,7 +124,7 @@ export default async function AboutPage() {
                   What people keep saying
                 </div>
                 <p className="review-spotlight__quote">
-                  "The best homemade pizza with the freshest of ingredients one could ask for!"
+                  {'“The best homemade pizza with the freshest of ingredients one could ask for!”'}
                 </p>
               </article>
 
@@ -147,27 +147,21 @@ export default async function AboutPage() {
           </div>
         </section>
 
-        <section className="info-grid"  style={{ display: 'flex', justifyContent: 'center', order: 100 }}>
+        <section className="info-grid" style={{ display: 'flex', justifyContent: 'center', order: 100 }}>
           <div className="info-card" style={{ flex: '0 1 40%' }}>
-            <div className="info-card__title">
-              {getConfigValue(bundle.config, 'about_location_title', 'Location')}
-            </div>
+            <div className="info-card__title">{getConfigValue(bundle.config, 'about_location_title', 'Location')}</div>
             <div className="info-card__body">
               <MapPin size={16} /> {getAddressLine(bundle)}
             </div>
-              <div className="info-card__copy">
-                {getConfigValue(bundle.config, 'google_maps_link', '') ? (
-                  <Link href={getConfigValue(bundle.config, 'google_maps_link', '')} className="footer__link" target="_blank">
-                  {'Open Google Maps and Reviews'}
-                  </Link>
-                ) : (
-                  getConfigValue(
-                    bundle.config,
-                    'about_map_missing_copy',
-                    'Map link is set in the store settings.'
-                  )
-                )}
-              </div>
+            <div className="info-card__copy">
+              {googleMapsLink ? (
+                <Link href={googleMapsLink} className="footer__link" target="_blank">
+                  Open Google Maps and Reviews
+                </Link>
+              ) : (
+                getConfigValue(bundle.config, 'about_map_missing_copy', 'Map link is set in the store settings.')
+              )}
+            </div>
           </div>
         </section>
       </div>
