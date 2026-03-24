@@ -242,6 +242,7 @@ export function getHomeFeaturedPizzas(bundle: StorefrontBundle) {
 export function getHomeFeaturedImageUrl(bundle: StorefrontBundle) {
   return (
     getConfigImageValue(bundle.config, 'home_feature_image_url') ||
+    getConfigImageValue(bundle.config, 'home_hero_background_image_url') ||
     getConfigImageValue(bundle.config, 'hero_bg_url') ||
     getFeaturedImageUrl(bundle)
   );
@@ -252,7 +253,11 @@ export function getHomeHeroImageUrl(bundle: StorefrontBundle) {
 }
 
 export function getHeroBackgroundImageUrl(bundle: StorefrontBundle) {
-  return getConfigImageValue(bundle.config, 'hero_bg_url') || getHomeFeaturedImageUrl(bundle);
+  return (
+    getConfigImageValue(bundle.config, 'home_hero_background_image_url') ||
+    getConfigImageValue(bundle.config, 'hero_bg_url') ||
+    getHomeFeaturedImageUrl(bundle)
+  );
 }
 
 export function getMenuHeroImageUrl(bundle: StorefrontBundle) {

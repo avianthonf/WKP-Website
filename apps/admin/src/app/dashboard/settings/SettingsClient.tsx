@@ -302,6 +302,23 @@ export default function SettingsClient({ initialConfigs, initialPizzas }: Settin
 
   const powerData = getPowerControlData();
   const getField = (key: string) => configs.find((config) => config.key === key);
+  const getResolvedField = (key: string, legacyKey?: string) => {
+    const current = getField(key);
+    if (current) return current;
+
+    if (legacyKey) {
+      const legacy = getField(legacyKey);
+      if (legacy) {
+        return {
+          ...legacy,
+          key,
+          label: legacy.label,
+        };
+      }
+    }
+
+    return undefined;
+  };
   const cmsGroups = [
     {
       title: 'Brand & Identity',
@@ -327,7 +344,6 @@ export default function SettingsClient({ initialConfigs, initialPizzas }: Settin
       icon: ImageIcon,
       fields: [
         { key: 'brand_logo_image_url', label: 'Brand logo image', kind: 'image', fallback: '', description: 'Shown in the top-left brand area and mobile drawer when set. Leave blank to use the text mark.' },
-        { key: 'hero_bg_url', label: 'Home hero background image', kind: 'image', fallback: '', description: 'Background image for the immersive home hero. Falls back behind the home showcase.' },
         { key: 'home_feature_image_url', label: 'Home feature image', kind: 'image', fallback: '', description: 'Shown in the homepage hero showcase and featured media panel.' },
         { key: 'menu_hero_image_url', label: 'Menu hero image', kind: 'image', fallback: '', description: 'Shown beside the menu intro and browsing summary.' },
         { key: 'cart_hero_image_url', label: 'Cart hero image', kind: 'image', fallback: '', description: 'Shown beside the checkout summary before the WhatsApp handoff.' },
@@ -371,6 +387,7 @@ export default function SettingsClient({ initialConfigs, initialPizzas }: Settin
         { key: 'home_hero_title', label: 'Hero title', kind: 'text', fallback: 'We Knead Pizza', description: 'Main title on the homepage.' },
         { key: 'home_hero_subtitle', label: 'Hero subtitle', kind: 'textarea', fallback: 'Hand-tossed pizza, warm sides, and a WhatsApp-first order flow.', description: 'Homepage hero subtitle.' },
         { key: 'home_announcement', label: 'Homepage announcement', kind: 'text', fallback: 'Freshly made daily.', description: 'Eyebrow announcement at the top of the home page.' },
+        { key: 'home_hero_background_image_url', label: 'Homepage hero background image', kind: 'image', fallback: '', description: 'Background image behind the immersive homepage hero card. Falls back to the live menu if blank.' },
         { key: 'home_feature_copy', label: 'Feature copy', kind: 'textarea', fallback: 'Rich, hot, and ready to slide from discovery to order with almost no friction.', description: 'Featured pizza callout on the homepage.' },
         { key: 'home_signature_eyebrow', label: 'Signature eyebrow', kind: 'text', fallback: 'Signature picks', description: 'Section label above the featured pizzas.' },
         { key: 'home_signature_title', label: 'Signature title', kind: 'text', fallback: 'Tap a favorite, feel the rhythm, and order', description: 'Signature section title.' },
@@ -1060,7 +1077,11 @@ export default function SettingsClient({ initialConfigs, initialPizzas }: Settin
                         {section.fields.map((field) => (
                           <EditableConfigField
                             key={field.key}
-                            config={getField(field.key)}
+                            config={
+                              field.key === 'home_hero_background_image_url'
+                                ? getResolvedField(field.key, 'hero_bg_url')
+                                : getField(field.key)
+                            }
                             field={field}
                             pending={isPending}
                             onSave={saveCmsSetting}
