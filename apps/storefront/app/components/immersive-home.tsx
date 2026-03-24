@@ -136,7 +136,6 @@ export function ImmersiveHome({
           <>
             <HeroLoopingVideo
               src={heroBackgroundVideoUrl}
-              poster={heroBackgroundImageUrl || undefined}
             />
             <div
               className="hero-card__media-overlay"
@@ -377,10 +376,8 @@ export function ImmersiveHome({
 
 function HeroLoopingVideo({
   src,
-  poster,
 }: {
   src: string;
-  poster?: string;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -388,23 +385,15 @@ function HeroLoopingVideo({
     const video = videoRef.current;
     if (!video) return;
 
-    let idlePauseTimer: number | undefined;
-    let isVisible = false;
-    let shouldPlayWhenReady = false;
-    let introScrollCount = 0;
-    let wheelCooldownTimer: number | undefined;
-    let continuousPlaybackEnabled = false;
-    let touchGestureActive = false;
-    let touchLockCounted = false;
-    let touchStartY = 0;
-    let touchStartX = 0;
-    let touchIntentLocked = false;
+    let shouldStartWhenReady = false;
+    let hasPlayedOnce = false;
+    let frozenFrameTime = 0;
 
     const playVideo = () => {
       if (video.readyState < 2) return;
       if (!video.paused) return;
 
-      shouldPlayWhenReady = false;
+      shouldStartWhenReady = false;
       const playPromise = video.play();
       if (playPromise && typeof playPromise.catch === 'function') {
         playPromise.catch(() => {
@@ -419,111 +408,41 @@ function HeroLoopingVideo({
       }
     };
 
-    const registerIntroScroll = () => {
-      if (introScrollCount >= 3) return false;
-      introScrollCount += 1;
-      shouldPlayWhenReady = true;
+    const snapToFirstFrame = () => {
+      if (!Number.isFinite(video.duration) || video.duration <= 0) return;
+      const safeStart = Math.min(0.04, Math.max(0.01, video.duration * 0.002));
+      if (video.currentTime > safeStart) {
+        video.currentTime = safeStart;
+      } else {
+        video.currentTime = 0;
+      }
+      pauseVideo();
+    };
+
+    const snapToFrozenFrame = () => {
+      if (!Number.isFinite(video.duration) || video.duration <= 0) return;
+      video.currentTime = frozenFrameTime || Math.max(video.duration - 0.08, 0);
+      pauseVideo();
+    };
+
+    const handleFirstScroll = () => {
+      if (hasPlayedOnce || document.visibilityState !== 'visible') return;
+      shouldStartWhenReady = true;
       playVideo();
-      if (idlePauseTimer) {
-        window.clearTimeout(idlePauseTimer);
-      }
-      queueIdlePause();
-      return true;
     };
 
-    const unlockContinuousPlayback = () => {
-      continuousPlaybackEnabled = true;
-      shouldPlayWhenReady = true;
-      if (idlePauseTimer) {
-        window.clearTimeout(idlePauseTimer);
-        idlePauseTimer = undefined;
-      }
-      playVideo();
-    };
-
-    const queueIdlePause = () => {
-      if (idlePauseTimer) {
-        window.clearTimeout(idlePauseTimer);
-      }
-      idlePauseTimer = window.setTimeout(() => {
-        pauseVideo();
-      }, 140);
-    };
-
-    const handleScrollActivity = () => {
-      if (!isVisible || document.visibilityState !== 'visible') return;
-      shouldPlayWhenReady = true;
-      playVideo();
-
-      if (!continuousPlaybackEnabled) {
-        queueIdlePause();
-      }
-    };
-
-    const handleWheel = (event: WheelEvent) => {
-      if (!isVisible || document.visibilityState !== 'visible') return;
-      if (introScrollCount < 3) {
-        event.preventDefault();
-        registerIntroScroll();
+    const handlePlaybackProgress = () => {
+      if (hasPlayedOnce || video.readyState < 2 || !Number.isFinite(video.duration) || video.duration <= 0) {
         return;
       }
 
-      if (!continuousPlaybackEnabled) {
-        unlockContinuousPlayback();
+      const endThreshold = Math.max(0.08, video.duration * 0.01);
+      if (video.currentTime >= video.duration - endThreshold) {
+        hasPlayedOnce = true;
+        frozenFrameTime = Math.max(video.duration - endThreshold, 0);
+        video.pause();
+        video.currentTime = frozenFrameTime;
       }
-
-      handleScrollActivity();
-    };
-
-    const handleTouchStart = (event: TouchEvent) => {
-      if (!isVisible || document.visibilityState !== 'visible') return;
-      const touch = event.touches[0];
-      if (!touch) return;
-
-      touchGestureActive = true;
-      touchLockCounted = false;
-      touchStartY = touch.clientY;
-      touchStartX = touch.clientX;
-      touchIntentLocked = false;
-    };
-
-    const handleTouchMove = (event: TouchEvent) => {
-      if (!isVisible || document.visibilityState !== 'visible') return;
-      if (!touchGestureActive) return;
-
-      const touch = event.touches[0];
-      if (!touch) return;
-
-      const deltaY = Math.abs(touch.clientY - touchStartY);
-      const deltaX = Math.abs(touch.clientX - touchStartX);
-      if (!touchIntentLocked && deltaY < 6 && deltaX < 6) {
-        return;
-      }
-
-      touchIntentLocked = true;
-      if (introScrollCount < 3) {
-        event.preventDefault();
-        if (!touchLockCounted) {
-          touchLockCounted = registerIntroScroll();
-        }
-        return;
-      }
-
-      if (!continuousPlaybackEnabled) {
-        unlockContinuousPlayback();
-      }
-
-      shouldPlayWhenReady = true;
-      playVideo();
-      if (!continuousPlaybackEnabled) {
-        queueIdlePause();
-      }
-    };
-
-    const handleTouchEnd = () => {
-      touchGestureActive = false;
-      touchLockCounted = false;
-      touchIntentLocked = false;
     };
 
     const handleVisibilityChange = () => {
@@ -532,60 +451,35 @@ function HeroLoopingVideo({
         return;
       }
 
-      if (continuousPlaybackEnabled) {
+      if (hasPlayedOnce) {
+        snapToFrozenFrame();
+      } else if (shouldStartWhenReady) {
         playVideo();
-      } else {
-        queueIdlePause();
       }
     };
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        isVisible = Boolean(entry?.isIntersecting);
-        if (!isVisible) {
-          shouldPlayWhenReady = false;
-          if (!continuousPlaybackEnabled) {
-            pauseVideo();
-          }
-          return;
-        }
-
-        if (video.readyState >= 2) {
-          if (continuousPlaybackEnabled) {
-            playVideo();
-          } else {
-            queueIdlePause();
-          }
-        }
-      },
-      { threshold: 0.2 }
-    );
+    const observer = new IntersectionObserver(() => {
+      // Intentionally no-op: the video now plays once after the first scroll and
+      // then freezes on the last frame, even if the hero leaves the viewport.
+    }, { threshold: 0.2 });
 
     observer.observe(video);
-    window.addEventListener('scroll', handleScrollActivity, { passive: true });
-    window.addEventListener('wheel', handleWheel, { passive: false, capture: true });
-    window.addEventListener('touchstart', handleTouchStart, { passive: true, capture: true });
-    window.addEventListener('touchmove', handleTouchMove, { passive: false, capture: true });
-    window.addEventListener('touchend', handleTouchEnd, { passive: true, capture: true });
+    window.addEventListener('scroll', handleFirstScroll, { passive: true });
+    window.addEventListener('wheel', handleFirstScroll, { passive: true });
+    window.addEventListener('touchstart', handleFirstScroll, { passive: true });
+    window.addEventListener('touchmove', handleFirstScroll, { passive: true });
     document.addEventListener('visibilitychange', handleVisibilityChange);
+    video.addEventListener('timeupdate', handlePlaybackProgress);
 
     if (video.readyState >= 2) {
-      if (continuousPlaybackEnabled) {
-        playVideo();
-      } else {
-        queueIdlePause();
-      }
+      snapToFirstFrame();
     } else {
       video.addEventListener(
-        'canplay',
+        'loadeddata',
         () => {
-          if (continuousPlaybackEnabled && isVisible && document.visibilityState === 'visible') {
+          snapToFirstFrame();
+          if (shouldStartWhenReady && document.visibilityState === 'visible') {
             playVideo();
-          } else if (shouldPlayWhenReady && isVisible && document.visibilityState === 'visible') {
-            playVideo();
-            queueIdlePause();
-          } else if (!continuousPlaybackEnabled) {
-            queueIdlePause();
           }
         },
         { once: true }
@@ -593,19 +487,13 @@ function HeroLoopingVideo({
     }
 
     return () => {
-      if (idlePauseTimer) {
-        window.clearTimeout(idlePauseTimer);
-      }
-      if (wheelCooldownTimer) {
-        window.clearTimeout(wheelCooldownTimer);
-      }
       observer.disconnect();
-      window.removeEventListener('scroll', handleScrollActivity);
-      window.removeEventListener('wheel', handleWheel, true);
-      window.removeEventListener('touchstart', handleTouchStart, true);
-      window.removeEventListener('touchmove', handleTouchMove, true);
-      window.removeEventListener('touchend', handleTouchEnd, true);
+      window.removeEventListener('scroll', handleFirstScroll);
+      window.removeEventListener('wheel', handleFirstScroll);
+      window.removeEventListener('touchstart', handleFirstScroll);
+      window.removeEventListener('touchmove', handleFirstScroll);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      video.removeEventListener('timeupdate', handlePlaybackProgress);
       pauseVideo();
     };
   }, [src]);
@@ -615,10 +503,9 @@ function HeroLoopingVideo({
       ref={videoRef}
       className="hero-card__media-video"
       src={src}
-      poster={poster}
       muted
       playsInline
-      loop
+      loop={false}
       preload="auto"
       disablePictureInPicture
       controls={false}
