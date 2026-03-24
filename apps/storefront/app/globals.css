@@ -625,14 +625,40 @@ img {
 .hero-card__media-frozen {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
   z-index: 1;
   pointer-events: none;
   transform: translateZ(0);
   backface-visibility: hidden;
+}
+
+.hero-card__media-frozen-frame {
+  position: absolute;
+  inset: 0;
+}
+
+.hero-card__media-frozen-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+}
+
+.hero-card__media-frozen-fade {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+.hero-card__media-frozen-fade::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(16, 12, 8, 0.02) 0%, rgba(16, 12, 8, 0.18) 100%),
+    linear-gradient(135deg, rgba(16, 12, 8, 0.06), rgba(16, 12, 8, 0.26));
+  opacity: 0.85;
+  transition: opacity 420ms var(--ease-smooth), background 420ms var(--ease-smooth);
 }
 
 .hero-card__media-overlay {

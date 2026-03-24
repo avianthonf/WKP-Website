@@ -555,7 +555,19 @@ function HeroLoopingVideo({
   return (
     <>
       {showFrozenFrame && frozenFrameSrc ? (
-        <img className="hero-card__media-frozen" src={frozenFrameSrc} alt="" aria-hidden="true" />
+        <div className="hero-card__media-frozen" aria-hidden="true">
+          <div className="hero-card__media-frozen-frame">
+            <Image
+              src={frozenFrameSrc}
+              alt=""
+              fill
+              unoptimized
+              sizes="100vw"
+              className="hero-card__media-frozen-image"
+            />
+          </div>
+          <span className="hero-card__media-frozen-fade" />
+        </div>
       ) : null}
       <video
         ref={videoRef}
