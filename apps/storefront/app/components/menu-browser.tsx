@@ -58,10 +58,15 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
     { key: 'addon', label: menuCopy.addonsFilterLabel },
     { key: 'dessert', label: menuCopy.dessertsFilterLabel },
   ];
-  const dietFilters: Array<{ key: DietFilterKey; label: string; icon?: ReactNode }> = [
-    { key: 'all', label: menuCopy.allFilterLabel },
-    { key: 'veg', label: menuCopy.vegFilterLabel, icon: <Leaf size={14} /> },
-    { key: 'nonveg', label: menuCopy.nonVegFilterLabel, icon: <Flame size={14} /> },
+  const dietFilters: Array<{
+    key: DietFilterKey;
+    label: string;
+    icon?: ReactNode;
+    sublabel: string;
+  }> = [
+    { key: 'all', label: menuCopy.allFilterLabel, icon: <Sparkles size={14} />, sublabel: 'Everything' },
+    { key: 'veg', label: menuCopy.vegFilterLabel, icon: <Leaf size={14} />, sublabel: 'Plant-forward' },
+    { key: 'nonveg', label: menuCopy.nonVegFilterLabel, icon: <Flame size={14} />, sublabel: 'Hearty picks' },
   ];
   const activeFilterIndex = Math.max(0, filters.findIndex((item) => item.key === filter));
 
@@ -190,7 +195,7 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
                       : 'Non-veg items only'}
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-2 sm:gap-3">
                 {dietFilters.map((item, index) => {
                   const isActive = dietFilter === item.key;
                   return (
@@ -198,29 +203,23 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
                       key={item.key}
                       type="button"
                       onClick={() => setDietFilter(item.key)}
-                      className="group flex items-center justify-center gap-2 rounded-full border px-4 py-2.5 text-sm font-semibold transition-all"
+                      className="diet-filter-chip group"
+                      data-active={isActive}
+                      data-key={item.key}
                       initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
                       animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
                       transition={{ duration: 0.25, delay: index * 0.04 }}
                       whileHover={canHover ? { y: -1, scale: 1.01 } : {}}
                       whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
-                      style={
-                        isActive
-                          ? {
-                              borderColor: 'rgba(232,84,10,0.24)',
-                              background: 'linear-gradient(135deg, rgba(232,84,10,0.10), rgba(232,84,10,0.05))',
-                              color: 'var(--ember)',
-                              boxShadow: '0 10px 20px rgba(232,84,10,0.08)',
-                            }
-                          : {
-                              borderColor: 'var(--border-default)',
-                              background: 'white',
-                              color: 'var(--stone)',
-                            }
-                      }
+                      aria-pressed={isActive}
                     >
-                      {item.icon}
-                      <span>{item.label}</span>
+                      <span className="diet-filter-chip__icon" aria-hidden="true">
+                        {item.icon}
+                      </span>
+                      <span className="diet-filter-chip__copy">
+                        <span className="diet-filter-chip__label">{item.label}</span>
+                        <span className="diet-filter-chip__sublabel">{item.sublabel}</span>
+                      </span>
                     </motion.button>
                   );
                 })}
