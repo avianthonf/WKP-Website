@@ -38,10 +38,6 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: getSiteMetaTitle(bundle),
     description: getSiteMetaDescription(bundle),
-    icons: {
-      icon: '/icon',
-      apple: '/apple-icon',
-    },
   };
 }
 
