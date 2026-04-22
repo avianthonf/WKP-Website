@@ -3,14 +3,14 @@
 import { useEffect } from 'react';
 import * as Sentry from '@sentry/nextjs';
 
-interface DashboardErrorProps {
+interface StorefrontErrorProps {
   error: Error & { digest?: string };
   reset: () => void;
 }
 
-function ErrorContent({ error, reset }: DashboardErrorProps) {
+function ErrorContent({ error, reset }: StorefrontErrorProps) {
   useEffect(() => {
-    console.error('Dashboard error:', error);
+    console.error('Storefront error:', error);
     Sentry.captureException(error);
   }, [error]);
 
@@ -18,7 +18,7 @@ function ErrorContent({ error, reset }: DashboardErrorProps) {
     <div className="flex min-h-screen flex-col items-center justify-center bg-[var(--cream)] px-4 text-[var(--ink)]">
       <h1 className="mb-4 text-3xl font-bold">Something went wrong</h1>
       <p className="mb-8 max-w-md text-center text-[var(--stone)]">
-        An unexpected error occurred in the dashboard. This has been logged automatically.
+        We encountered an unexpected error. Our team has been notified.
       </p>
       {error.message && (
         <pre className="mb-8 max-w-2xl overflow-x-auto rounded-2xl border border-[var(--border-default)] bg-white p-4 text-sm text-[var(--ink)] shadow-sm">
@@ -35,6 +35,6 @@ function ErrorContent({ error, reset }: DashboardErrorProps) {
   );
 }
 
-export default function DashboardError({ error, reset }: DashboardErrorProps) {
+export default function StorefrontError({ error, reset }: StorefrontErrorProps) {
   return <ErrorContent error={error} reset={reset} />;
 }
