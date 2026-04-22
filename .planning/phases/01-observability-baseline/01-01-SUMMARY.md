@@ -48,9 +48,9 @@ completed: 2026-04-22
 Each task was committed atomically:
 
 1. **Task 1: Install Observability Dependencies** - `ce1f209` (chore)
-2. **Task 2: Configure Sentry Infrastructure** - `TBD_AFTER_COMMIT` (chore)
+2. **Task 2: Configure Sentry Infrastructure** - `ad80d4c` (chore)
 
-**Plan metadata:** `TBD_AFTER_COMMIT` (docs: complete plan)
+**Plan metadata:** `ad80d4c` (docs: complete plan)
 
 ## Files Created/Modified
 - `apps/admin/package.json` - Added Sentry and structured logging dependencies
@@ -73,7 +73,7 @@ Each task was committed atomically:
 - **Fix:** Finished the planned `withSentryConfig` changes and created the required summary in the same worktree
 - **Files modified:** `apps/admin/next.config.ts`, `apps/storefront/next.config.ts`, `.planning/phases/01-observability-baseline/01-01-SUMMARY.md`
 - **Verification:** Spot-check on modified files and worktree commit history
-- **Committed in:** `TBD_AFTER_COMMIT`
+- **Committed in:** `ad80d4c`
 
 ---
 
