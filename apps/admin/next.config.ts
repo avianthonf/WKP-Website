@@ -1,9 +1,21 @@
 import { withSentryConfig } from '@sentry/nextjs';
 import type { NextConfig } from 'next';
 
-const supabaseHostname = process.env.NEXT_PUBLIC_SUPABASE_URL
-  ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname
-  : '**.supabase.co';
+function resolveSupabaseHostname() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+  if (!supabaseUrl) {
+    return '**.supabase.co';
+  }
+
+  try {
+    return new URL(supabaseUrl).hostname;
+  } catch {
+    return '**.supabase.co';
+  }
+}
+
+const supabaseHostname = resolveSupabaseHostname();
 
 const nextConfig: NextConfig = {
   images: {

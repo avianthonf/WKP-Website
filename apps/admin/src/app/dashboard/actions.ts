@@ -34,31 +34,37 @@ export async function createTopping(formData: any) {
 }
 
 export async function createExtra(formData: any) {
-  const validated = extraSchema.safeParse(formData);
-  if (!validated.success) return { error: 'Invalid data' };
-  const slug = validated.data.name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
-  const { error } = await supabaseAdmin.from('extras').insert([{ ...validated.data, slug }]);
-  if (error) return { error: error.message };
-  revalidatePath('/dashboard/extras');
-  return { success: true };
+  return withObservedAction('createExtra', async () => {
+    const validated = extraSchema.safeParse(formData);
+    if (!validated.success) return { error: 'Invalid data' };
+    const slug = validated.data.name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
+    const { error } = await supabaseAdmin.from('extras').insert([{ ...validated.data, slug }]);
+    if (error) return { error: error.message };
+    revalidatePath('/dashboard/extras');
+    return { success: true };
+  });
 }
 
 export async function createAddon(formData: any) {
-  const validated = addonSchema.safeParse(formData);
-  if (!validated.success) return { error: 'Invalid data' };
-  const slug = validated.data.name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
-  const { error } = await supabaseAdmin.from('addons').insert([{ ...validated.data, slug }]);
-  if (error) return { error: error.message };
-  revalidatePath('/dashboard/addons');
-  return { success: true };
+  return withObservedAction('createAddon', async () => {
+    const validated = addonSchema.safeParse(formData);
+    if (!validated.success) return { error: 'Invalid data' };
+    const slug = validated.data.name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
+    const { error } = await supabaseAdmin.from('addons').insert([{ ...validated.data, slug }]);
+    if (error) return { error: error.message };
+    revalidatePath('/dashboard/addons');
+    return { success: true };
+  });
 }
 
 export async function createDessert(formData: any) {
-  const validated = dessertSchema.safeParse(formData);
-  if (!validated.success) return { error: 'Invalid data' };
-  const slug = validated.data.name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
-  const { error } = await supabaseAdmin.from('desserts').insert([{ ...validated.data, slug }]);
-  if (error) return { error: error.message };
-  revalidatePath('/dashboard/desserts');
-  return { success: true };
+  return withObservedAction('createDessert', async () => {
+    const validated = dessertSchema.safeParse(formData);
+    if (!validated.success) return { error: 'Invalid data' };
+    const slug = validated.data.name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
+    const { error } = await supabaseAdmin.from('desserts').insert([{ ...validated.data, slug }]);
+    if (error) return { error: error.message };
+    revalidatePath('/dashboard/desserts');
+    return { success: true };
+  });
 }
