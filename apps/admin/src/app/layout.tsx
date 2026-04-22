@@ -1,5 +1,8 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import { ReactScan } from '@/components/diagnostics/ReactScan';
+
+const isDevelopment = process.env.NODE_ENV === 'development';
 
 export const metadata: Metadata = {
   title: 'We Knead Pizza | Control Room',
@@ -17,7 +20,10 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <meta name="theme-color" content="#F5F0E8" />
       </head>
-      <body className="admin-app antialiased">{children}</body>
+      <body className="admin-app antialiased">
+        {isDevelopment && <ReactScan />}
+        {children}
+      </body>
     </html>
   );
 }

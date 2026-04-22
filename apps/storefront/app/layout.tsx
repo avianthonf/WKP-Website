@@ -3,7 +3,10 @@ import { Cormorant_Garamond, Outfit } from "next/font/google";
 import { CartProvider } from "./components/cart-provider";
 import { fetchStorefrontBundle } from "./lib/storefront";
 import { getSiteMetaDescription, getSiteMetaTitle, getThemeColor } from "./lib/catalog";
+import { ReactScan } from "./components/diagnostics/ReactScan";
 import "./globals.css";
+
+const isDevelopment = process.env.NODE_ENV === "development";
 
 export const dynamic = 'force-dynamic';
 
@@ -49,6 +52,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${cormorant.variable} ${outfit.variable}`}>
       <body>
+        {isDevelopment && <ReactScan />}
         <CartProvider>{children}</CartProvider>
       </body>
     </html>
