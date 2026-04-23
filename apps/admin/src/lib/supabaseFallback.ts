@@ -135,5 +135,5 @@ export function hasSupabaseEnv() {
 }
 
 export function shouldUseMockSupabase() {
-  return !hasSupabaseEnv() && (process.env.GITHUB_ACTIONS === 'true' || process.env.NODE_ENV === 'development');
+  return !hasSupabaseEnv();
 }
