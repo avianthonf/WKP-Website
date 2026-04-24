@@ -30,7 +30,6 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
   const [filter, setFilter] = useState<FilterKey>('all');
   const [recentlyAddedNotice, setRecentlyAddedNotice] = useState<{ id: number; text: string } | null>(null);
   const deliveryNotice = getConfigValue(bundle.config, 'delivery_notice', '').trim();
-  const showDeliveryNoticePopup = Boolean(recentlyAddedNotice);
   const triggerDeliveryNoticePopup = () => {
     if (!deliveryNotice) return;
     setRecentlyAddedNotice({ id: Date.now(), text: deliveryNotice });
