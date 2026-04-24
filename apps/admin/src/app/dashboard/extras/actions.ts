@@ -16,6 +16,7 @@ export async function createExtra(formData: ExtraFormData) {
     if (error) throw error;
 
     revalidatePath('/dashboard/extras');
+    revalidatePath('/dashboard/pizzas');
     revalidateTag('menu');
 
     return { success: true };
@@ -37,6 +38,7 @@ export async function updateExtra(id: string, formData: ExtraFormData) {
     if (error) throw error;
 
     revalidatePath('/dashboard/extras');
+    revalidatePath('/dashboard/pizzas');
     revalidateTag('menu');
 
     return { success: true };
@@ -56,6 +58,7 @@ export async function deleteExtra(id: string) {
     if (error) throw error;
 
     revalidatePath('/dashboard/extras');
+    revalidatePath('/dashboard/pizzas');
     revalidateTag('menu');
 
     return { success: true };
@@ -79,6 +82,7 @@ export async function updateExtraPrice(id: string, size: 'small' | 'medium' | 'l
 
     revalidatePath('/dashboard/extras');
     revalidatePath('/dashboard/prices');
+    revalidatePath('/dashboard/pizzas');
     revalidateTag('menu');
 
     return { success: true };
@@ -98,6 +102,7 @@ export async function toggleExtraSoldOut(id: string, currentState: boolean) {
     if (error) throw error;
 
     revalidatePath('/dashboard/extras');
+    revalidatePath('/dashboard/pizzas');
     revalidateTag('menu');
 
     return { success: true };

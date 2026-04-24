@@ -261,8 +261,9 @@ export function AddonsClient({ initialAddons, createSignal }: AddonsClientProps)
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--ink)' }}>Name</label>
+            <label htmlFor="addon-name" className="block text-sm font-medium mb-1.5" style={{ color: 'var(--ink)' }}>Name</label>
             <input
+              id="addon-name"
               {...register('name')}
               placeholder="Addon name"
               className="input-base"
@@ -271,8 +272,9 @@ export function AddonsClient({ initialAddons, createSignal }: AddonsClientProps)
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--ink)' }}>Description</label>
+            <label htmlFor="addon-description" className="block text-sm font-medium mb-1.5" style={{ color: 'var(--ink)' }}>Description</label>
             <textarea
+              id="addon-description"
               {...register('description')}
               rows={2}
               placeholder="Brief description (optional)"
@@ -282,10 +284,11 @@ export function AddonsClient({ initialAddons, createSignal }: AddonsClientProps)
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--ink)' }}>Price (₹)</label>
+            <label htmlFor="addon-price" className="block text-sm font-medium mb-1.5" style={{ color: 'var(--ink)' }}>Price (₹)</label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm" style={{ color: 'var(--stone)' }}>₹</span>
               <input
+                id="addon-price"
                 type="number"
                 {...register('price', { valueAsNumber: true })}
                 className="input-base"
@@ -325,8 +328,8 @@ export function AddonsClient({ initialAddons, createSignal }: AddonsClientProps)
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--ink)' }}>Sort Order</label>
-            <input type="number" {...register('sort_order', { valueAsNumber: true })} className="input-base" style={{ width: '8rem' }} />
+            <label htmlFor="addon-sort-order" className="block text-sm font-medium mb-1.5" style={{ color: 'var(--ink)' }}>Sort Order</label>
+            <input id="addon-sort-order" type="number" {...register('sort_order', { valueAsNumber: true })} className="input-base" style={{ width: '8rem' }} />
             <p className="text-xs mt-1" style={{ color: 'var(--stone)' }}>Lower numbers appear first</p>
           </div>
 

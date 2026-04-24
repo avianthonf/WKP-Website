@@ -254,8 +254,9 @@ export function DessertsClient({ initialDesserts, createSignal }: DessertsClient
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--ink)' }}>Name</label>
+            <label htmlFor="dessert-name" className="block text-sm font-medium mb-1.5" style={{ color: 'var(--ink)' }}>Name</label>
             <input
+              id="dessert-name"
               {...register('name')}
               placeholder="Dessert name"
               className="input-base"
@@ -264,8 +265,9 @@ export function DessertsClient({ initialDesserts, createSignal }: DessertsClient
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--ink)' }}>Description</label>
+            <label htmlFor="dessert-description" className="block text-sm font-medium mb-1.5" style={{ color: 'var(--ink)' }}>Description</label>
             <textarea
+              id="dessert-description"
               {...register('description')}
               rows={2}
               placeholder="Brief description (optional)"
@@ -275,10 +277,11 @@ export function DessertsClient({ initialDesserts, createSignal }: DessertsClient
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--ink)' }}>Price (₹)</label>
+            <label htmlFor="dessert-price" className="block text-sm font-medium mb-1.5" style={{ color: 'var(--ink)' }}>Price (₹)</label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm" style={{ color: 'var(--stone)' }}>₹</span>
               <input
+                id="dessert-price"
                 type="number"
                 {...register('price', { valueAsNumber: true })}
                 className="input-base"
@@ -311,8 +314,8 @@ export function DessertsClient({ initialDesserts, createSignal }: DessertsClient
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--ink)' }}>Sort Order</label>
-            <input type="number" {...register('sort_order', { valueAsNumber: true })} className="input-base" style={{ width: '8rem' }} />
+            <label htmlFor="dessert-sort-order" className="block text-sm font-medium mb-1.5" style={{ color: 'var(--ink)' }}>Sort Order</label>
+            <input id="dessert-sort-order" type="number" {...register('sort_order', { valueAsNumber: true })} className="input-base" style={{ width: '8rem' }} />
             <p className="text-xs mt-1" style={{ color: 'var(--stone)' }}>Lower numbers appear first</p>
           </div>
 

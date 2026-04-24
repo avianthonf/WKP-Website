@@ -16,6 +16,7 @@ export async function createDessert(formData: DessertFormData) {
     if (error) throw error;
 
     revalidatePath('/dashboard/desserts');
+    revalidatePath('/dashboard/pizzas');
     revalidateTag('menu');
 
     return { success: true };
@@ -37,6 +38,7 @@ export async function updateDessert(id: string, formData: DessertFormData) {
     if (error) throw error;
 
     revalidatePath('/dashboard/desserts');
+    revalidatePath('/dashboard/pizzas');
     revalidateTag('menu');
 
     return { success: true };
@@ -56,6 +58,7 @@ export async function deleteDessert(id: string) {
     if (error) throw error;
 
     revalidatePath('/dashboard/desserts');
+    revalidatePath('/dashboard/pizzas');
     revalidateTag('menu');
 
     return { success: true };
@@ -75,6 +78,7 @@ export async function toggleDessertSoldOut(id: string, currentState: boolean) {
     if (error) throw error;
 
     revalidatePath('/dashboard/desserts');
+    revalidatePath('/dashboard/pizzas');
     revalidateTag('menu');
 
     return { success: true };
@@ -96,6 +100,7 @@ export async function updateDessertPrice(id: string, price: number) {
     if (error) throw error;
 
     revalidatePath('/dashboard/prices');
+    revalidatePath('/dashboard/pizzas');
     revalidateTag('menu');
 
     return { success: true };
