@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import React, { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { ChefHat, Flame, Leaf, Search, Sparkles } from 'lucide-react';
 import { useCart } from './cart-provider';
 import {
@@ -27,12 +28,12 @@ const pizzaSizes: Size[] = ['small', 'medium', 'large'];
 export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
   const { addItem, items, totalItems } = useCart();
   const [filter, setFilter] = useState<FilterKey>('all');
-  const [recentlyAddedNotice, setRecentlyAddedNotice] = useState<string | null>(null);
+  const [recentlyAddedNotice, setRecentlyAddedNotice] = useState<{ id: number; text: string } | null>(null);
   const deliveryNotice = getConfigValue(bundle.config, 'delivery_notice', '').trim();
   const showDeliveryNoticePopup = Boolean(recentlyAddedNotice);
   const triggerDeliveryNoticePopup = () => {
     if (!deliveryNotice) return;
-    setRecentlyAddedNotice(deliveryNotice);
+    setRecentlyAddedNotice({ id: Date.now(), text: deliveryNotice });
   };
   const [dietFilter, setDietFilter] = useState<DietFilterKey>('all');
   const [query, setQuery] = useState('');
@@ -243,21 +244,6 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
               </div>
             </div>
 
-            <AnimatePresence>
-              {showDeliveryNoticePopup ? (
-                <motion.div
-                  className="notice"
-                  data-tone="warning"
-                  initial={prefersReducedMotion ? false : { opacity: 0, y: -8 }}
-                  animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
-                  exit={prefersReducedMotion ? {} : { opacity: 0, y: -8 }}
-                >
-                  <Sparkles size={16} />
-                  {recentlyAddedNotice}
-                </motion.div>
-              ) : null}
-            </AnimatePresence>
-
             <div className="menu-grid">
               {menuItems.pizzas.map((pizza, index) => (
                 <PizzaCard
@@ -352,6 +338,9 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
           </div>
         </div>
       </section>
+
+      <DeliveryNoticeSnackbar notice={recentlyAddedNotice?.text} prefersReducedMotion={Boolean(prefersReducedMotion)} />
+
     <section className="hero-card reveal">
         <div className="hero-card__grid">
           <div>
@@ -441,6 +430,43 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
         </div>
       </section>
     </div>
+  );
+}
+
+function DeliveryNoticeSnackbar({
+  notice,
+  prefersReducedMotion,
+}: {
+  notice?: string;
+  prefersReducedMotion: boolean;
+}) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+
+  return createPortal(
+    <AnimatePresence>
+      {notice ? (
+        <motion.div
+          className="menu-browser-snackbar"
+          role="status"
+          aria-live="polite"
+          initial={prefersReducedMotion ? false : { opacity: 0, y: 18, scale: 0.98 }}
+          animate={prefersReducedMotion ? {} : { opacity: 1, y: 0, scale: 1 }}
+          exit={prefersReducedMotion ? {} : { opacity: 0, y: 12, scale: 0.98 }}
+        >
+          <div className="notice menu-browser-snackbar__notice" data-tone="warning">
+            <Sparkles size={16} />
+            <span>{notice}</span>
+          </div>
+        </motion.div>
+      ) : null}
+    </AnimatePresence>,
+    document.body
   );
 }
 

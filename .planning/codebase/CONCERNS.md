@@ -1,79 +1,72 @@
 # Codebase Concerns
 
-**Analysis Date:** 2026-04-22
+**Analysis Date:** 2026-04-23
 
 ## Tech Debt
 
-**God Component (Settings):**
-- Issue: `SettingsClient.tsx` has grown to nearly 1900 lines, handling everything from real-time database sync to complex UI state for multiple config types. This violates the "Many Small Files" principle and makes testing nearly impossible.
-- Files: `apps/admin/src/app/dashboard/settings/SettingsClient.tsx`
-- Impact: Extremely difficult to modify without side effects; slow IDE performance; high risk of bugs during config updates.
-- Fix approach: Break into sub-components (e.g., `ConfigList`, `ConfigItem`, `RealtimeSyncProvider`) and move business logic into custom hooks.
+**Server Action Redundancy:**
+- Issue: Duplicate server action implementations for basic CRUD operations across multiple files.
+- Files: `apps/admin/src/app/dashboard/actions.ts`, `apps/admin/src/app/dashboard/pizzas/actions.ts`, `apps/admin/src/app/dashboard/categories/actions.ts`
+- Impact: High maintenance overhead, risk of inconsistent behavior (e.g., some use `withObservedAction` wrapper while others don't).
+- Fix approach: Consolidate redundant actions into a shared library or standard service layer within `packages/core`.
 
-**Oversized UI Components:**
-- Issue: Several components exceed the 800-line maximum, containing significant business logic that should be in hooks or utility functions.
-- Files: `apps/storefront/app/components/cart-checkout.tsx` (802 lines), `apps/admin/src/app/dashboard/pizzas/MenuStudio.tsx` (733 lines).
-- Impact: High maintenance cost and poor readability.
-- Fix approach: Extract logic into dedicated hooks (e.g., `useCheckout`) and split UI into smaller, focused components.
+**Inconsistent Error Handling in Actions:**
+- Issue: Some server actions return `{ success: true }` / `{ error: string }` while others throw Errors directly.
+- Files: `apps/admin/src/app/dashboard/actions.ts` (returns), `apps/admin/src/app/dashboard/pizzas/actions.ts` (throws).
+- Impact: Inconsistent UI handling of errors; risk of unhandled promise rejections or leaked sensitive error details.
+- Fix approach: Standardize on a result object pattern (e.g., `Result<T, E>`) for all server actions.
 
-**Stubbed Backup/Restore Logic:**
-- Issue: The core backup and restore utility is partially implemented, with critical TODOs for the actual restoration of data.
+**Large Component Files (Prop Drilling & Complexity):**
+- Issue: Large React components handling too many responsibilities (UI, State, Real-time subs).
+- Files: `apps/admin/src/app/dashboard/settings/SettingsClient.tsx` (1886 lines), `apps/storefront/app/components/cart-checkout.tsx` (802 lines).
+- Impact: Hard to test, slow to maintain, high risk of side effects when modifying unrelated logic.
+- Fix approach: Extract business logic into custom hooks, split into smaller sub-components, and use state management (Zustand) more effectively.
+
+**Unimplemented Backup/Restore Logic:**
+- Issue: "TODO" comments indicate critical missing functionality for system recovery.
 - Files: `packages/core/cms-backup-restore.ts`
-- Impact: The backup/restore feature advertised in the admin panel may not actually work for data restoration.
-- Fix approach: Implement the `table-by-table upsert` logic and JSON parsing as noted in the TODO comments.
+- Impact: System administrators cannot currently restore data from backups, risking data loss if a manual intervention is needed.
+- Fix approach: Implement the table-by-table upsert and file reading logic as noted in the source.
 
 ## Known Bugs
 
-**Real-time Config Race Conditions:**
-- Symptoms: Local state updates in `SettingsClient.tsx` are handled both optimistically and via Postgres change notifications.
-- Files: `apps/admin/src/app/dashboard/settings/SettingsClient.tsx`
-- Trigger: Rapidly toggling boolean settings or multiple users editing config simultaneously.
-- Workaround: Refreshing the page synchronizes state.
+**Slug Generation Collisions:**
+- Issue: Slugs are generated from labels/names without checking for uniqueness in the database.
+- Files: `apps/admin/src/app/dashboard/categories/actions.ts`, `apps/admin/src/app/dashboard/pizzas/actions.ts`
+- Impact: Potential `23505` (unique constraint) database errors if two items have the same name, or routing issues if slugs are not unique.
+- Trigger: Create two categories or pizzas with the same name.
+- Workaround: Manually rename items before creation.
 
 ## Security Considerations
 
-**Service Role Key Protection:**
-- Risk: Potential for `SUPABASE_SERVICE_ROLE_KEY` to be leaked if used incorrectly in client-side code, though `CLAUDE.md` warns against this.
-- Files: `apps/admin/src/lib/supabaseClient.ts` (implied usage in actions)
-- Current mitigation: Environment variable validation and Server Actions.
-- Recommendations: Implement a strict audit of all files using `SERVICE_ROLE_KEY` to ensure they are strictly server-side.
-
-**Admin Email Allowlist:**
-- Risk: Middleware relies on an `ADMIN_EMAIL` check which might be too simple for a multi-admin environment.
-- Files: `apps/admin/src/middleware.ts`
-- Current mitigation: Basic email check.
-- Recommendations: Move to a more robust RBAC (Role-Based Access Control) system within Supabase.
+**Service Role Key Exposure Risk:**
+- Risk: `SUPABASE_SERVICE_ROLE_KEY` is used in several server-side files. If a developer accidentally imports one of these into a `'use client'` component, the key could be leaked.
+- Files: `apps/admin/src/lib/supabaseAdmin.ts`
+- Current mitigation: Next.js environment variable naming (`NEXT_PUBLIC_` prefix requirement) and manual code review.
+- Recommendations: Use `server-only` package to ensure admin-level libraries cannot be imported into client components.
 
 ## Performance Bottlenecks
 
-**Unfiltered Real-time Subscriptions:**
-- Problem: Subscribing to all changes on the `site_config` table.
+**Heavy Real-time Subscriptions:**
+- Problem: `SettingsClient` subscribes to all changes in the `site_config` table and triggers a full state update on every event.
 - Files: `apps/admin/src/app/dashboard/settings/SettingsClient.tsx`
-- Cause: `client.channel('site_config-changes').on('postgres_changes', { event: '*', schema: 'public', table: 'site_config' }, ...)`
-- Improvement path: Use filters in the subscription if only certain keys are needed, or throttle state updates.
+- Cause: Subscribing to `*` (all events) and re-sorting the entire array in-memory on every change.
+- Improvement path: Filter events at the subscription level or debounced/batch state updates for high-frequency changes.
 
 ## Fragile Areas
 
-**Menu Studio State:**
-- Files: `apps/admin/src/app/dashboard/pizzas/MenuStudio.tsx`
-- Why fragile: Complex state management for pizza customization, categories, and addons in a single component.
-- Safe modification: Use the `useAdminCatalogStore` hook but be careful of direct state mutations.
-- Test coverage: Gaps in E2E testing for complex menu configurations.
+**Pizza-Topping Synchronization:**
+- Files: `apps/admin/src/app/dashboard/pizzas/actions.ts`
+- Why fragile: Uses a "delete-all-then-insert-all" pattern for syncing many-to-many relationships. This is non-transactional in the current implementation (two separate Supabase calls) and can leave the system in a partial state if the insert fails.
+- Safe modification: Use a single RPC call or wrap both operations in a database transaction.
+- Test coverage: Low.
 
 ## Missing Critical Features
 
-**Data Restoration:**
-- Problem: Backup creation exists but restoration is not fully implemented in the core package.
-- Blocks: Disaster recovery and environment synchronization.
-
-## Test Coverage Gaps
-
-**Server Actions:**
-- What's not tested: Most Server Actions in `apps/admin` lack unit tests for error paths.
-- Files: `apps/admin/src/app/dashboard/**/actions.ts`
-- Risk: Failed database operations might return "success" or crash the client.
-- Priority: High
+**CMS Restore Functionality:**
+- Problem: Backup exists but Restore is incomplete.
+- Blocks: Disaster recovery workflows.
 
 ---
 
-*Concerns audit: 2026-04-22*
+*Concerns audit: 2026-04-23*

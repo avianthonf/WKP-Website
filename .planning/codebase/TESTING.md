@@ -1,12 +1,12 @@
 # Testing Patterns
 
-**Analysis Date:** 2026-04-22
+**Analysis Date:** 2026-04-23
 
 ## Test Framework
 
 **Runner:**
 - Vitest (^2.0.5)
-- Config: `apps/admin/vitest.config.ts`
+- Config: `apps/admin/vitest.config.ts`, `apps/storefront/vitest.config.ts`
 
 **Assertion Library:**
 - Vitest (compatible with Jest matchers)
@@ -23,7 +23,7 @@ npm run test:coverage # Coverage report
 
 **Location:**
 - Co-located with implementation: `src/**/*.test.tsx` (e.g., `src/app/dashboard/toppings/ToppingsClient.test.tsx`)
-- Separate test directory for infrastructure/setup: `apps/admin/test/`
+- Separate test directory for infrastructure/setup: `apps/admin/test/` and `apps/storefront/test/`
 
 **Naming:**
 - `[FileName].test.ts` or `[FileName].test.tsx`
@@ -38,7 +38,7 @@ apps/admin/
 └── test/
     ├── mocks/         # Shared mocks
     ├── setup.ts       # Global vitest setup
-    └── utils/         # Test utilities
+    └── utils/         # Test utilities (e.g., render-with-providers.tsx)
 ```
 
 ## Test Structure
@@ -61,9 +61,10 @@ describe('ComponentName', () => {
 ```
 
 **Patterns:**
-- `beforeEach`: Clear all mocks to ensure test isolation
-- `describe/it`: Standard BDD-style organization
-- `render/screen`: React Testing Library pattern for component testing
+- `beforeEach`: Clear all mocks using `vi.clearAllMocks()` to ensure test isolation.
+- `describe/it`: Standard BDD-style organization.
+- `render/screen`: React Testing Library pattern for component testing.
+- `userEvent`: Use `@testing-library/user-event` for simulating user interactions.
 
 ## Mocking
 
@@ -86,36 +87,27 @@ vi.mock('next/navigation', () => ({
 ```
 
 **What to Mock:**
-- External services (Supabase)
-- Next.js internal hooks (`useRouter`, `useParams`)
-- Server Actions in Client Component tests
-- DOM APIs not available in JSDOM (`matchMedia`, `IntersectionObserver`)
+- External services (Supabase SDK clients)
+- Next.js internal hooks (`useRouter`, `useParams`, `usePathname`)
+- Server Actions in Client Component tests to isolate UI logic
+- DOM APIs not available in JSDOM (e.g., `matchMedia`, `IntersectionObserver`, `ResizeObserver` - found in `test/setup.ts`)
 
 **What NOT to Mock:**
-- Pure logic/utility functions unless they have side effects
-- Zod schemas used for validation
+- Pure logic/utility functions unless they have expensive side effects
+- Zod schemas used for validation (use the real schemas to ensure data integrity)
 
 ## Fixtures and Factories
 
 **Test Data:**
-```typescript
-const mockToppings: Topping[] = [
-  {
-    id: '1',
-    slug: 'cheese-1',
-    name: 'Mozzarella',
-    // ... complete interface
-  }
-];
-```
+- Usually defined within the test file for local context and clarity.
+- Shared mock objects in `test/mocks/` (e.g., `supabase.ts`, `next-navigation.ts`).
 
 **Location:**
-- Usually defined within the test file for local context
-- Shared mocks in `test/mocks/` (e.g., `supabase.ts`, `next-navigation.ts`)
+- Co-located with tests or in centralized `test/mocks/` directory.
 
 ## Coverage
 
-**Requirements:** 80% minimum (enforced by project rules)
+**Requirements:** 80% minimum (enforced by project quality standards).
 
 **View Coverage:**
 ```bash
@@ -126,14 +118,15 @@ npm run test:coverage
 
 **Unit Tests:**
 - Validation logic: `src/lib/validations.test.ts`
-- Utility functions
-- Individual components: `src/components/admin/Modal.test.tsx`
+- Utility functions and shared core logic
+- Individual presentational components: `src/components/admin/Modal.test.tsx`
 
 **Integration Tests:**
 - Client Components interacting with mocked Server Actions: `ToppingsClient.test.tsx`
+- Catalog management logic: `apps/storefront/app/lib/catalog.test.ts`
 
 **E2E Tests:**
-- Playwright (recommended in rules, though no playwright config was found in root yet)
+- Playwright (recommended for critical user flows, though configuration is pending implementation)
 
 ## Common Patterns
 
@@ -141,16 +134,13 @@ npm run test:coverage
 ```typescript
 await user.click(button);
 await waitFor(() => {
-  expect(mockAction).toHaveBeenCalled();
+  expect(mockAction).toHaveBeenCalledWith(expect.objectContaining({ ... }));
 });
 ```
 
-**Form Testing:**
-```typescript
-await user.type(screen.getByLabelText('Name'), 'New Item');
-await user.click(screen.getByRole('button', { name: /Add/i }));
-```
+**Error Boundary Testing:**
+- Verify that components gracefully handle errors and display `error.tsx` content (e.g., `apps/admin/src/app/dashboard/error.test.tsx`).
 
 ---
 
-*Testing analysis: 2026-04-22*
+*Testing analysis: 2026-04-23*

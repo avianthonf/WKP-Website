@@ -1,91 +1,89 @@
 # Architecture
 
-**Analysis Date:** 2026-04-22
+**Analysis Date:** 2026-04-23
 
 ## Pattern Overview
 
-**Overall:** Monorepo with Next.js 15 App Router (Full-stack TypeScript)
+**Overall:** Monorepo with Shared Core and Next.js 15 App Router
 
 **Key Characteristics:**
-- **Shared Core:** Common logic, types, and API clients reside in `packages/core`.
-- **Server Actions:** Data mutations are handled via Next.js Server Actions for secure, high-privilege operations.
-- **Client-Side State:** Uses Zustand for complex client state (e.g., catalog management in `packages/core/useAdminCatalogStore.ts`).
-- **Supabase Integration:** Direct database and auth interaction using Supabase SDKs, split between client and server contexts.
+- **Layered Monorepo:** Logic shared between `apps/admin` and `apps/storefront` is housed in `packages/core`.
+- **Server-First Mutations:** Uses Next.js Server Actions for all data modifications, ensuring security and high-privilege operations are kept on the server.
+- **Supabase Integration:** Direct PostgreSQL and Auth interaction using Supabase SDKs, with specific clients for server, browser, and administrative contexts.
 
 ## Layers
 
-**Application Layer (Apps):**
+**Application Layer:**
 - Purpose: Entry points for users (Storefront and Admin).
 - Location: `apps/admin` and `apps/storefront`
 - Contains: Pages, layouts, UI components, and application-specific hooks.
-- Depends on: `packages/core`, `@wkp/core` (internal alias)
-- Used by: End users and administrators.
+- Depends on: `packages/core` (internal alias `@wkp/core`)
+- Used by: End users (Storefront) and administrators (Admin).
 
-**Shared Logic Layer (Packages):**
-- Purpose: Centralize business logic and data access patterns.
+**Shared Core Layer:**
+- Purpose: Centralize business logic, API wrappers, and validation schemas.
 - Location: `packages/core`
-- Contains: API wrappers (`adminApi.ts`), shared stores (`useAdminCatalogStore.ts`), and validation schemas.
-- Depends on: External SDKs (Supabase).
+- Contains: API abstractions (`adminApi.ts`), Zustand stores (`useAdminCatalogStore.ts`), and Zod schemas (`validations.ts`).
+- Depends on: Supabase SDK.
 - Used by: Both `apps/admin` and `apps/storefront`.
 
-**Infrastructure Layer (Supabase):**
-- Purpose: Persistent storage, authentication, and file hosting.
-- Location: Managed Service (Supabase)
-- Contains: PostgreSQL database, Auth, and S3-compatible Storage.
+**Infrastructure Layer:**
+- Purpose: Managed services for persistence and authentication.
+- Location: Supabase (Managed Service)
+- Contains: PostgreSQL, Auth, and Storage.
 
 ## Data Flow
 
-**Admin Dashboard Mutation Flow:**
-
-1. User submits a form (e.g., `apps/admin/src/components/admin/PizzaForm.tsx`).
-2. Server Action is invoked (e.g., `createPizza` in `apps/admin/src/app/dashboard/pizzas/actions.ts`).
-3. Action validates input using Zod (`apps/admin/src/lib/validations.ts`).
-4. Action interacts with Supabase using Service Role key (`apps/admin/src/lib/supabaseAdmin.ts`).
-5. Next.js cache is invalidated via `revalidatePath` or `revalidateTag`.
-6. UI reflects changes after server-side re-render.
+**Mutation Flow (Server Actions):**
+1. **Trigger:** User interacts with a Client Component (e.g., submitting a form).
+2. **Action:** Component invokes a Server Action (e.g., `createTopping` in `actions.ts`).
+3. **Validation:** Action validates input using Zod schemas from `packages/core`.
+4. **Execution:** Action performs DB operation using `supabaseAdmin` or `supabaseServer`.
+5. **Revalidation:** Action calls `revalidatePath` or `revalidateTag` to update Next.js cache.
+6. **Response:** UI updates based on action response (success/error).
 
 **State Management:**
-- **Server State:** Managed by Next.js cache and revalidation.
-- **Client State:** Managed by Zustand in `packages/core/useAdminCatalogStore.ts` for real-time interactions and local UI state.
+- **Server State:** Handled by Next.js Data Cache and revalidation.
+- **Client State:** Managed via Zustand in `packages/core/useAdminCatalogStore.ts` for complex local UI states (e.g., Kanban boards, drag-and-drop catalog management).
 
 ## Key Abstractions
 
 **Supabase Client Factory:**
-- Purpose: Provides typed Supabase clients for different environments (Server, Browser, Admin).
-- Examples: `apps/admin/src/lib/supabaseServer.ts`, `apps/admin/src/lib/supabaseBrowser.ts`.
-- Pattern: Factory/Utility functions.
+- Purpose: Provides environment-specific Supabase clients.
+- Examples: `apps/admin/src/lib/supabaseServer.ts` (Server actions/pages), `apps/admin/src/lib/supabaseBrowser.ts` (Client components).
+- Pattern: Utility functions.
 
-**Server Actions:**
-- Purpose: Encapsulates server-side side effects and database operations.
-- Examples: `apps/admin/src/app/dashboard/pizzas/actions.ts`.
-- Pattern: Command pattern via Next.js primitives.
+**Observability Wrapper:**
+- Purpose: Standardizes error logging and performance tracking.
+- Location: `apps/admin/src/lib/observability.ts`.
+- Pattern: Higher-order functions for wrapping server actions.
 
 ## Entry Points
 
-**Admin Entry:**
+**Admin App:**
 - Location: `apps/admin/src/app/page.tsx`
 - Triggers: URL access to `/` or `/dashboard`.
-- Responsibilities: Auth verification (via middleware), landing page rendering.
+- Responsibilities: Auth redirection, layout management for the dashboard.
 
-**Storefront Entry:**
+**Storefront App:**
 - Location: `apps/storefront/src/app/page.tsx`
-- Triggers: Customer access to root domain.
-- Responsibilities: Catalog display and order initiation.
+- Triggers: Public domain access.
+- Responsibilities: Public catalog rendering and order flow initiation.
 
 ## Error Handling
 
-**Strategy:** Comprehensive server-side catching with client-side error boundaries.
+**Strategy:** Multi-tier fallback and explicit logging.
 
 **Patterns:**
-- **Try-Catch in Actions:** Standard catch blocks in server actions with explicit error throwing.
-- **Next.js Error Files:** `error.tsx` files at various route segments (e.g., `apps/admin/src/app/dashboard/error.tsx`).
+- **Boundary Handling:** `error.tsx` files at various route levels catch unhandled UI errors.
+- **Explicit Catching:** Server actions use try-catch blocks to log errors via observability wrappers and return standardized error objects to the UI.
 
 ## Cross-Cutting Concerns
 
-**Logging:** Primarily server-side console logging in actions; client-side console logging for debugging.
-**Validation:** Shared Zod schemas in `apps/admin/src/lib/validations.ts` and `packages/core/validations.ts`.
-**Authentication:** Supabase Auth integrated with Next.js Middleware (`apps/admin/src/middleware.ts`) for route protection.
+**Logging:** Pino-based logging integrated into observability wrappers.
+**Validation:** Zod-based schema validation at the edge of every server action.
+**Authentication:** Next.js Middleware (`middleware.ts`) and Supabase Auth Helpers handle session management and protected routes.
 
 ---
 
-*Architecture analysis: 2026-04-22*
+*Architecture analysis: 2026-04-23*

@@ -43,7 +43,7 @@ function makeBundle(config: Record<string, string> = {}): StorefrontBundle {
 }
 
 describe('MenuBrowser delivery notice popup', () => {
-  it('shows a temporary notice after adding an item to the cart', async () => {
+  it('shows a temporary snackbar after adding an item to the cart', async () => {
     const user = userEvent.setup();
 
     render(
@@ -58,9 +58,9 @@ describe('MenuBrowser delivery notice popup', () => {
 
     await user.click(screen.getByRole('button', { name: 'Add Medium' }));
 
-    expect(
-      await screen.findByText('Minimum Order Quantity and Delivery Charges may be applicable for Home Delivery')
-    ).toBeInTheDocument();
+    const snackbar = await screen.findByRole('status');
+    expect(snackbar).toHaveClass('menu-browser-snackbar');
+    expect(snackbar).toHaveTextContent('Minimum Order Quantity and Delivery Charges may be applicable for Home Delivery');
   });
 
   it('does not show the temporary popup when the notice is blank', async () => {
@@ -74,6 +74,7 @@ describe('MenuBrowser delivery notice popup', () => {
 
     await user.click(screen.getByRole('button', { name: 'Add Medium' }));
 
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
     expect(
       screen.queryByText('Minimum Order Quantity and Delivery Charges may be applicable for Home Delivery')
     ).not.toBeInTheDocument();
