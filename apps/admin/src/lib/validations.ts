@@ -82,6 +82,10 @@ export const notificationSchema = z.object({
   expires_at: z.string().datetime().nullable().optional(),
 });
 
+export const deliveryNoticeSchema = z.object({
+  notice: z.string().trim().max(250, 'Notice is too long').optional().or(z.literal('')),
+});
+
 export type PizzaFormData = z.infer<typeof pizzaSchema>;
 export type ToppingFormData = z.infer<typeof toppingSchema>;
 export type ExtraFormData = z.infer<typeof extraSchema>;
@@ -89,3 +93,4 @@ export type AddonFormData = z.infer<typeof addonSchema>;
 export type DessertFormData = z.infer<typeof dessertSchema>;
 export type CategoryFormData = z.infer<typeof categorySchema>;
 export type NotificationFormData = z.infer<typeof notificationSchema>;
+export type DeliveryNoticeFormData = z.infer<typeof deliveryNoticeSchema>;

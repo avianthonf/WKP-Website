@@ -229,6 +229,7 @@ export async function createWhatsAppOrder(payload: z.infer<typeof orderSchema>) 
       deliveryLocationUrl: data.fulfillment === 'delivery' ? deliveryLocation?.mapUrl : undefined,
       scheduledFor: scheduledForLabel,
       notes: data.notes,
+      deliveryNotice: getConfig('delivery_notice', ''),
       items: data.items,
       total: data.total,
       storeName,

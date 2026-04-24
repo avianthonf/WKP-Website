@@ -28,6 +28,7 @@ export function buildWhatsAppMessage(input: {
   deliveryLocationUrl?: string;
   scheduledFor?: string;
   notes?: string;
+  deliveryNotice?: string;
   fulfillment?: WhatsAppFulfillment;
   items: CartLine[];
   total: number;
@@ -42,6 +43,7 @@ export function buildWhatsAppMessage(input: {
   const orderNumberSuffix = input.orderNumber
     ? ` ${input.copy.orderNumberPrefix}${input.orderNumber}`
     : '';
+  const deliveryNotice = input.deliveryNotice?.trim();
 
   const lines = [
     `*${input.storeName || 'We Knead Pizza'} ${input.copy.headingLabel}${orderNumberSuffix}*`,
@@ -53,6 +55,7 @@ export function buildWhatsAppMessage(input: {
     input.deliveryLocationUrl ? `${input.copy.locationLinkLabel}: ${input.deliveryLocationUrl}` : null,
     input.scheduledFor ? `${input.copy.scheduleLabel}: ${input.scheduledFor}` : null,
     input.notes ? `${input.copy.notesLabel}: ${input.notes}` : null,
+    deliveryNotice || null,
     '',
     `*${input.copy.itemsHeading}*`,
     ...input.items.map((item) => {

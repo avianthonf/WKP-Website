@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { useEffect, useMemo, useState, useTransition, type FormEvent } from 'react';
+import React, { useEffect, useMemo, useState, useTransition, type FormEvent } from 'react';
 import { ArrowRight, CheckCircle2, MapPin, Navigation, PhoneCall, ShoppingBag, Trash2 } from 'lucide-react';
 import { useCart } from './cart-provider';
 import { createWhatsAppOrder } from '../actions';
@@ -67,6 +67,7 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
     'This checkout stores the order for the kitchen and prepares the final handoff after checkout.'
   );
   const checkoutHoursCopy = getConfigValue(bundle.config, 'cart_hours_copy', 'Store hours:');
+  const deliveryNotice = getConfigValue(bundle.config, 'delivery_notice', '').trim();
   const emptyCartCopy = getConfigValue(bundle.config, 'cart_empty_copy', cartCopy.emptySummaryCopy);
   const openingWindow = getOpeningWindow(bundle);
   const scheduleResolution = useMemo(() => {
@@ -385,6 +386,12 @@ export function CartCheckout({ bundle }: { bundle: StorefrontBundle }) {
                     'cart_schedule_notice_copy',
                     'The kitchen is currently outside its live window, so this order will be scheduled for a later time.'
                   )}
+                </div>
+              ) : null}
+              {deliveryNotice ? (
+                <div className="notice" data-tone="warning">
+                  <ShoppingBag size={16} />
+                  {deliveryNotice}
                 </div>
               ) : null}
             </div>

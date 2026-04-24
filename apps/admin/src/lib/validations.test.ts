@@ -10,6 +10,7 @@ import {
   ExtraFormData,
   AddonFormData,
   DessertFormData,
+  deliveryNoticeSchema,
 } from '../lib/validations';
 
 describe('Validation Schemas', () => {
@@ -212,6 +213,28 @@ describe('Validation Schemas', () => {
           expect(err.message).toContain('Number');
         }
       }
+    });
+  });
+
+  describe('Delivery Notice Schema', () => {
+    it('accepts a valid delivery notice', () => {
+      expect(deliveryNoticeSchema.parse({ notice: 'Minimum Order Quantity and Delivery Charges may be applicable for Home Delivery' })).toEqual({
+        notice: 'Minimum Order Quantity and Delivery Charges may be applicable for Home Delivery',
+      });
+    });
+
+    it('trims surrounding whitespace', () => {
+      expect(deliveryNoticeSchema.parse({ notice: '  Delivery charge may apply  ' })).toEqual({
+        notice: 'Delivery charge may apply',
+      });
+    });
+
+    it('allows an empty string', () => {
+      expect(deliveryNoticeSchema.parse({ notice: '' })).toEqual({ notice: '' });
+    });
+
+    it('rejects notices longer than 250 characters', () => {
+      expect(() => deliveryNoticeSchema.parse({ notice: 'x'.repeat(251) })).toThrow('Notice is too long');
     });
   });
 });

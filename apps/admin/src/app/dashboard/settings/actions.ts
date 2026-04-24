@@ -1,5 +1,6 @@
 'use server';
 
+import { deliveryNoticeSchema } from '@wkp/core/validations';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { revalidatePath, unstable_noStore as noStore } from 'next/cache';
 
@@ -83,6 +84,35 @@ export async function upsertDashboardLiveMode(value: boolean) {
   } catch (error: any) {
     console.error('Failed to update dashboard live mode:', error);
     throw new Error(error.message || 'Failed to update dashboard live mode');
+  }
+}
+
+export async function updateDeliveryNotice(notice: string) {
+  try {
+    const validated = deliveryNoticeSchema.parse({ notice });
+
+    const { error } = await supabaseAdmin
+      .from('site_config')
+      .upsert(
+        {
+          key: 'delivery_notice',
+          value: validated.notice ?? '',
+          label: 'Delivery Notice',
+          type: 'text',
+          description: 'Notice shown across storefront ordering surfaces and WhatsApp orders.',
+          is_public: true,
+        },
+        { onConflict: 'key' }
+      );
+
+    if (error) throw error;
+
+    revalidatePath('/dashboard/settings');
+
+    return { success: true };
+  } catch (error: any) {
+    console.error('Failed to update delivery notice:', error);
+    throw new Error(error.message || 'Failed to update delivery notice');
   }
 }
 

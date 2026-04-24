@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import React, { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { ChefHat, Flame, Leaf, Search, Sparkles } from 'lucide-react';
 import { useCart } from './cart-provider';
 import {
@@ -27,6 +27,13 @@ const pizzaSizes: Size[] = ['small', 'medium', 'large'];
 export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
   const { addItem, items, totalItems } = useCart();
   const [filter, setFilter] = useState<FilterKey>('all');
+  const [recentlyAddedNotice, setRecentlyAddedNotice] = useState<string | null>(null);
+  const deliveryNotice = getConfigValue(bundle.config, 'delivery_notice', '').trim();
+  const showDeliveryNoticePopup = Boolean(recentlyAddedNotice);
+  const triggerDeliveryNoticePopup = () => {
+    if (!deliveryNotice) return;
+    setRecentlyAddedNotice(deliveryNotice);
+  };
   const [dietFilter, setDietFilter] = useState<DietFilterKey>('all');
   const [query, setQuery] = useState('');
   const [hasFinePointer, setHasFinePointer] = useState(false);
@@ -78,6 +85,16 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
     media.addEventListener('change', update);
     return () => media.removeEventListener('change', update);
   }, []);
+
+  useEffect(() => {
+    if (!recentlyAddedNotice) return;
+
+    const timeout = window.setTimeout(() => {
+      setRecentlyAddedNotice(null);
+    }, 2500);
+
+    return () => window.clearTimeout(timeout);
+  }, [recentlyAddedNotice]);
 
   const canHover = !prefersReducedMotion && hasFinePointer;
 
@@ -226,6 +243,21 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
               </div>
             </div>
 
+            <AnimatePresence>
+              {showDeliveryNoticePopup ? (
+                <motion.div
+                  className="notice"
+                  data-tone="warning"
+                  initial={prefersReducedMotion ? false : { opacity: 0, y: -8 }}
+                  animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+                  exit={prefersReducedMotion ? {} : { opacity: 0, y: -8 }}
+                >
+                  <Sparkles size={16} />
+                  {recentlyAddedNotice}
+                </motion.div>
+              ) : null}
+            </AnimatePresence>
+
             <div className="menu-grid">
               {menuItems.pizzas.map((pizza, index) => (
                 <PizzaCard
@@ -236,7 +268,7 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
                   pizza={pizza}
                   disabled={orderingPaused || pizza.is_sold_out}
                   cartCounts={pizzaCartCounts.get(pizza.id) || { small: 0, medium: 0, large: 0 }}
-                  onAdd={(size) =>
+                  onAdd={(size) => {
                     addItem({
                       kind: 'pizza',
                       sourceId: pizza.id,
@@ -245,8 +277,9 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
                       size,
                       unitPrice: getPizzaPrice(pizza, size),
                       customization: { defaultSize: size },
-                    })
-                  }
+                    });
+                    triggerDeliveryNoticePopup();
+                  }}
                 />
               ))}
 
@@ -262,15 +295,16 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
                   tone="warning"
                   href={`/menu/${addon.slug}`}
                   disabled={orderingPaused || addon.is_sold_out}
-                  onAdd={() =>
+                  onAdd={() => {
                     addItem({
                       kind: 'addon',
                       sourceId: addon.id,
                       name: addon.name,
                       imageUrl: addon.image_url,
                       unitPrice: getAddonPrice(addon),
-                    })
-                  }
+                    });
+                    triggerDeliveryNoticePopup();
+                  }}
                 />
               ))}
 
@@ -286,15 +320,16 @@ export function MenuBrowser({ bundle }: { bundle: StorefrontBundle }) {
                   tone="danger"
                   href={`/menu/${dessert.slug}`}
                   disabled={orderingPaused || dessert.is_sold_out}
-                  onAdd={() =>
+                  onAdd={() => {
                     addItem({
                       kind: 'dessert',
                       sourceId: dessert.id,
                       name: dessert.name,
                       imageUrl: dessert.image_url,
                       unitPrice: getDessertPrice(dessert),
-                    })
-                  }
+                    });
+                    triggerDeliveryNoticePopup();
+                  }}
                 />
               ))}
 

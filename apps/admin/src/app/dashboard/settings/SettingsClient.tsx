@@ -1,7 +1,7 @@
 ﻿'use client';
 
+import React, { useState, useEffect, useTransition, type ReactNode } from 'react';
 import Link from 'next/link';
-import { useState, useEffect, useTransition, type ReactNode } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { createClient } from '@/lib/supabaseClient';
 import { MenuImageField } from '@/components/admin/MenuImageField';
@@ -366,6 +366,7 @@ export default function SettingsClient({ initialConfigs, initialPizzas }: Settin
         { key: 'closing_time', label: 'Closing time', kind: 'time', fallback: '23:00', description: 'Closing time used across the storefront.' },
         { key: 'store_timezone', label: 'Store timezone', kind: 'text', fallback: 'Asia/Kolkata', description: 'IANA timezone used for open/closed logic and scheduled order validation.' },
         { key: 'min_order_amount', label: 'Minimum order', kind: 'number', fallback: '0', description: 'Shown in cart and delivery pages.' },
+        { key: 'delivery_notice', label: 'Delivery Notice', kind: 'textarea', fallback: 'Minimum Order Quantity and Delivery Charges may be applicable for Home Delivery', description: 'Notice shown across storefront ordering surfaces and WhatsApp orders.' },
       ],
     },
     {

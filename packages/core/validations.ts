@@ -108,3 +108,9 @@ export const notificationSchema = z.object({
 });
 
 export type NotificationFormData = z.infer<typeof notificationSchema>;
+
+export const deliveryNoticeSchema = z.object({
+  notice: z.string().trim().max(250, 'Notice is too long').optional().or(z.literal('')),
+});
+
+export type DeliveryNoticeFormData = z.infer<typeof deliveryNoticeSchema>;
