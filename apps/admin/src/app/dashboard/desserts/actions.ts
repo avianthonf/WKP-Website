@@ -100,6 +100,7 @@ export async function updateDessertPrice(id: string, price: number) {
     if (error) throw error;
 
     revalidatePath('/dashboard/prices');
+    revalidatePath('/dashboard/pizzas');
     revalidateTag('menu');
 
     return { success: true };

@@ -49,7 +49,6 @@ export function DessertsClient({ initialDesserts }: DessertsClientProps) {
         </div>
       </section>
 
-      {/* Header */}
       <div className="page-header">
         <div>
           <h1 className="page-title">Desserts</h1>
@@ -62,92 +61,92 @@ export function DessertsClient({ initialDesserts }: DessertsClientProps) {
 
       <section className="rounded-3xl border border-[var(--border-default)] bg-white/90 shadow-sm overflow-hidden">
         <div className="table-wrap border-0 shadow-none">
-        <table>
-          <thead>
-            <tr>
-              <th style={{ width: '4rem' }}></th>
-              <th>Product</th>
-              <th>Price ₹</th>
-              <th>Veg</th>
-              <th>Sold Out</th>
-              <th>Status</th>
-              <th style={{ textAlign: 'right' }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {desserts.map((dessert) => (
-              <tr key={dessert.id}>
-                <td>
-                  <div
-                    className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border"
-                    style={{ background: 'var(--surface-secondary)', border: '1px solid var(--border-default)' }}
-                  >
-                    {dessert.image_url ? (
-                      <a
-                        href={dessert.image_url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--ember)] underline underline-offset-2"
-                      >
-                        Open
-                      </a>
-                    ) : (
-                      <Cookie size={16} style={{ color: 'var(--stone)' }} />
-                    )}
-                  </div>
-                </td>
-                <td>
-                  <div style={{ fontWeight: 600, color: 'var(--ink)' }}>{dessert.name}</div>
-                  {dessert.description && (
-                    <div className="text-xs truncate" style={{ color: 'var(--stone)', maxWidth: '16rem' }}>
-                      {dessert.description}
-                    </div>
-                  )}
-                </td>
-                <td>
-                  <span className="font-mono font-bold" style={{ color: 'var(--ember)' }}>₹{dessert.price}</span>
-                </td>
-                <td>
-                  <span className={`badge ${dessert.is_veg ? 'badge-veg' : 'badge-meat'}`}>
-                    {dessert.is_veg ? 'Veg' : 'Non-Veg'}
-                  </span>
-                </td>
-                <td>
-                  <ToggleSoldOut
-                    id={dessert.id}
-                    initialSoldOut={dessert.is_sold_out}
-                    onToggle={toggleDessertSoldOut}
-                  />
-                </td>
-                <td>
-                  <span className={`badge ${dessert.is_active ? 'badge-active' : 'badge-inactive'}`}>
-                    {dessert.is_active ? 'Active' : 'Hidden'}
-                  </span>
-                </td>
-                <td>
-                  <div className="flex justify-end gap-1">
-                    <Link href={`/dashboard/desserts/${dessert.id}/edit`} className="icon-btn" style={{ color: '#3b82f6' }}>
-                      <Edit size={15} />
-                    </Link>
-                    <button onClick={() => handleDelete(dessert)} className="icon-btn danger" disabled={isPending}>
-                      <Trash2 size={15} />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {desserts.length === 0 && (
+          <table>
+            <thead>
               <tr>
-                <td colSpan={7}>
-                  <div className="empty-state">
-                    <Cookie size={40} className="empty-state-icon" />
-                    <p className="empty-state-text">No desserts configured yet.</p>
-                  </div>
-                </td>
+                <th style={{ width: '4rem' }}></th>
+                <th>Product</th>
+                <th>Price ₹</th>
+                <th>Veg</th>
+                <th>Sold Out</th>
+                <th>Status</th>
+                <th style={{ textAlign: 'right' }}>Actions</th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {desserts.map((dessert) => (
+                <tr key={dessert.id}>
+                  <td>
+                    <div
+                      className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border"
+                      style={{ background: 'var(--surface-secondary)', border: '1px solid var(--border-default)' }}
+                    >
+                      {dessert.image_url ? (
+                        <a
+                          href={dessert.image_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--ember)] underline underline-offset-2"
+                        >
+                          Open
+                        </a>
+                      ) : (
+                        <Cookie size={16} style={{ color: 'var(--stone)' }} />
+                      )}
+                    </div>
+                  </td>
+                  <td>
+                    <div style={{ fontWeight: 600, color: 'var(--ink)' }}>{dessert.name}</div>
+                    {dessert.description && (
+                      <div className="text-xs truncate" style={{ color: 'var(--stone)', maxWidth: '16rem' }}>
+                        {dessert.description}
+                      </div>
+                    )}
+                  </td>
+                  <td>
+                    <span className="font-mono font-bold" style={{ color: 'var(--ember)' }}>₹{dessert.price}</span>
+                  </td>
+                  <td>
+                    <span className={`badge ${dessert.is_veg ? 'badge-veg' : 'badge-meat'}`}>
+                      {dessert.is_veg ? 'Veg' : 'Non-Veg'}
+                    </span>
+                  </td>
+                  <td>
+                    <ToggleSoldOut
+                      id={dessert.id}
+                      initialSoldOut={dessert.is_sold_out}
+                      onToggle={toggleDessertSoldOut}
+                    />
+                  </td>
+                  <td>
+                    <span className={`badge ${dessert.is_active ? 'badge-active' : 'badge-inactive'}`}>
+                      {dessert.is_active ? 'Active' : 'Hidden'}
+                    </span>
+                  </td>
+                  <td>
+                    <div className="flex justify-end gap-1">
+                      <Link href={`/dashboard/desserts/${dessert.id}/edit`} className="icon-btn" style={{ color: '#3b82f6' }}>
+                        <Edit size={15} />
+                      </Link>
+                      <button onClick={() => handleDelete(dessert)} className="icon-btn danger" disabled={isPending}>
+                        <Trash2 size={15} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {desserts.length === 0 && (
+                <tr>
+                  <td colSpan={7}>
+                    <div className="empty-state">
+                      <Cookie size={40} className="empty-state-icon" />
+                      <p className="empty-state-text">No desserts configured yet.</p>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </section>
     </div>

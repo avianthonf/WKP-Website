@@ -49,7 +49,6 @@ export function AddonsClient({ initialAddons }: AddonsClientProps) {
         </div>
       </section>
 
-      {/* Header */}
       <div className="page-header">
         <div>
           <h1 className="page-title">Sides & Addons</h1>
@@ -62,96 +61,96 @@ export function AddonsClient({ initialAddons }: AddonsClientProps) {
 
       <section className="rounded-3xl border border-[var(--border-default)] bg-white/90 shadow-sm overflow-hidden">
         <div className="table-wrap border-0 shadow-none">
-        <table>
-          <thead>
-            <tr>
-              <th style={{ width: '4rem' }}></th>
-              <th>Product</th>
-              <th>Price ₹</th>
-              <th>Veg</th>
-              <th>Bestseller</th>
-              <th>Sold Out</th>
-              <th>Status</th>
-              <th style={{ textAlign: 'right' }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {addons.map((addon) => (
-              <tr key={addon.id}>
-                <td>
-                  <div
-                    className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border"
-                    style={{ background: 'var(--surface-secondary)', border: '1px solid var(--border-default)' }}
-                  >
-                    {addon.image_url ? (
-                      <a
-                        href={addon.image_url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--ember)] underline underline-offset-2"
-                      >
-                        Open
-                      </a>
-                    ) : (
-                      <Package size={16} style={{ color: 'var(--stone)' }} />
-                    )}
-                  </div>
-                </td>
-                <td>
-                  <div style={{ fontWeight: 600, color: 'var(--ink)' }}>{addon.name}</div>
-                  {addon.description && (
-                    <div className="text-xs truncate" style={{ color: 'var(--stone)', maxWidth: '16rem' }}>
-                      {addon.description}
-                    </div>
-                  )}
-                </td>
-                <td>
-                  <span className="font-mono font-bold" style={{ color: 'var(--ember)' }}>₹{addon.price}</span>
-                </td>
-                <td>
-                  <span className={`badge ${addon.is_veg ? 'badge-veg' : 'badge-meat'}`}>
-                    {addon.is_veg ? 'Veg' : 'Non-Veg'}
-                  </span>
-                </td>
-                <td>
-                  {addon.is_bestseller && <span style={{ color: '#f59e0b' }}>★</span>}
-                </td>
-                <td>
-                  <ToggleSoldOut
-                    id={addon.id}
-                    initialSoldOut={addon.is_sold_out}
-                    onToggle={toggleAddonSoldOut}
-                  />
-                </td>
-                <td>
-                  <span className={`badge ${addon.is_active ? 'badge-active' : 'badge-inactive'}`}>
-                    {addon.is_active ? 'Active' : 'Hidden'}
-                  </span>
-                </td>
-                <td>
-                  <div className="flex justify-end gap-1">
-                    <Link href={`/dashboard/addons/${addon.id}/edit`} className="icon-btn" style={{ color: '#3b82f6' }}>
-                      <Edit size={15} />
-                    </Link>
-                    <button onClick={() => handleDelete(addon)} className="icon-btn danger" disabled={isPending}>
-                      <Trash2 size={15} />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {addons.length === 0 && (
+          <table>
+            <thead>
               <tr>
-                <td colSpan={8}>
-                  <div className="empty-state">
-                    <Package size={40} className="empty-state-icon" />
-                    <p className="empty-state-text">No addons configured yet.</p>
-                  </div>
-                </td>
+                <th style={{ width: '4rem' }}></th>
+                <th>Product</th>
+                <th>Price ₹</th>
+                <th>Veg</th>
+                <th>Bestseller</th>
+                <th>Sold Out</th>
+                <th>Status</th>
+                <th style={{ textAlign: 'right' }}>Actions</th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {addons.map((addon) => (
+                <tr key={addon.id}>
+                  <td>
+                    <div
+                      className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border"
+                      style={{ background: 'var(--surface-secondary)', border: '1px solid var(--border-default)' }}
+                    >
+                      {addon.image_url ? (
+                        <a
+                          href={addon.image_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--ember)] underline underline-offset-2"
+                        >
+                          Open
+                        </a>
+                      ) : (
+                        <Package size={16} style={{ color: 'var(--stone)' }} />
+                      )}
+                    </div>
+                  </td>
+                  <td>
+                    <div style={{ fontWeight: 600, color: 'var(--ink)' }}>{addon.name}</div>
+                    {addon.description && (
+                      <div className="text-xs truncate" style={{ color: 'var(--stone)', maxWidth: '16rem' }}>
+                        {addon.description}
+                      </div>
+                    )}
+                  </td>
+                  <td>
+                    <span className="font-mono font-bold" style={{ color: 'var(--ember)' }}>₹{addon.price}</span>
+                  </td>
+                  <td>
+                    <span className={`badge ${addon.is_veg ? 'badge-veg' : 'badge-meat'}`}>
+                      {addon.is_veg ? 'Veg' : 'Non-Veg'}
+                    </span>
+                  </td>
+                  <td>
+                    {addon.is_bestseller && <span style={{ color: '#f59e0b' }}>★</span>}
+                  </td>
+                  <td>
+                    <ToggleSoldOut
+                      id={addon.id}
+                      initialSoldOut={addon.is_sold_out}
+                      onToggle={toggleAddonSoldOut}
+                    />
+                  </td>
+                  <td>
+                    <span className={`badge ${addon.is_active ? 'badge-active' : 'badge-inactive'}`}>
+                      {addon.is_active ? 'Active' : 'Hidden'}
+                    </span>
+                  </td>
+                  <td>
+                    <div className="flex justify-end gap-1">
+                      <Link href={`/dashboard/addons/${addon.id}/edit`} className="icon-btn" style={{ color: '#3b82f6' }}>
+                        <Edit size={15} />
+                      </Link>
+                      <button onClick={() => handleDelete(addon)} className="icon-btn danger" disabled={isPending}>
+                        <Trash2 size={15} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {addons.length === 0 && (
+                <tr>
+                  <td colSpan={8}>
+                    <div className="empty-state">
+                      <Package size={40} className="empty-state-icon" />
+                      <p className="empty-state-text">No addons configured yet.</p>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </section>
     </div>
