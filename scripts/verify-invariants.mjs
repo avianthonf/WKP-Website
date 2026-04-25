@@ -46,8 +46,8 @@ async function main() {
   const actions = await load('apps/admin/src/app/dashboard/settings/actions.ts');
   const menuImageField = await load('apps/admin/src/components/admin/MenuImageField.tsx');
   const pizzaForm = await load('apps/admin/src/components/admin/PizzaForm.tsx');
-  const addons = await load('apps/admin/src/app/dashboard/addons/AddonsClient.tsx');
-  const desserts = await load('apps/admin/src/app/dashboard/desserts/DessertsClient.tsx');
+  const addonForm = await load('apps/admin/src/components/admin/AddonForm.tsx');
+  const dessertForm = await load('apps/admin/src/components/admin/DessertForm.tsx');
   const storageMigration = await load('apps/admin/supabase/migrations/202603200002_menu_images_storage.sql');
   const brandMigration = await load('apps/admin/supabase/migrations/202603220009_brand_assets_storage.sql');
 
@@ -62,8 +62,8 @@ async function main() {
   assert(menuImageField.includes("formData.append('bucket', bucket)"), 'MenuImageField does not forward bucket selection');
 
   assert(pizzaForm.includes('bucket="menu"'), 'PizzaForm does not route pizza images to the menu bucket');
-  assert(addons.includes('bucket="menu"'), 'AddonsClient does not route addon images to the menu bucket');
-  assert(desserts.includes('bucket="menu"'), 'DessertsClient does not route dessert images to the menu bucket');
+  assert(addonForm.includes('bucket="menu"'), 'AddonForm does not route addon images to the menu bucket');
+  assert(dessertForm.includes('bucket="menu"'), 'DessertForm does not route dessert images to the menu bucket');
 
   assert(hasBucketMigration(storageMigration, 'menu', 'menu_images'), 'Menu storage migration is missing bucket creation/policies');
   assert(hasBucketMigration(brandMigration, 'brand-assets', 'brand_assets'), 'Brand-assets migration is missing bucket creation/policies');
