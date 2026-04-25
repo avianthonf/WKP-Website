@@ -131,6 +131,14 @@ export default function MenuStudio({
       router.push('/dashboard/extras/new');
       return;
     }
+    if (tab === 'addons') {
+      router.push('/dashboard/addons/new');
+      return;
+    }
+    if (tab === 'desserts') {
+      router.push('/dashboard/desserts/new');
+      return;
+    }
 
     setCreateSignals((prev) => ({
       ...prev,
@@ -358,11 +366,11 @@ export default function MenuStudio({
       </section>
 
       <section hidden={activeTab !== 'addons'} className="card card-premium p-0 overflow-hidden">
-        <AddonsClient initialAddons={addons} createSignal={createSignals.addons} />
+        <AddonsClient initialAddons={addons} />
       </section>
 
       <section hidden={activeTab !== 'desserts'} className="card card-premium p-0 overflow-hidden">
-        <DessertsClient initialDesserts={desserts} createSignal={createSignals.desserts} />
+        <DessertsClient initialDesserts={desserts} />
       </section>
 
       <Modal

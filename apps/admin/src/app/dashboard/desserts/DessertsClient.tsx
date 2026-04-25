@@ -1,121 +1,26 @@
 'use client';
 
-import React, { useCallback, useEffect, useRef, useState, useTransition } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { dessertSchema, DessertFormData } from '@/lib/validations';
-import { Dessert } from '@/types';
-import { createDessert, updateDessert, deleteDessert, toggleDessertSoldOut } from './actions';
-import { toast } from 'react-hot-toast';
+import Link from 'next/link';
+import React, { useEffect, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { Modal } from '@/components/admin/Modal';
-import { ToggleSoldOut } from '@/components/admin/ToggleSoldOut';
+import { toast } from 'react-hot-toast';
 import { Plus, Edit, Trash2, Cookie } from 'lucide-react';
-import { MenuImageField } from '@/components/admin/MenuImageField';
+import { ToggleSoldOut } from '@/components/admin/ToggleSoldOut';
+import { deleteDessert, toggleDessertSoldOut } from './actions';
+import type { Dessert } from '@/types';
 
 interface DessertsClientProps {
   initialDesserts: Dessert[];
-  createSignal?: number;
 }
 
-export function DessertsClient({ initialDesserts, createSignal }: DessertsClientProps) {
+export function DessertsClient({ initialDesserts }: DessertsClientProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editingDessert, setEditingDessert] = useState<Dessert | null>(null);
   const [desserts, setDesserts] = useState<Dessert[]>(initialDesserts);
-  const createSignalRef = useRef(0);
 
   useEffect(() => {
     setDesserts(initialDesserts);
   }, [initialDesserts]);
-
-  const {
-    register,
-    handleSubmit,
-    reset,
-    watch,
-    setValue,
-    formState: { errors }
-  } = useForm<DessertFormData>({
-    resolver: zodResolver(dessertSchema as any),
-    defaultValues: {
-      name: '',
-      description: '',
-      price: 0,
-      image_url: null,
-      is_veg: true,
-      is_active: true,
-      sort_order: 0,
-    }
-  });
-
-  const imageUrl = watch('image_url');
-
-  const openCreateModal = useCallback(() => {
-    setEditingDessert(null);
-    reset({
-      name: '',
-      description: '',
-      price: 0,
-      image_url: null,
-      is_veg: true,
-      is_active: true,
-      sort_order: 0,
-    });
-    setModalOpen(true);
-  }, [reset]);
-
-  useEffect(() => {
-    if (!createSignal) return;
-    if (createSignal !== createSignalRef.current) {
-      createSignalRef.current = createSignal;
-      openCreateModal();
-    }
-  }, [createSignal, openCreateModal]);
-
-  const openEditModal = (dessert: Dessert) => {
-    setEditingDessert(dessert);
-    reset({
-      name: dessert.name,
-      description: dessert.description || '',
-      price: dessert.price,
-      image_url: dessert.image_url || null,
-      is_veg: dessert.is_veg,
-      is_active: dessert.is_active,
-      sort_order: dessert.sort_order,
-    });
-    setModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setModalOpen(false);
-    setEditingDessert(null);
-    reset();
-  };
-
-  const onSubmit = (data: DessertFormData) => {
-    startTransition(async () => {
-      try {
-        if (editingDessert) {
-          await updateDessert(editingDessert.id, data);
-          toast.success('Dessert updated');
-          setDesserts(prev => prev.map(d => d.id === editingDessert.id ? { ...d, ...data } : d));
-          router.refresh();
-        } else {
-          const result = await createDessert(data);
-          if (result.success) {
-            toast.success('Dessert created');
-            router.refresh();
-          }
-        }
-        closeModal();
-      } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : 'Operation failed';
-        toast.error(message);
-      }
-    });
-  };
 
   const handleDelete = (dessert: Dessert) => {
     if (!window.confirm(`Delete '${dessert.name}'? This cannot be undone.`)) return;
@@ -124,7 +29,7 @@ export function DessertsClient({ initialDesserts, createSignal }: DessertsClient
       try {
         await deleteDessert(dessert.id);
         toast.success(`'${dessert.name}' deleted`);
-        setDesserts(prev => prev.filter(d => d.id !== dessert.id));
+        setDesserts((prev) => prev.filter((d) => d.id !== dessert.id));
         router.refresh();
       } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'Deletion failed';
@@ -150,9 +55,9 @@ export function DessertsClient({ initialDesserts, createSignal }: DessertsClient
           <h1 className="page-title">Desserts</h1>
           <p className="page-subtitle">Manage sweet endings and confectionery items.</p>
         </div>
-        <button onClick={openCreateModal} className="btn-primary">
+        <Link href="/dashboard/desserts/new" className="btn-primary">
           <Plus size={16} /> New Dessert
-        </button>
+        </Link>
       </div>
 
       <section className="rounded-3xl border border-[var(--border-default)] bg-white/90 shadow-sm overflow-hidden">
@@ -170,7 +75,7 @@ export function DessertsClient({ initialDesserts, createSignal }: DessertsClient
             </tr>
           </thead>
           <tbody>
-            {desserts.map(dessert => (
+            {desserts.map((dessert) => (
               <tr key={dessert.id}>
                 <td>
                   <div
@@ -221,9 +126,9 @@ export function DessertsClient({ initialDesserts, createSignal }: DessertsClient
                 </td>
                 <td>
                   <div className="flex justify-end gap-1">
-                    <button onClick={() => openEditModal(dessert)} className="icon-btn" style={{ color: '#3b82f6' }}>
+                    <Link href={`/dashboard/desserts/${dessert.id}/edit`} className="icon-btn" style={{ color: '#3b82f6' }}>
                       <Edit size={15} />
-                    </button>
+                    </Link>
                     <button onClick={() => handleDelete(dessert)} className="icon-btn danger" disabled={isPending}>
                       <Trash2 size={15} />
                     </button>
@@ -245,85 +150,6 @@ export function DessertsClient({ initialDesserts, createSignal }: DessertsClient
         </table>
         </div>
       </section>
-
-      {/* Modal */}
-      <Modal
-        open={modalOpen}
-        onClose={closeModal}
-        title={editingDessert ? 'Edit Dessert' : 'New Dessert'}
-      >
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--ink)' }}>Name</label>
-            <input
-              {...register('name')}
-              placeholder="Dessert name"
-              className="input-base"
-            />
-            {errors.name && <p className="text-xs mt-1" style={{ color: '#ef4444' }}>{errors.name.message}</p>}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--ink)' }}>Description</label>
-            <textarea
-              {...register('description')}
-              rows={2}
-              placeholder="Brief description (optional)"
-              className="input-base resize-none"
-              style={{ height: 'auto', paddingTop: '0.75rem', paddingBottom: '0.75rem' }}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--ink)' }}>Price (₹)</label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm" style={{ color: 'var(--stone)' }}>₹</span>
-              <input
-                type="number"
-                {...register('price', { valueAsNumber: true })}
-                className="input-base"
-                style={{ paddingLeft: '1.75rem' }}
-              />
-            </div>
-          </div>
-
-          <MenuImageField
-            label="Dessert photo"
-            description="Shown on dessert cards and dessert detail pages across the storefront."
-          folder="desserts"
-          bucket="menu"
-          value={imageUrl}
-          onChange={(next) => setValue('image_url', next, { shouldDirty: true, shouldValidate: true })}
-        />
-
-          <div className="flex items-center gap-2.5">
-            <input type="checkbox" id="is_veg" {...register('is_veg')} className="w-5 h-5 rounded accent-ember" />
-            <label htmlFor="is_veg" className="text-sm font-medium cursor-pointer" style={{ color: 'var(--ink)' }}>
-              Vegetarian
-            </label>
-          </div>
-
-          <div className="flex items-center gap-2.5">
-            <input type="checkbox" id="is_active" {...register('is_active')} className="w-5 h-5 rounded accent-ember" />
-            <label htmlFor="is_active" className="text-sm font-medium cursor-pointer" style={{ color: 'var(--ink)' }}>
-              Active (visible on menu)
-            </label>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--ink)' }}>Sort Order</label>
-            <input type="number" {...register('sort_order', { valueAsNumber: true })} className="input-base" style={{ width: '8rem' }} />
-            <p className="text-xs mt-1" style={{ color: 'var(--stone)' }}>Lower numbers appear first</p>
-          </div>
-
-          <div className="flex justify-end gap-3 pt-4 border-t" style={{ borderColor: 'var(--border-default)' }}>
-            <button type="button" onClick={closeModal} className="btn-ghost">Cancel</button>
-            <button type="submit" disabled={isPending} className="btn-primary">
-              {isPending ? 'Saving...' : (editingDessert ? 'Update Dessert' : 'Add Dessert')}
-            </button>
-          </div>
-        </form>
-      </Modal>
     </div>
   );
 }

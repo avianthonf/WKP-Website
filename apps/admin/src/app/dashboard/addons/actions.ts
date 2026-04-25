@@ -16,6 +16,7 @@ export async function createAddon(formData: AddonFormData) {
     if (error) throw error;
 
     revalidatePath('/dashboard/addons');
+    revalidatePath('/dashboard/pizzas');
     revalidateTag('menu');
 
     return { success: true };
@@ -37,6 +38,7 @@ export async function updateAddon(id: string, formData: AddonFormData) {
     if (error) throw error;
 
     revalidatePath('/dashboard/addons');
+    revalidatePath('/dashboard/pizzas');
     revalidateTag('menu');
 
     return { success: true };
@@ -56,6 +58,7 @@ export async function deleteAddon(id: string) {
     if (error) throw error;
 
     revalidatePath('/dashboard/addons');
+    revalidatePath('/dashboard/pizzas');
     revalidateTag('menu');
 
     return { success: true };
@@ -75,6 +78,7 @@ export async function toggleAddonSoldOut(id: string, currentState: boolean) {
     if (error) throw error;
 
     revalidatePath('/dashboard/addons');
+    revalidatePath('/dashboard/pizzas');
     revalidateTag('menu');
 
     return { success: true };
