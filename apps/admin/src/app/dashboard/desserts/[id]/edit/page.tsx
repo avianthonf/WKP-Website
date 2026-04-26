@@ -14,6 +14,11 @@ export default async function EditDessertPage({ params }: { params: Promise<{ id
     notFound();
   }
 
+  const handleUpdate = async (data: Parameters<typeof updateDessert>[1]) => {
+    'use server';
+    return updateDessert(id, data);
+  };
+
   return (
     <div className="space-y-6 max-w-4xl animate-fade-in">
       <header className="space-y-3">
@@ -37,7 +42,7 @@ export default async function EditDessertPage({ params }: { params: Promise<{ id
       </header>
 
       <DessertForm
-        onSubmitAction={(data) => updateDessert(id, data)}
+        onSubmitAction={handleUpdate}
         initialData={{
           name: dessert.name,
           description: dessert.description ?? '',

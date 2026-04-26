@@ -14,6 +14,11 @@ export default async function EditExtraPage({ params }: { params: Promise<{ id: 
     notFound();
   }
 
+  const handleUpdate = async (data: Parameters<typeof updateExtra>[1]) => {
+    'use server';
+    return updateExtra(id, data);
+  };
+
   return (
     <div className="space-y-6 max-w-4xl animate-fade-in">
       <header className="space-y-3">
@@ -37,7 +42,7 @@ export default async function EditExtraPage({ params }: { params: Promise<{ id: 
       </header>
 
       <ExtraForm
-        onSubmitAction={(data) => updateExtra(id, data)}
+        onSubmitAction={handleUpdate}
         initialData={{
           name: extra.name,
           price_small: extra.price_small,

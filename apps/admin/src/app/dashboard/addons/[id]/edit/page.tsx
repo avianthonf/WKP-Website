@@ -14,6 +14,11 @@ export default async function EditAddonPage({ params }: { params: Promise<{ id: 
     notFound();
   }
 
+  const handleUpdate = async (data: Parameters<typeof updateAddon>[1]) => {
+    'use server';
+    return updateAddon(id, data);
+  };
+
   return (
     <div className="space-y-6 max-w-4xl animate-fade-in">
       <header className="space-y-3">
@@ -37,7 +42,7 @@ export default async function EditAddonPage({ params }: { params: Promise<{ id: 
       </header>
 
       <AddonForm
-        onSubmitAction={(data) => updateAddon(id, data)}
+        onSubmitAction={handleUpdate}
         initialData={{
           name: addon.name,
           description: addon.description ?? '',
