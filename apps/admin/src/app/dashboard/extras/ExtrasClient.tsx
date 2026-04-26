@@ -28,9 +28,14 @@ export function ExtrasClient({ initialExtras }: ExtrasClientProps) {
 
     startTransition(async () => {
       try {
-        await deleteExtra(extra.id);
-        toast.success(`'${extra.name}' deleted`);
-        setExtras((prev) => prev.filter((item) => item.id !== extra.id));
+        const result = await deleteExtra(extra.id);
+        if (result?.softDeleted) {
+          toast.success(`'${extra.name}' deactivated (in use)`);
+          setExtras((prev) => prev.map((item) => (item.id === extra.id ? { ...item, is_active: false } : item)));
+        } else {
+          toast.success(`'${extra.name}' deleted`);
+          setExtras((prev) => prev.filter((item) => item.id !== extra.id));
+        }
         router.refresh();
       } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'Deletion failed';

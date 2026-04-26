@@ -64,6 +64,9 @@ export function AddonForm({ onSubmitAction, initialData, isEdit, submitLabel, on
       try {
         await onSubmitAction(data);
         toast.success(isEdit ? 'Addon updated' : 'Addon created');
+        if (isEdit) {
+          router.push('/dashboard/addons');
+        }
         router.refresh();
         onCancel?.();
       } catch (error: unknown) {

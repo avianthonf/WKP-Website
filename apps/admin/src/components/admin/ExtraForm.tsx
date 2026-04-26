@@ -57,6 +57,9 @@ export function ExtraForm({ onSubmitAction, initialData, isEdit, submitLabel, on
       try {
         await onSubmitAction(data);
         toast.success(isEdit ? 'Extra updated' : 'Extra created');
+        if (isEdit) {
+          router.push('/dashboard/extras');
+        }
         router.refresh();
         onCancel?.();
       } catch (error: unknown) {

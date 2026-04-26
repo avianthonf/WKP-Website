@@ -1,6 +1,7 @@
 'use client';
 
 import { useTransition } from 'react';
+import { useRouter } from 'next/navigation';
 import { togglePizzaActive } from '@/app/dashboard/pizzas/actions';
 import { toast } from 'react-hot-toast';
 
@@ -11,12 +12,14 @@ interface TogglePizzaActiveProps {
 
 export function TogglePizzaActive({ pizzaId, initialActive }: TogglePizzaActiveProps) {
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
 
   const handleToggle = () => {
     startTransition(async () => {
       try {
         await togglePizzaActive(pizzaId, initialActive);
         toast.success(`Pizza ${initialActive ? 'hidden' : 'activated'}`);
+        router.refresh();
       } catch (error) {
         toast.error('Failed to toggle status');
       }

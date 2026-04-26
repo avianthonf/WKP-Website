@@ -27,9 +27,14 @@ export function DessertsClient({ initialDesserts }: DessertsClientProps) {
 
     startTransition(async () => {
       try {
-        await deleteDessert(dessert.id);
-        toast.success(`'${dessert.name}' deleted`);
-        setDesserts((prev) => prev.filter((d) => d.id !== dessert.id));
+        const result = await deleteDessert(dessert.id);
+        if (result?.softDeleted) {
+          toast.success(`'${dessert.name}' deactivated (in use)`);
+          setDesserts((prev) => prev.map((d) => (d.id === dessert.id ? { ...d, is_active: false } : d)));
+        } else {
+          toast.success(`'${dessert.name}' deleted`);
+          setDesserts((prev) => prev.filter((d) => d.id !== dessert.id));
+        }
         router.refresh();
       } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'Deletion failed';

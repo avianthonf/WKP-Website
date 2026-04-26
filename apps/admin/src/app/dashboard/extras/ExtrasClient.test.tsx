@@ -2,14 +2,14 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { AddonsClient } from './AddonsClient';
-import { deleteAddon } from './actions';
+import { ExtrasClient } from './ExtrasClient';
+import { deleteExtra } from './actions';
 
 const refreshMock = vi.fn();
 
 vi.mock('./actions', () => ({
-  deleteAddon: vi.fn(() => Promise.resolve({ success: true, softDeleted: false })),
-  toggleAddonSoldOut: vi.fn(() => Promise.resolve({ success: true })),
+  deleteExtra: vi.fn(() => Promise.resolve({ success: true, softDeleted: false })),
+  toggleExtraSoldOut: vi.fn(() => Promise.resolve({ success: true })),
 }));
 
 vi.mock('next/navigation', () => ({
@@ -29,27 +29,30 @@ vi.mock('@/components/admin/ToggleSoldOut', () => ({
   ToggleSoldOut: () => <button type="button">Toggle sold out</button>,
 }));
 
-describe('AddonsClient', () => {
+vi.mock('@/components/admin/InlineExtraPrice', () => ({
+  InlineExtraPrice: ({ initialPrice }: { initialPrice: number }) => <span>{initialPrice}</span>,
+}));
+
+describe('ExtrasClient', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('renders create and edit links for dedicated addon pages', () => {
+  it('renders create and edit links for dedicated extra pages', () => {
     render(
-      <AddonsClient
-        initialAddons={[
+      <ExtrasClient
+        initialExtras={[
           {
-            id: 'addon-1',
-            name: 'Garlic Bread',
-            description: 'Buttery and crisp',
-            price: 149,
-            image_url: null,
+            id: 'extra-1',
+            name: 'Olives',
+            price_small: 20,
+            price_medium: 30,
+            price_large: 40,
             is_veg: true,
-            is_bestseller: true,
             is_active: true,
             is_sold_out: false,
             sort_order: 1,
-            slug: 'garlic-bread',
+            slug: 'olives',
             created_at: '',
             updated_at: '',
           },
@@ -57,31 +60,30 @@ describe('AddonsClient', () => {
       />
     );
 
-    expect(screen.getByRole('link', { name: /new addon/i })).toHaveAttribute('href', '/dashboard/addons/new');
+    expect(screen.getByRole('link', { name: /new extra/i })).toHaveAttribute('href', '/dashboard/extras/new');
 
     const editLink = screen.getByRole('link', { name: '' });
-    expect(editLink).toHaveAttribute('href', '/dashboard/addons/addon-1/edit');
+    expect(editLink).toHaveAttribute('href', '/dashboard/extras/extra-1/edit');
   });
 
-  it('deletes an addon from the list', async () => {
+  it('deletes an extra from the list', async () => {
     const user = userEvent.setup();
     const confirmMock = vi.spyOn(window, 'confirm').mockReturnValue(true);
 
     render(
-      <AddonsClient
-        initialAddons={[
+      <ExtrasClient
+        initialExtras={[
           {
-            id: 'addon-1',
-            name: 'Garlic Bread',
-            description: 'Buttery and crisp',
-            price: 149,
-            image_url: null,
+            id: 'extra-1',
+            name: 'Olives',
+            price_small: 20,
+            price_medium: 30,
+            price_large: 40,
             is_veg: true,
-            is_bestseller: false,
             is_active: true,
             is_sold_out: false,
             sort_order: 1,
-            slug: 'garlic-bread',
+            slug: 'olives',
             created_at: '',
             updated_at: '',
           },
@@ -94,34 +96,33 @@ describe('AddonsClient', () => {
     await user.click(deleteButton);
 
     await waitFor(() => {
-      expect(deleteAddon).toHaveBeenCalledWith('addon-1');
+      expect(deleteExtra).toHaveBeenCalledWith('extra-1');
       expect(refreshMock).toHaveBeenCalled();
     });
 
     confirmMock.mockRestore();
   });
 
-  it('soft-deletes (deactivates) an addon that is referenced in orders', async () => {
+  it('soft-deletes (deactivates) an extra that is referenced in orders', async () => {
     const user = userEvent.setup();
     const confirmMock = vi.spyOn(window, 'confirm').mockReturnValue(true);
 
-    vi.mocked(deleteAddon).mockResolvedValueOnce({ success: true, softDeleted: true });
+    vi.mocked(deleteExtra).mockResolvedValueOnce({ success: true, softDeleted: true });
 
     render(
-      <AddonsClient
-        initialAddons={[
+      <ExtrasClient
+        initialExtras={[
           {
-            id: 'addon-1',
-            name: 'Garlic Bread',
-            description: 'Buttery and crisp',
-            price: 149,
-            image_url: null,
+            id: 'extra-1',
+            name: 'Olives',
+            price_small: 20,
+            price_medium: 30,
+            price_large: 40,
             is_veg: true,
-            is_bestseller: false,
             is_active: true,
             is_sold_out: false,
             sort_order: 1,
-            slug: 'garlic-bread',
+            slug: 'olives',
             created_at: '',
             updated_at: '',
           },
@@ -134,14 +135,12 @@ describe('AddonsClient', () => {
     await user.click(deleteButton);
 
     await waitFor(() => {
-      expect(deleteAddon).toHaveBeenCalledWith('addon-1');
+      expect(deleteExtra).toHaveBeenCalledWith('extra-1');
       expect(refreshMock).toHaveBeenCalled();
     });
 
-    // Item should remain in the list but marked inactive (not filtered out)
-    expect(screen.getByText('Garlic Bread')).toBeInTheDocument();
-    // Status badge should show "Hidden" for inactive
-    expect(screen.getByText('Hidden')).toBeInTheDocument();
+    expect(screen.getByText('Olives')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: '' })).toHaveAttribute('href', '/dashboard/extras/extra-1/edit');
 
     confirmMock.mockRestore();
   });

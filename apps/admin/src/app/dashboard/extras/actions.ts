@@ -55,7 +55,25 @@ export async function deleteExtra(id: string) {
       .delete()
       .eq('id', id);
 
-    if (error) throw error;
+    // Soft-delete fallback: if hard-delete fails (FK constraint from order_items),
+    // deactivate the item instead so it's hidden from menus but data is preserved.
+    if (error) {
+      if (error.code === '23503') {
+        const { error: softError } = await supabaseAdmin
+          .from('extras')
+          .update({ is_active: false })
+          .eq('id', id);
+
+        if (softError) throw softError;
+
+        revalidatePath('/dashboard/extras');
+        revalidatePath('/dashboard/pizzas');
+        revalidateTag('menu');
+
+        return { success: true, softDeleted: true };
+      }
+      throw error;
+    }
 
     revalidatePath('/dashboard/extras');
     revalidatePath('/dashboard/pizzas');

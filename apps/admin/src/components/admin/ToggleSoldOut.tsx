@@ -24,8 +24,8 @@ export function ToggleSoldOut({ id, initialSoldOut, onToggle }: ToggleSoldOutPro
     setIsSoldOut(nextState);
     startTransition(async () => {
       try {
-        await onToggle(id, isSoldOut);
-        toast.success(`Marked as ${isSoldOut ? 'available' : 'sold out'}`);
+        await onToggle(id, isSoldOut); // Pass CURRENT state to server action which negates it
+        toast.success(`Marked as ${nextState ? 'sold out' : 'available'}`);
         router.refresh();
       } catch (error) {
         setIsSoldOut((current) => !current);

@@ -62,6 +62,9 @@ export function DessertForm({ onSubmitAction, initialData, isEdit, submitLabel, 
       try {
         await onSubmitAction(data);
         toast.success(isEdit ? 'Dessert updated' : 'Dessert created');
+        if (isEdit) {
+          router.push('/dashboard/desserts');
+        }
         router.refresh();
         onCancel?.();
       } catch (error: unknown) {

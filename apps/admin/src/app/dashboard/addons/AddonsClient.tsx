@@ -27,9 +27,16 @@ export function AddonsClient({ initialAddons }: AddonsClientProps) {
 
     startTransition(async () => {
       try {
-        await deleteAddon(addon.id);
-        toast.success(`'${addon.name}' deleted`);
-        setAddons((prev) => prev.filter((a) => a.id !== addon.id));
+        const result = await deleteAddon(addon.id);
+        if (result?.softDeleted) {
+          toast.success(`'${addon.name}' deactivated (in use)`);
+          // Note: we don't remove it from the list here because it's just deactivated,
+          // so it still needs to appear in the admin view.
+          setAddons((prev) => prev.map((a) => (a.id === addon.id ? { ...a, is_active: false } : a)));
+        } else {
+          toast.success(`'${addon.name}' deleted`);
+          setAddons((prev) => prev.filter((a) => a.id !== addon.id));
+        }
         router.refresh();
       } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'Deletion failed';
